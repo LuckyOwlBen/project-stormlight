@@ -1,0 +1,26 @@
+[
+  {
+    "id": "chull-cart",
+    "name": "Chull Cart",
+    "type": "vehicle",
+    "quantity": 1,
+    "weight": 0,
+    "price": 500,
+    "rarity": "common",
+    "description": "A cart pulled by a chull. Travel speed: 2mph.",
+    "equipable": false,
+    "stackable": false
+  },
+  {
+    "id": "rowboat",
+    "name": "Rowboat",
+    "type": "vehicle",
+    "quantity": 1,
+    "weight": 0,
+    "price": 250,
+    "rarity": "common",
+    "description": "A small boat for water travel. Travel speed: 3mph downstream, 1mph upstream.",
+    "equipable": false,
+    "stackable": false
+  }
+]

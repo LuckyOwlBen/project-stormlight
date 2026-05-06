@@ -1,0 +1,26 @@
+[
+    {
+        "name": "Deception",
+        "attribute": "Presence"
+    },
+    {
+        "name": "Insight",
+        "attribute": "Awareness"
+    },
+    {
+        "name" : "Leadership",
+        "attribute": "Presence"
+    },
+    {
+        "name": "Perception",
+        "attribute": "Awareness"
+    },
+    {
+        "name": "Persuasion",
+        "attribute": "Presence"
+    },
+    {
+        "name": "Survival",
+        "attribute": "Awareness"
+    }
+]

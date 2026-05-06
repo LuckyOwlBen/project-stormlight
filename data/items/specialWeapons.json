@@ -1,0 +1,112 @@
+ [
+  {
+    "id": "half-shard",
+    "name": "Half-Shard",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 10,
+    "price": 2000,
+    "rarity": "common",
+    "description": "A diamond-shaped kite shield with a fabrial that can resist Shardblades.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "offHand",
+    "weaponProperties": {
+      "skill": "heavy-weaponry",
+      "damage": "2d4",
+      "damageType": "impact",
+      "range": "Melee",
+      "traits": ["Defensive", "Two-Handed", "Unique"],
+      "expertTraits": ["Momentum"]
+    },
+    "fabrialProperties": {
+      "charges": 1,
+      "currentCharges": 1,
+      "effect": "Can expend a charge to increase deflect by 10 against one attack"
+    }
+  },
+  {
+    "id": "shardblade",
+    "name": "Shardblade",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 4,
+    "price": 0,
+    "rarity": "reward-only",
+    "description": "A priceless blade that cuts through soul rather than flesh. Can be summoned from thin air.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "heavy-weaponry",
+      "damage": "2d8",
+      "damageType": "spirit",
+      "range": "Melee",
+      "traits": ["Dangerous", "Deadly", "Unique"],
+      "expertTraits": ["Unique: loses Dangerous Trait"]
+    }
+  },
+  {
+    "id": "shardblade-radiant",
+    "name": "Shardblade (Radiant)",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 0,
+    "price": 0,
+    "rarity": "talent-only",
+    "description": "A living Shardblade formed from a bonded spren. Can be instantly summoned and reshaped.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "heavy-weaponry",
+      "damage": "2d8",
+      "damageType": "spirit",
+      "range": "Melee",
+      "traits": ["Deadly", "Unique"],
+      "expertTraits": []
+    }
+  },
+  {
+    "id": "warhammer",
+    "name": "Warhammer",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 150,
+    "price": 400,
+    "rarity": "common",
+    "description": "A massive hammer typically wielded only by those in Shardplate.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "heavy-weaponry",
+      "damage": "2d10",
+      "damageType": "impact",
+      "range": "Melee",
+      "traits": ["Cumbersome[5]", "Two-Handed"],
+      "expertTraits": ["Unique"]
+    }
+  },
+  {
+    "id": "grandbow",
+    "name": "Grandbow",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 20,
+    "price": 1000,
+    "rarity": "common",
+    "description": "An enormous bow of tremendous power and range.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "heavy-weaponry",
+      "damage": "2d6",
+      "damageType": "keen",
+      "range": "Ranged[200/800]",
+      "traits": ["Cumbersome[5]", "Two-Handed"],
+      "expertTraits": ["Pierce"]
+    }
+  }
+]

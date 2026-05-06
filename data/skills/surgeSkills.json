@@ -1,0 +1,42 @@
+[
+    {
+        "name": "Adhesion",
+        "attribute": "Willpower"
+    },
+    {
+        "name": "Gravitation",
+        "attribute": "Willpower"
+    },
+    {
+        "name": "Division",
+        "attribute": "Willpower"
+    },
+    {
+        "name": "Abrasion",
+        "attribute": "Willpower"
+    },
+    {
+        "name": "Progression",
+        "attribute": "Willpower"
+    },
+    {
+        "name": "Illumination",
+        "attribute": "Willpower"
+    },
+    {
+        "name": "Transformation",
+        "attribute": "Willpower"
+    },
+    {
+        "name": "Transportation",
+        "attribute": "Willpower"
+    },
+    {
+        "name": "Cohesion",
+        "attribute": "Willpower"
+    },
+    {
+        "name": "Tension",
+        "attribute": "Willpower"
+    }
+]

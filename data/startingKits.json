@@ -1,0 +1,123 @@
+ [
+  {
+    "id": "academic-kit",
+    "name": "Academic Kit",
+    "description": "Equipment for scholars and researchers.",
+    "weapons": [
+      { "itemId": "knife", "quantity": 1 }
+    ],
+    "armor": [
+      { "itemId": "uniform", "quantity": 1 }
+    ],
+    "equipment": [
+      { "itemId": "backpack", "quantity": 1 },
+      { "itemId": "common-clothing", "quantity": 1 },
+      { "itemId": "ink-pen", "quantity": 1 },
+      { "itemId": "ink-bottle", "quantity": 1 },
+      { "itemId": "paper", "quantity": 10 },
+      { "itemId": "vial-empty", "quantity": 3 },
+      { "itemId": "wax-block", "quantity": 1 },
+      { "itemId": "reference-book", "quantity": 1 },
+      { "itemId": "poison-weak", "quantity": 1 }
+    ],
+    "currency": 18
+  },
+  {
+    "id": "artisan-kit",
+    "name": "Artisan Kit",
+    "description": "Tools for crafters and artisans.",
+    "weapons": [
+      { "itemId": "hammer", "quantity": 1 }
+    ],
+    "armor": [
+      { "itemId": "leather-armor", "quantity": 1 }
+    ],
+    "equipment": [
+      { "itemId": "common-clothing", "quantity": 1 },
+      { "itemId": "surgical-supplies", "quantity": 1 },
+      { "itemId": "antiseptic-weak", "quantity": 1 },
+      { "itemId": "ink-pen", "quantity": 1 },
+      { "itemId": "ink-bottle", "quantity": 1 },
+      { "itemId": "paper", "quantity": 5 },
+      { "itemId": "candle", "quantity": 5 },
+      { "itemId": "flint-steel", "quantity": 1 },
+      { "itemId": "vial-empty", "quantity": 3 },
+      { "itemId": "tuning-fork", "quantity": 1 },
+      { "itemId": "musical-instrument", "quantity": 1 },
+      { "itemId": "scale", "quantity": 1 }
+    ],
+    "currency": 16
+  },
+  {
+    "id": "military-kit",
+    "name": "Military Kit",
+    "description": "Standard equipment for soldiers.",
+    "weapons": [
+      { "itemId": "longsword", "quantity": 1 },
+      { "itemId": "shield", "quantity": 1 }
+    ],
+    "armor": [
+      { "itemId": "uniform", "quantity": 1 },
+      { "itemId": "chain-armor", "quantity": 1 }
+    ],
+    "equipment": [
+      { "itemId": "backpack", "quantity": 1 },
+      { "itemId": "common-clothing", "quantity": 1 },
+      { "itemId": "waterskin", "quantity": 1 },
+      { "itemId": "flint-steel", "quantity": 1 },
+      { "itemId": "whetstone", "quantity": 1 },
+      { "itemId": "blanket", "quantity": 1 },
+      { "itemId": "food-ration", "quantity": 10 }
+    ],
+    "currency": 7
+  },
+  {
+    "id": "courtier-kit",
+    "name": "Courtier Kit",
+    "description": "Fine attire and accoutrements for nobles.",
+    "weapons": [
+      { "itemId": "sidesword", "quantity": 1 }
+    ],
+    "armor": [],
+    "equipment": [
+      { "itemId": "alcohol-bottle", "quantity": 1 },
+      { "itemId": "fine-clothing", "quantity": 1 }
+    ],
+    "currency": 40
+  },
+  {
+    "id": "prisoner-kit",
+    "name": "Prisoner Kit",
+    "description": "The bare minimum for those who have lost everything.",
+    "weapons": [],
+    "armor": [],
+    "equipment": [
+      { "itemId": "manacles", "quantity": 1 }
+    ],
+    "currency": 0
+  },
+  {
+    "id": "underworld-kit",
+    "name": "Underworld Kit",
+    "description": "Tools for thieves and rogues.",
+    "weapons": [
+      { "itemId": "knife", "quantity": 2 }
+    ],
+    "armor": [
+      { "itemId": "leather-armor", "quantity": 1 }
+    ],
+    "equipment": [
+      { "itemId": "backpack", "quantity": 1 },
+      { "itemId": "common-clothing", "quantity": 1 },
+      { "itemId": "alcohol-bottle", "quantity": 1 },
+      { "itemId": "crowbar", "quantity": 1 },
+      { "itemId": "lockpick", "quantity": 1 },
+      { "itemId": "rope", "quantity": 1 },
+      { "itemId": "flint-steel", "quantity": 1 },
+      { "itemId": "oil-lantern", "quantity": 1 },
+      { "itemId": "oil-flask", "quantity": 1 },
+      { "itemId": "food-street", "quantity": 5 }
+    ],
+    "currency": 10
+  }
+]

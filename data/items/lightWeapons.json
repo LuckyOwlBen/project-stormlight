@@ -1,0 +1,191 @@
+[
+  {
+    "id": "javelin",
+    "name": "Javelin",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 2,
+    "price": 20,
+    "rarity": "common",
+    "description": "A light throwing spear effective at range.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "light-weaponry",
+      "damage": "1d6",
+      "damageType": "keen",
+      "range": "Melee",
+      "traits": ["Thrown[30/120]"],
+      "expertTraits": ["Indirect"]
+    }
+  },
+  {
+    "id": "knife",
+    "name": "Knife",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 1,
+    "price": 8,
+    "rarity": "common",
+    "description": "A small, easily concealed blade.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "light-weaponry",
+      "damage": "1d4",
+      "damageType": "keen",
+      "range": "Melee",
+      "traits": ["Discreet"],
+      "expertTraits": ["Offhand", "Thrown[20/60]"]
+    }
+  },
+  {
+    "id": "mace",
+    "name": "Mace",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 3,
+    "price": 20,
+    "rarity": "common",
+    "description": "A weighted club for crushing blows.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "light-weaponry",
+      "damage": "1d6",
+      "damageType": "impact",
+      "range": "Melee",
+      "traits": [],
+      "expertTraits": ["Momentum"]
+    }
+  },
+  {
+    "id": "rapier",
+    "name": "Rapier",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 2,
+    "price": 100,
+    "rarity": "common",
+    "description": "An elegant thrusting sword favored by duelists.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "light-weaponry",
+      "damage": "1d6",
+      "damageType": "keen",
+      "range": "Melee",
+      "traits": ["Quickdraw"],
+      "expertTraits": ["Defensive"]
+    }
+  },
+  {
+    "id": "shortspear",
+    "name": "Shortspear",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 3,
+    "price": 10,
+    "rarity": "common",
+    "description": "A versatile spear that can be wielded one or two-handed.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "light-weaponry",
+      "damage": "1d8",
+      "damageType": "keen",
+      "range": "Melee",
+      "traits": ["Two-Handed"],
+      "expertTraits": ["Unique: loses Two-Handed trait"]
+    }
+  },
+  {
+    "id": "sidesword",
+    "name": "Sidesword",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 2,
+    "price": 40,
+    "rarity": "common",
+    "description": "A balanced cutting sword, quick to draw.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "light-weaponry",
+      "damage": "1d6",
+      "damageType": "keen",
+      "range": "Melee",
+      "traits": ["Quickdraw"],
+      "expertTraits": ["Offhand"]
+    }
+  },
+  {
+    "id": "staff",
+    "name": "Staff",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 4,
+    "price": 1,
+    "rarity": "common",
+    "description": "A long wooden pole, easily disguised as a walking stick.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "light-weaponry",
+      "damage": "1d6",
+      "damageType": "impact",
+      "range": "Melee",
+      "traits": ["Discreet", "Two-Handed"],
+      "expertTraits": ["Defensive"]
+    }
+  },
+  {
+    "id": "shortbow",
+    "name": "Shortbow",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 2,
+    "price": 80,
+    "rarity": "common",
+    "description": "A compact bow suitable for mounted archery.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "light-weaponry",
+      "damage": "1d6",
+      "damageType": "keen",
+      "range": "Ranged[80/320]",
+      "traits": ["Two-Handed"],
+      "expertTraits": ["Quickdraw"]
+    }
+  },
+  {
+    "id": "sling",
+    "name": "Sling",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 1,
+    "price": 2,
+    "rarity": "common",
+    "description": "A simple leather strap for hurling stones.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "light-weaponry",
+      "damage": "1d4",
+      "damageType": "impact",
+      "range": "Ranged[30/120]",
+      "traits": ["Discreet"],
+      "expertTraits": ["Indirect"]
+    }
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "chull",
+    "name": "Chull",
+    "type": "mount",
+    "quantity": 1,
+    "weight": 0,
+    "price": 200,
+    "rarity": "common",
+    "description": "A large crustacean mount. Travel speed: 2mph, Carry capacity: 1,500lb.",
+    "equipable": false,
+    "stackable": false,
+    "properties": {
+      "travelSpeed": "2mph",
+      "carryCapacity": 1500
+    }
+  },
+  {
+    "id": "horse",
+    "name": "Horse",
+    "type": "mount",
+    "quantity": 1,
+    "weight": 0,
+    "price": 4000,
+    "rarity": "common",
+    "description": "An uncommon but swift mount. Travel speed: 4mph, Carry capacity: 500lb.",
+    "equipable": false,
+    "stackable": false,
+    "properties": {
+      "travelSpeed": "4mph",
+      "carryCapacity": 500
+    }
+  },
+  {
+    "id": "ryshadium",
+    "name": "Ryshadium",
+    "type": "mount",
+    "quantity": 1,
+    "weight": 0,
+    "price": 0,
+    "rarity": "reward-only",
+    "description": "A rare, sapient breed of horse that chooses its rider. Travel speed: 6mph, Carry capacity: 1,000lb.",
+    "equipable": false,
+    "stackable": false,
+    "properties": {
+      "travelSpeed": "6mph",
+      "carryCapacity": 1000
+    }
+  }
+]

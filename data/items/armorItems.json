@@ -1,0 +1,156 @@
+[
+  {
+    "id": "uniform",
+    "name": "Uniform",
+    "type": "armor",
+    "quantity": 1,
+    "weight": 5,
+    "price": 40,
+    "rarity": "common",
+    "description": "Standard military or professional attire.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "armor",
+    "armorProperties": {
+      "deflectValue": 0,
+      "traits": ["Presentable"],
+      "expertTraits": []
+    }
+  },
+  {
+    "id": "leather-armor",
+    "name": "Leather Armor",
+    "type": "armor",
+    "quantity": 1,
+    "weight": 10,
+    "price": 60,
+    "rarity": "common",
+    "description": "Light armor of tanned hide, offering basic protection.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "armor",
+    "armorProperties": {
+      "deflectValue": 1,
+      "traits": [],
+      "expertTraits": ["Presentable"]
+    }
+  },
+  {
+    "id": "chain-armor",
+    "name": "Chain Armor",
+    "type": "armor",
+    "quantity": 1,
+    "weight": 25,
+    "price": 80,
+    "rarity": "common",
+    "description": "Interlocking metal rings providing solid protection.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "armor",
+    "armorProperties": {
+      "deflectValue": 2,
+      "traits": ["Cumbersome[3]"],
+      "expertTraits": ["Unique: loses Cumbersome Trait"]
+    }
+  },
+  {
+    "id": "breastplate",
+    "name": "Breastplate",
+    "type": "armor",
+    "quantity": 1,
+    "weight": 30,
+    "price": 120,
+    "rarity": "common",
+    "description": "Metal chest armor with cloth or leather backing.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "armor",
+    "armorProperties": {
+      "deflectValue": 2,
+      "traits": ["Cumbersome[3]"],
+      "expertTraits": ["Presentable"]
+    }
+  },
+  {
+    "id": "half-plate",
+    "name": "Half Plate",
+    "type": "armor",
+    "quantity": 1,
+    "weight": 40,
+    "price": 400,
+    "rarity": "common",
+    "description": "Heavy armor protecting vital areas.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "armor",
+    "armorProperties": {
+      "deflectValue": 3,
+      "traits": ["Cumbersome[4]"],
+      "expertTraits": ["Unique: Cumbersome[3] instead of Cumbersome[4]"]
+    }
+  },
+  {
+    "id": "full-plate",
+    "name": "Full Plate",
+    "type": "armor",
+    "quantity": 1,
+    "weight": 55,
+    "price": 1600,
+    "rarity": "common",
+    "description": "Complete suit of heavy metal armor.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "armor",
+    "armorProperties": {
+      "deflectValue": 4,
+      "traits": ["Cumbersome[5]"],
+      "expertTraits": []
+    }
+  },
+  {
+    "id": "shardplate",
+    "name": "Shardplate",
+    "type": "armor",
+    "quantity": 1,
+    "weight": 1400,
+    "price": 0,
+    "rarity": "reward-only",
+    "description": "Legendary full-body armor that enhances strength and blocks Shardblades.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "armor",
+    "armorProperties": {
+      "deflectValue": 5,
+      "traits": ["Dangerous", "Unique"],
+      "expertTraits": ["Unique: loses Dangerous Trait"]
+    },
+    "fabrialProperties": {
+      "charges": 4,
+      "currentCharges": 4,
+      "effect": "Can expend a charge to increase deflect by 10 against one attack"
+    }
+  },
+  {
+    "id": "shardplate-radiant",
+    "name": "Shardplate (Radiant)",
+    "type": "armor",
+    "quantity": 1,
+    "weight": 0,
+    "price": 0,
+    "rarity": "talent-only",
+    "description": "Living armor formed from common spren, glowing with luminescent light.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "armor",
+    "armorProperties": {
+      "deflectValue": 5,
+      "traits": ["Unique"],
+      "expertTraits": []
+    },
+    "fabrialProperties": {
+      "charges": 4,
+      "currentCharges": 4,
+      "effect": "Can expend a charge to increase deflect by 10. Regains all charges after long rest."
+    }
+  }
+]

@@ -1,0 +1,54 @@
+[
+  {
+    "id": "spanreed-pair",
+    "name": "Spanreed (1 pair)",
+    "type": "fabrial",
+    "quantity": 1,
+    "weight": 1,
+    "price": 1000,
+    "rarity": "common",
+    "description": "A pair of conjoined writing reeds for long-distance communication.",
+    "equipable": false,
+    "stackable": false,
+    "fabrialProperties": {
+      "charges": 3,
+      "currentCharges": 3,
+      "effect": "Allows written communication over long distances. Expends 1 charge per 5 days."
+    }
+  },
+  {
+    "id": "heatrial",
+    "name": "Heatrial",
+    "type": "fabrial",
+    "quantity": 1,
+    "weight": 5,
+    "price": 250,
+    "rarity": "common",
+    "description": "A heating fabrial for warmth or cooking.",
+    "equipable": false,
+    "stackable": false,
+    "fabrialProperties": {
+      "charges": 5,
+      "currentCharges": 5,
+      "effect": "Generates heat. Expends 1 charge per day for ambient warmth, or per hour for cooking."
+    }
+  },
+  {
+    "id": "soulcaster",
+    "name": "Soulcaster",
+    "type": "fabrial",
+    "quantity": 1,
+    "weight": 5,
+    "price": 0,
+    "rarity": "reward-only",
+    "description": "A fabrial that can transform materials into one specific Essence.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "accessory",
+    "fabrialProperties": {
+      "charges": 5,
+      "currentCharges": 5,
+      "effect": "Allows use of Transformation surge to convert materials to one Essence type."
+    }
+  }
+]

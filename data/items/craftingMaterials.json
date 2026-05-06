@@ -1,0 +1,157 @@
+[
+  {
+    "id": "iron-ingot",
+    "name": "Iron Ingot",
+    "description": "A bar of refined iron, used for weapon and armor crafting.",
+    "weight": 2,
+    "price": 5,
+    "type": "equipment",
+    "rarity": "common",
+    "equipable": false,
+    "stackable": true,
+    "quantity": 1
+  },
+  {
+    "id": "leather-strip",
+    "name": "Leather Strip",
+    "description": "A strip of cured leather for binding and crafting.",
+    "weight": 0.1,
+    "price": 1,
+    "type": "equipment",
+    "rarity": "common",
+    "equipable": false,
+    "stackable": true,
+    "quantity": 1
+  },
+  {
+    "id": "leather",
+    "name": "Leather",
+    "description": "Tanned leather suitable for armor crafting.",
+    "weight": 1,
+    "price": 3,
+    "type": "equipment",
+    "rarity": "common",
+    "equipable": false,
+    "stackable": true,
+    "quantity": 1
+  },
+  {
+    "id": "thread",
+    "name": "Thread",
+    "description": "Strong thread for stitching leather and fabric.",
+    "weight": 0.1,
+    "price": 1,
+    "type": "equipment",
+    "rarity": "common",
+    "equipable": false,
+    "stackable": true,
+    "quantity": 1
+  },
+  {
+    "id": "gemstone-ruby",
+    "name": "Ruby Gemstone",
+    "description": "A polished ruby used in fabrial construction.",
+    "weight": 0.1,
+    "price": 50,
+    "type": "equipment",
+    "rarity": "common",
+    "equipable": false,
+    "stackable": true,
+    "quantity": 1
+  },
+  {
+    "id": "metal-housing",
+    "name": "Metal Housing",
+    "description": "A precisely crafted metal housing for fabrial components.",
+    "weight": 0.5,
+    "price": 10,
+    "type": "equipment",
+    "rarity": "common",
+    "equipable": false,
+    "stackable": true,
+    "quantity": 1
+  },
+  {
+    "id": "copper-wire",
+    "name": "Copper Wire",
+    "description": "Fine copper wire used in fabrial circuitry.",
+    "weight": 0.1,
+    "price": 2,
+    "type": "equipment",
+    "rarity": "common",
+    "equipable": false,
+    "stackable": true,
+    "quantity": 1
+  },
+  {
+    "id": "iron-sword",
+    "name": "Iron Sword",
+    "description": "A simple iron sword, well-balanced and reliable.",
+    "weight": 3,
+    "price": 15,
+    "type": "weapon",
+    "rarity": "common",
+    "equipable": true,
+    "stackable": false,
+    "quantity": 1,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "light-weaponry",
+      "damage": "1d8",
+      "damageType": "keen",
+      "range": "melee",
+      "traits": [],
+      "expertTraits": []
+    }
+  },
+  {
+    "id": "steel-sword",
+    "name": "Steel Sword",
+    "description": "A superior steel blade with excellent edge retention.",
+    "weight": 3,
+    "price": 50,
+    "type": "weapon",
+    "rarity": "common",
+    "equipable": true,
+    "stackable": false,
+    "quantity": 1,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "light-weaponry",
+      "damage": "1d8+1",
+      "damageType": "keen",
+      "range": "melee",
+      "traits": [],
+      "expertTraits": []
+    }
+  },
+  {
+    "id": "heating-fabrial",
+    "name": "Heating Fabrial",
+    "description": "A fabrial device that generates warmth.",
+    "weight": 1,
+    "price": 100,
+    "type": "fabrial",
+    "rarity": "common",
+    "equipable": false,
+    "stackable": false,
+    "quantity": 1,
+    "fabrialProperties": {
+      "charges": 10,
+      "currentCharges": 10,
+      "effect": "Generates heat within a 10-foot radius"
+    }
+  },
+  {
+    "id": "health-potion",
+    "name": "Health Potion",
+    "description": "A potion that restores health when consumed.",
+    "weight": 0.5,
+    "price": 50,
+    "type": "consumable",
+    "rarity": "common",
+    "equipable": false,
+    "stackable": true,
+    "quantity": 1
+  }
+]

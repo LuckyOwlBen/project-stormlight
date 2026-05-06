@@ -17,13 +17,13 @@ type Character struct {
 
 	// Relationships
 	// We use a pointer (*Attributes) so it can be 'nil' if we fetch a character WITHOUT fetching their attributes
-	Cultures     *Cultures       `json:"cultures,omitempty"`
+	Cultures     *[]Culture      `json:"cultures,omitempty"`
 	Attributes   *Attributes     `json:"attributes,omitempty"`
 	Paths        *[]Paths        `json:"paths,omitempty"`
-	Skills       *[]Skills       `json:"skills,omitempty"`
+	Skills       *[]Skill        `json:"skills,omitempty"`
 	Inventory    *[]Inventory    `json:"inventory,omitempty"`
 	Talents      *[]Talents      `json:"talents,omitempty"`
-	Expertises   *[]Expertises   `json:"expertises,omitempty"`
+	Expertises   *[]Expertise    `json:"expertises,omitempty"`
 	Resources    *Resources      `json:"resources,omitempty"`
 	RadiantPaths *[]RadiantPaths `json:"radiantPaths,omitempty"`
 	SingerForms  *[]SingerForms  `json:"singerForms,omitempty"`

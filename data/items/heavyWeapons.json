@@ -1,0 +1,191 @@
+[
+  {
+    "id": "axe",
+    "name": "Axe",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 2,
+    "price": 20,
+    "rarity": "common",
+    "description": "A balanced hand axe that can be thrown.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "heavy-weaponry",
+      "damage": "1d6",
+      "damageType": "keen",
+      "range": "Melee",
+      "traits": ["Thrown[20/60]"],
+      "expertTraits": ["Offhand"]
+    }
+  },
+  {
+    "id": "greatsword",
+    "name": "Greatsword",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 7,
+    "price": 200,
+    "rarity": "common",
+    "description": "A massive two-handed blade capable of devastating strikes.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "heavy-weaponry",
+      "damage": "1d10",
+      "damageType": "keen",
+      "range": "Melee",
+      "traits": ["Two-Handed"],
+      "expertTraits": ["Deadly"]
+    }
+  },
+  {
+    "id": "hammer",
+    "name": "Hammer",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 8,
+    "price": 40,
+    "rarity": "common",
+    "description": "A heavy war hammer built for crushing armor.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "heavy-weaponry",
+      "damage": "1d10",
+      "damageType": "impact",
+      "range": "Melee",
+      "traits": ["Two-Handed"],
+      "expertTraits": ["Momentum"]
+    }
+  },
+  {
+    "id": "longspear",
+    "name": "Longspear",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 9,
+    "price": 15,
+    "rarity": "common",
+    "description": "A long spear with extended reach.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "heavy-weaponry",
+      "damage": "1d8",
+      "damageType": "keen",
+      "range": "Melee[+5]",
+      "traits": ["Two-Handed"],
+      "expertTraits": ["Defensive"]
+    }
+  },
+  {
+    "id": "longsword",
+    "name": "Longsword",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 3,
+    "price": 60,
+    "rarity": "common",
+    "description": "A versatile blade that can be wielded one or two-handed.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "heavy-weaponry",
+      "damage": "1d8",
+      "damageType": "keen",
+      "range": "Melee",
+      "traits": ["Quickdraw", "Two-Handed"],
+      "expertTraits": ["Unique: loses Two-handed Trait"]
+    }
+  },
+  {
+    "id": "poleaxe",
+    "name": "Poleaxe",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 5,
+    "price": 40,
+    "rarity": "common",
+    "description": "An axe mounted on a long pole for reach.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "heavy-weaponry",
+      "damage": "1d10",
+      "damageType": "keen",
+      "range": "Melee",
+      "traits": ["Two-Handed"],
+      "expertTraits": ["Unique: Melee[+5]"]
+    }
+  },
+  {
+    "id": "shield",
+    "name": "Shield",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 2,
+    "price": 10,
+    "rarity": "common",
+    "description": "A defensive shield that can also be used to bash.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "offHand",
+    "weaponProperties": {
+      "skill": "heavy-weaponry",
+      "damage": "1d4",
+      "damageType": "impact",
+      "range": "Melee",
+      "traits": ["Defensive"],
+      "expertTraits": ["Offhand"]
+    }
+  },
+  {
+    "id": "crossbow",
+    "name": "Crossbow",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 7,
+    "price": 200,
+    "rarity": "common",
+    "description": "A mechanical bow with devastating power.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "heavy-weaponry",
+      "damage": "1d8",
+      "damageType": "keen",
+      "range": "Ranged[100/400]",
+      "traits": ["Loaded[1]", "Two-Handed"],
+      "expertTraits": ["Deadly"]
+    }
+  },
+  {
+    "id": "longbow",
+    "name": "Longbow",
+    "type": "weapon",
+    "quantity": 1,
+    "weight": 3,
+    "price": 100,
+    "rarity": "common",
+    "description": "A powerful bow with impressive range.",
+    "equipable": true,
+    "stackable": false,
+    "slot": "mainHand",
+    "weaponProperties": {
+      "skill": "heavy-weaponry",
+      "damage": "1d6",
+      "damageType": "keen",
+      "range": "Ranged[150/600]",
+      "traits": ["Two-Handed"],
+      "expertTraits": ["Indirect"]
+    }
+  }
+]

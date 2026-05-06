@@ -1,0 +1,22 @@
+[
+    {
+        "name": "Armor Crafting",
+        "category": "specialist",
+        "description": "Skilled in crafting and repairing various types of armor."
+    },
+    {
+        "name": "Weapon Crafting",
+        "category": "specialist",
+        "description": "Skilled in crafting and maintaining different kinds of weapons."
+    },
+    {
+        "name": "Fabrial Crafting",
+        "category": "specialist",
+        "description": "Expertise in creating and enchanting fabrials for various uses."
+    },
+    {
+        "name": "Equipment Crafting",
+        "category": "specialist",
+        "description": "Skilled in crafting and maintaining various types of equipment."
+    }
+]

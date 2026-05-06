@@ -1,0 +1,97 @@
+ [
+    {
+        "name": "Animal Care",
+        "category": "utility",
+        "description": "Knowledge in caring for and managing animals, including feeding, grooming, and basic medical care."
+    },
+    {
+        "name": "Breastplate",
+        "category": "armor",
+        "description": "Specialized proficiency with breastplates and similar torso armor. Granted by talents like Iron Will."
+    },
+    {
+        "name": "Culinary Arts", 
+        "category": "utility",
+        "description": "Knowledge in preparing, cooking, and presenting food. Includes understanding of ingredients, techniques, and kitchen safety."
+    },
+    {
+        "name": "Engineering",
+        "category": "utility",
+        "description": "Knowledge in designing, building, and maintaining mechanical systems and devices."
+    },
+    {
+        "name": "High Society",
+        "category": "utility",
+        "description": "Knowledge in navigating social hierarchies, etiquette, and influential networks."
+    },
+    {
+        "name": "History",
+        "category": "utility",
+        "description": "Knowledge in historical events, cultures, and significant figures."
+    },
+    {
+        "name": "Improvised Weapons",
+        "category": "weapon",
+        "description": "Specialized proficiency with improvised weapons. Granted by talents like Improvised Combat."
+    },
+    {
+        "name": "Knives",
+        "category": "weapon",
+        "description": "Specialized proficiency with knives and similar bladed tools. Granted by talents like Killing Edge."
+    },
+    {
+        "name": "Leather Armor",
+        "category": "armor",
+        "description": "Specialized proficiency with leather armor. Granted by talents like Leather Mastery."
+    },
+    {
+        "name": "Military Strategy",
+        "category": "utility",
+        "description": "Knowledge in planning and executing military operations, including tactics, logistics, and leadership."
+    },
+    {
+        "name": "Religion",
+        "category": "utility",
+        "description": "Knowledge in various religious beliefs, practices, and institutions."
+    },
+    {
+        "name": "Riding Horses",
+        "category": "utility",
+        "description": "Knowledge in riding and managing horses, including basic care and training."
+    },
+    {
+        "name": "Shortbow",
+        "category": "weapon",
+        "description": "Specialized proficiency with shortbows and similar ranged weapons. Granted by talents like Archery Mastery."
+    },
+    {
+        "name": "Shortspear",
+        "category": "weapon",
+        "description": "Specialized proficiency with shortspears and similar polearms. Granted by talents like Polearm Mastery."
+    },
+    {
+        "name": "Sidesword",
+        "category": "weapon",
+        "description": "Specialized proficiency with sideswords and similar one-handed swords. Granted by talents like Sword Mastery."
+    },
+    {
+        "name": "Unarmed Attacks",
+        "category": "weapon",
+        "description": "Specialized proficiency with unarmed combat techniques. Granted by talents like Martial Arts Mastery."
+    },
+    {
+        "name": "Underworld",
+        "category": "utility",
+        "description": "Knowledge in navigating and understanding the criminal underworld, including its networks, operations, and key figures."
+    },
+    {
+        "name": "Visual Arts",
+        "category": "utility",
+        "description": "Knowledge in visual arts, including painting, drawing, sculpture, and other forms of artistic expression."
+    },
+    {
+        "name": "Fabrial Operation",
+        "category": "utility",
+        "description": "Knowledge in operating and repairing common fabrials used for everyday tasks and combat support."
+    }
+]

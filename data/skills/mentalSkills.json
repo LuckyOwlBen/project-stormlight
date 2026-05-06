@@ -1,0 +1,26 @@
+[
+    {
+        "name": "Crafting",
+        "attribute": "Intellect"
+    },
+    {
+        "name": "Deduction",
+        "attribute": "Intellect"
+    },
+    {
+        "name": "Discipline",
+        "attribute": "Willpower"
+    },
+    {
+        "name": "Intimidation",
+        "attribute": "Willpower"
+    },
+    {
+        "name": "Lore",
+        "attribute": "Intellect"
+    },
+    {
+        "name": "Medicine",
+        "attribute": "Intellect"
+    }
+]

@@ -1,0 +1,26 @@
+[
+    {
+        "name": "Agility",
+        "attribute": "Speed"
+    },
+    {
+        "name": "Athletics",
+        "attribute": "Strength"
+    },
+    {
+        "name": "Heavy-Weaponry",
+        "attribute": "Strength"
+    },
+    {
+        "name": "Light-Weaponry",
+        "attribute": "Speed"
+    },
+    {
+        "name": "Stealth",
+        "attribute": "Speed"
+    },
+    {
+        "name": "Thievery",
+        "attribute": "Speed"
+    }
+]
