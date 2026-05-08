@@ -1,0 +1,21 @@
+ {
+    "id": "agent",
+    "name": "Agent",
+    "paths": [
+        "investigator",
+        "spy",
+        "thief"
+    ],
+    "talentNodes": [
+        {
+            "id": "opportunist",
+            "name": "Opportunist",
+            "description": "Once per round, you can reroll your plot die.",
+            "actionCost": -2,
+            "specialActivation": "Reroll your plot die once per round.",
+            "prerequisites": [],
+            "tier": 0,
+            "bonuses": []
+        }
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "id": "hunter",
+    "name": "Hunter",
+    "paths": [
+        "Archer",
+        "Assassin",
+        "Tracker"
+    ],
+    "talentNodes": [{ 
+        "id": "seekQuarry",
+        "name": "Seek Quarry",
+        "description": "Choose a character to be your quarry, gaining an advantage on tests to find, attack and study them.",
+        "actionCost": "Special",
+        "specialActivation": "Choose a character as your quarry. Gain advantage on tests to find, attack, and study them.",
+        "prerequisites": [],
+        "tier": 0,
+        "bonuses": [],
+        "grantsAdvantage": ["tests_to_find_quarry", "tests_to_attack_quarry", "tests_to_study_quarry"]
+    }]
+}

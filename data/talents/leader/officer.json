@@ -1,0 +1,188 @@
+{
+    "id": "officer",
+    "parentId": "leader",
+    "pathName": "Officer",
+    "nodes": [
+        {
+            "id": "composed",
+            "name": "Composed",
+            "description": "When you acquire this talent, your maximum and current focus increase by a number equal to your tier. When your tier increases by 1, your maximum and current focus do as well.",
+            "actionCost": "Passive",
+            "prerequisites": [
+                { "type": "talent", "target": "decisiveCommand" }
+            ],
+            "tier": 1,
+            "bonuses": [
+                { "type": "Resource", "target": "focus", "formula": "tier", "scaling": true }
+            ]
+        },
+        {
+            "id": "throughTheFray",
+            "name": "Through the Fray",
+            "description": "Choose an ally you can influence within 20 feet of you. Before the end of your turn, they can use the Disengage or Gain Advantage action as a reaction.",
+            "actionCost": 1,
+            "prerequisites": [
+                { "type": "skill", "target": "Persuasion", "value": 1 },
+                { "type": "talent", "target": "decisiveCommand" }
+            ],
+            "tier": 1,
+            "bonuses": [],
+            "otherEffects": [
+                "Target ally must be within 20 feet and under your influence.",
+                "The ally can use Disengage or Gain Advantage as a reaction before the end of your turn."
+            ]
+        },
+        {
+            "id": "customaryGarb",
+            "name": "Customary Garb",
+            "description": "While you're visibly wearing Presentable armor or clothing appropriate for your station, your Physical and Spiritual defenses increase by 2.",
+            "actionCost": "Passive",
+            "prerequisites": [
+                { "type": "talent", "target": "throughTheFray" }
+            ],
+            "tier": 2,
+            "bonuses": [
+                { "type": "Defense", "target": "Physical", "value": 2, "condition": "while wearing Presentable armor or appropriate clothing" },
+                { "type": "Defense", "target": "Spiritual", "value": 2, "condition": "while wearing Presentable armor or appropriate clothing" }
+            ]
+        },
+        {
+            "id": "wellSupplied",
+            "name": "Well Supplied",
+            "description": "When you make a test to requisition or allocate resources, you can spend 2 focus to add an Opportunity to the result. Additionally, when you acquire this talent, gain a utility expertise in Military Logistics.",
+            "actionCost": "Special",
+            "specialActivation": "When making a test to requisition or allocate resources, spend 2 focus to add an Opportunity to the result.",
+            "prerequisites": [
+                { "type": "skill", "target": "Persuasion", "value": 2 },
+                { "type": "talent", "target": "composed" }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "expertiseGrants": [
+                { "type": "fixed", "expertises": ["Military Logistics"] }
+            ],
+            "resourceTriggers": [
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": 2,
+                    "trigger": "making a test to requisition or allocate resources — add an Opportunity to the result",
+                    "frequency": "unlimited"
+                }
+            ]
+        },
+        {
+            "id": "confidentCommand",
+            "name": "Confident Command",
+            "description": "Before you make an Intimidation, Leadership, or Persuasion test, you can spend 1 focus to roll your command die and add the result to your d20 roll. Additionally, when you acquire this talent, increase the size of your command die by one size (such as from a d4 to a d6).",
+            "actionCost": "Special",
+            "specialActivation": "Before an Intimidation, Leadership, or Persuasion test, spend 1 focus to add your command die result to the roll.",
+            "prerequisites": [
+                { "type": "skill", "target": "Leadership", "value": 2 },
+                { "type": "talent", "target": "customaryGarb" }
+            ],
+            "tier": 3,
+            "bonuses": [],
+            "resourceTriggers": [ 
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "before an Intimidation, Leadership, or Persuasion test — add command die result to roll",
+                    "frequency": "unlimited"
+                },
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "before an Intimidation, Leadership, or Persuasion test — add command die result to roll",
+                    "frequency": "unlimited"
+                }
+            ],
+            "otherEffects": ["When you acquire this talent, increase your command die size by one step (e.g. d4 → d6)."]
+        },
+        {
+            "id": "relentlessMarch",
+            "name": "Relentless March",
+            "modifiesTalent": "decisiveCommand",
+            "description": "After you use your Decisive Command on an ally, until the end of their next turn, their movement rate increases by 10 feet and they ignore the effects of the Exhausted, Slowed, and Surprised conditions.",
+            "actionCost": "Passive",
+            "prerequisites": [
+                { "type": "skill", "target": "Persuasion", "value": 3 },
+                { "type": "talent", "target": "confidentCommand" }
+            ],
+            "tier": 3,
+            "bonuses": [],
+            "conditionEffects": [ 
+                {
+                    "type": "ignore",
+                    "condition": "Exhausted",
+                    "trigger": "ally targeted by Decisive Command",
+                    "target": "target",
+                    "duration": "until end of their next turn"
+                },
+                {
+                    "type": "ignore",
+                    "condition": "Slowed",
+                    "trigger": "ally targeted by Decisive Command",
+                    "target": "target",
+                    "duration": "until end of their next turn"
+                },
+                {
+                    "type": "ignore",
+                    "condition": "Surprised",
+                    "trigger": "ally targeted by Decisive Command",
+                    "target": "target",
+                    "duration": "until end of their next turn"
+                }
+            ],
+            "otherEffects": ["The affected ally's movement rate also increases by 10 feet until end of their next turn."]
+        },
+        {
+            "id": "authority",
+            "name": "Authority",
+            "description": "Your Leader talents that affect allies now have double the range (if they had one) and can affect up to twice as many allies as usual.",
+            "actionCost": "Passive",
+            "prerequisites": [
+                { "type": "talent", "target": "confidentCommand" }
+            ],
+            "tier": 4,
+            "bonuses": [],
+            "otherEffects": [
+                "Leader talents that affect allies have double range and can affect up to twice as many allies.",
+                "Requires a title granting command over at least 5 people."
+            ]
+        },
+        {
+            "id": "synchronizedAssault",
+            "name": "Synchronized Assault",
+            "description": "Spend 2 focus to make a Leadership test against the Cognitive defense of an enemy you can sense. On a success, choose a number of allies up to your ranks in Leadership. On a failure, choose one ally you can influence. On the next turn of each of your chosen allies, they gain 1 action that can be spent only to Strike against that enemy. This Strike doesn't count against their allowed number of Strike actions for the hands holding that weapon.",
+            "actionCost": 3,
+            "prerequisites": [
+                { "type": "skill", "target": "Leadership", "value": 3 },
+                { "type": "talent", "target": "authority" }
+            ],
+            "tier": 4,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": 2,
+                    "trigger": "activate Synchronized Assault",
+                    "frequency": "unlimited"
+                }
+            ],
+            "attackDefinition": {
+                "targetDefense": "Cognitive",
+                "range": "special",
+                "specialMechanics": [
+                    "Test Leadership vs. Cognitive defense.",
+                    "On success: choose a number of allies up to your Leadership ranks — each gains 1 action on their next turn to Strike the target.",
+                    "On failure: choose 1 ally you can influence — they gain the same bonus Strike.",
+                    "The bonus Strike does not count against the ally's normal Strike limit for that weapon hand."
+                ]
+            }
+        }
+    ]
+}

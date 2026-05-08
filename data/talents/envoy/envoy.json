@@ -1,0 +1,23 @@
+{
+    "id": "envoy",
+    "name": "Envoy",
+    "paths": [
+        "diplomat",
+        "faithful",
+        "mentor"
+    ],
+    "talentNodes": [
+        {
+            "id": "rousingPresence",
+            "name": "Rousing Presence",
+            "description": "An ally becomes Determined until end of scene",
+            "actionCost": 1,
+            "prerequisites": [],
+            "tier": 0,
+            "bonuses": [],
+            "conditionEffects": [
+                { "type": "apply", "condition": "Determined", "trigger": "when using this talent", "target": "target", "duration": "end of scene" }
+            ]
+        }
+    ]
+}

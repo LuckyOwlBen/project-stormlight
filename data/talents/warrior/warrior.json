@@ -1,0 +1,27 @@
+{
+    "id": "warrior",
+    "name": "Warrior",
+    "paths": [
+        "Soldier",
+        "Duelist",
+        "Shardbearer"
+    ],
+    "talentNodes": [
+        {
+            "id": "vigilantStance",
+            "name": "Vigilant Stance",
+            "description": "Enter Vigilant Stance: Reduce the focus cost of Dodge and Reactive Strike by 1, and you can enter other stances as a reaction.",
+            "actionCost": 1,
+            "prerequisites": [],
+            "tier": 0,
+            "bonuses": [],
+            "resourceTriggers": [
+                { "resource": "focus", "effect": "reduce-cost", "amount": 1, "trigger": "when using Dodge action", "condition": "while in vigilant stance" },
+                { "resource": "focus", "effect": "reduce-cost", "amount": 1, "trigger": "when using Reactive Strike action", "condition": "while in vigilant stance" }
+            ],
+            "actionGrants": [
+                { "type": "reaction", "count": 1, "restrictedTo": "Enter stance", "frequency": "unlimited" }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,201 @@
+{
+    "id": "diplomat",
+    "parentId": "envoy",
+    "pathName": "Diplomat",
+    "nodes": [
+        {
+            "id": "steadfastChallenge",
+            "name": "Steadfast Challenge",
+            "description": "Spend 1 focus to test Discipline vs. an enemy's Spiritual. On success, they are Disoriented and gain a disadvantage on tests against you.",
+            "actionCost": 1,
+            "prerequisites": [
+                { "type": "skill", "target": "Discipline", "value": 1 }
+            ],
+            "tier": 1,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "activate Steadfast Challenge",
+                    "frequency": "unlimited"
+                }
+            ],
+            "attackDefinition": {
+                "targetDefense": "Spiritual",
+                "range": "special",
+                "specialMechanics": [
+                    "Test Discipline vs. Spiritual."
+                ]
+            },
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "Disoriented",
+                    "trigger": "succeed with Steadfast Challenge",
+                    "target": "target"
+                }
+            ],
+            "grantsDisadvantage": ["tests against you while Disoriented from Steadfast Challenge"]
+        },
+        {
+            "id": "witheringRetort",
+            "name": "Withering Retort",
+            "modifiesTalent": "steadfastChallenge",
+            "description": "Use your Steadfast Challenge before an attack and increase your deflect against the attack by your ranks in Discipline.",
+            "actionCost": 1,
+            "prerequisites": [
+                { "type": "skill", "target": "Discipline", "value": 2 },
+                { "type": "talent", "target": "steadfastChallenge" }
+            ],
+            "tier": 2,
+            "bonuses": [
+                {
+                    "type": "deflect",
+                    "target": "deflect",
+                    "formula": "discipline.ranks",
+                    "condition": "when using Withering Retort before an attack"
+                }
+            ],
+            "actionGrants": [
+                {
+                    "type": "reaction",
+                    "count": 1,
+                    "restrictedTo": "Use Steadfast Challenge before an attack",
+                    "frequency": "unlimited"
+                }
+            ]
+        },
+        {
+            "id": "calmAppeal",
+            "name": "Calm Appeal",
+            "modifiesTalent": "steadfastChallenge",
+            "description": "When your Steadfast Challenge makes a target Disoriented, spend 1 focus to pacify them. Resisting your Steadfast Challenge costs additional focus equal to your ranks in Discipline.",
+            "actionCost": 1,
+            "specialActivation": "When your Steadfast Challenge makes a target Disoriented, spend 1 focus to pacify them.",
+            "prerequisites": [
+                { "type": "skill", "target": "Discipline", "value": 2 },
+                { "type": "talent", "target": "witheringRetort" }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "pacify a Disoriented target after Steadfast Challenge",
+                    "frequency": "unlimited"
+                },
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": "discipline.ranks",
+                    "trigger": "target resists your Steadfast Challenge",
+                    "frequency": "unlimited",
+                    "condition": "applies to the target, not you"
+                }
+            ]
+        },
+        {
+            "id": "peacefulSolution",
+            "name": "Peaceful Solution",
+            "description": "If all non-minion enemies are pacified, you ease tensions and end combat.",
+            "actionCost": 0,
+            "prerequisites": [
+                { "type": "skill", "target": "Discipline", "value": 3 },
+                { "type": "talent", "target": "calmAppeal" }
+            ],
+            "tier": 3,
+            "bonuses": [],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "Combat Ended",
+                    "trigger": "all non-minion enemies become pacified",
+                    "target": "self"
+                }
+            ]
+        },
+        {
+            "id": "collected",
+            "name": "Collected",
+            "description": "Increase your Cognitive and Spiritual defenses by 2.",
+            "actionCost": 0,
+            "prerequisites": [],
+            "tier": 1,
+            "bonuses": [
+                { "type": "defense", "target": "Cognitive", "value": 2 },
+                { "type": "defense", "target": "Spiritual", "value": 2 }
+            ]
+        },
+        {
+            "id": "wellDressed",
+            "name": "Well Dressed",
+            "description": "Gain Fashion expertise. While wearing Presentable armor or fashionable clothing, gain an advantage on your first Deception, Leadership, or Persuasion test.",
+            "actionCost": 0,
+            "prerequisites": [
+                { "type": "talent", "target": "steadfastChallenge" }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "expertiseGrants": [
+                { "type": "fixed", "expertises": ["Fashion"] }
+            ],
+            "grantsAdvantage": [
+                "first Deception test while wearing Presentable armor or fashionable clothing",
+                "first Leadership test while wearing Presentable armor or fashionable clothing",
+                "first Persuasion test while wearing Presentable armor or fashionable clothing"
+            ]
+        },
+        {
+            "id": "highSocietyContacts",
+            "name": "High Society Contacts",
+            "description": "Gain High Society expertise. Spend 2 focus to add an opportunity to a test to interact in high society.",
+            "actionCost": 0,
+            "specialActivation": "Spend 2 focus to add an opportunity to a test to interact in high society.",
+            "prerequisites": [
+                { "type": "talent", "target": "wellDressed" }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "expertiseGrants": [
+                { "type": "fixed", "expertises": ["High Society"] }
+            ],
+            "resourceTriggers": [
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": 2,
+                    "trigger": "add an opportunity to a high society interaction test",
+                    "frequency": "unlimited"
+                }
+            ]
+        },
+        {
+            "id": "practicedOratory",
+            "name": "Practiced Oratory",
+            "modifiesTalent": ["steadfastChallenge", "rousingPresence"],
+            "description": "When you use Rousing Presence or Steadfast Challenge, spend focus up to your ranks in Persuasion to add that many targets.",
+            "actionCost": 0,
+            "specialActivation": "Spend focus up to your Persuasion ranks to add additional targets to Rousing Presence or Steadfast Challenge.",
+            "prerequisites": [
+                { "type": "skill", "target": "Persuasion", "value": 3 },
+                { "type": "talent", "target": "highSocietyContacts" }
+            ],
+            "tier": 3,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": "persuasion.ranks",
+                    "trigger": "use Rousing Presence or Steadfast Challenge to add additional targets",
+                    "frequency": "unlimited",
+                    "condition": "amount spent determines number of extra targets; capped at Persuasion ranks"
+                }
+            ]
+        }
+    ]
+}

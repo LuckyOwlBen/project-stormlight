@@ -1,0 +1,168 @@
+{
+    "id": "tracker",
+    "parentId": "hunter",
+    "pathName": "Tracker",
+    "nodes": [
+        {
+            "id": "animalBond",
+            "name": "Animal Bond",
+            "description": "Upgrades an animal companion you've gained as a reward. You can communicate simple concepts with your animal companion. They alert you of danger (+1 to all defenses while within 10 feet). During combat, can use free action to have them act with 1-2 actions immediately (borrowing from their next turn). Animal companion can use Track action (2 actions) to mark target as quarry.",
+            "actionCost": "Special",
+            "specialActivation": "Use a free action during your turn to command your animal companion to take 1 or 2 actions immediately.",
+            "prerequisites": [
+                { "type": "talent", "target": "seekQuarry" }
+            ],
+            "tier": 1,
+            "bonuses": [
+                { "type": "DEFENSE", "target": "Physical", "value": 1, "condition": "while animal companion is within 10 feet" },
+                { "type": "DEFENSE", "target": "Cognitive", "value": 1, "condition": "while animal companion is within 10 feet" },
+                { "type": "DEFENSE", "target": "Spiritual", "value": 1, "condition": "while animal companion is within 10 feet" }
+            ],
+            "actionGrants": [
+                { "type": "free-action", "count": 1, "restrictedTo": "Command companion to take 1 or 2 actions", "timing": "always", "frequency": "unlimited" }
+            ],
+            "otherEffects": [
+                "Requires an animal companion reward.",
+                "You can communicate simple concepts with your companion.",
+                "Actions given to the companion are borrowed from their next turn.",
+                "Companion can use the Track action (2 actions) to mark a target as your quarry.",
+                "Companion retreats at 0 health instead of becoming Unconscious."
+            ]
+        },
+        {
+            "id": "deadlyTrap",
+            "name": "Deadly Trap",
+            "description": "Create and conceal a trap within your reach using foraged supplies or equipment. Choose entangling trap (2d4 impact damage, Immobilized 1 round, difficult terrain) or impaling trap (2d4 keen damage, Afflicted [vital 3+Survival ranks], can spend opportunity for injury). Trap covers 5-foot diameter, triggers when touched. Max traps equal to Survival ranks. Disarm DC equals your Spiritual defense. Gain advantage if target is quarry.",
+            "actionCost": 2,
+            "prerequisites": [
+                { "type": "skill", "target": "Survival", "value": 1 },
+                { "type": "talent", "target": "seekQuarry" }
+            ],
+            "tier": 1,
+            "bonuses": [],
+            "grantsAdvantage": ["trap trigger tests when the trapped target is your quarry"],
+            "otherEffects": [
+                "Entangling trap: 2d4 impact damage, Immobilized for 1 round, creates difficult terrain.",
+                "Impaling trap: 2d4 keen damage, Afflicted [vital 3 + Survival ranks]; spend opportunity for an injury.",
+                "Trap covers a 5-foot diameter and triggers when touched.",
+                "Maximum active traps equals your Survival ranks.",
+                "Disarm DC equals your Spiritual defense."
+            ]
+        },
+        {
+            "id": "protectiveBond",
+            "name": "Protective Bond",
+            "modifiesTalent": "animalBond",
+            "description": "Assign your animal companion to protect an ally within 30 feet. Animal companion moves to ally's side. While within reach of that ally, you lose the Animal Bond defense bonus and the ally gains it instead. Ends when you use action within 30 feet of companion or at end of scene.",
+            "actionCost": 1,
+            "prerequisites": [
+                { "type": "talent", "target": "animalBond" }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "otherEffects": [
+                "Assign companion to protect an ally within 30 feet; companion moves to their side.",
+                "While active, the ally gains +1 to all defenses while the companion is within reach and you lose that bonus.",
+                "Ends when you take an action within 30 feet of your companion, or at end of scene."
+            ]
+        },
+        {
+            "id": "experiencedTrapper",
+            "name": "Experienced Trapper",
+            "modifiesTalent": "deadlyTrap",
+            "description": "Forage during short rest without using full attention (can roll recovery die). Auto-succeed on Survival tests to forage for food/water (sustains Survival ranks number of characters). After long rest in wilderness, can fashion survival tool using Survival instead of Crafting. Deadly Trap damage increases to 2d6 and conditions last 2 rounds.",
+            "actionCost": "Passive",
+            "prerequisites": [
+                { "type": "skill", "target": "Perception", "value": 2 },
+                { "type": "talent", "target": "deadlyTrap" }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "otherEffects": [
+                "You can forage during a short rest without forfeiting your recovery die roll.",
+                "Automatically succeed on Survival tests to forage for food and water (sustains a number of characters equal to your Survival ranks).",
+                "After a long rest in the wilderness, you can fashion a survival tool using Survival instead of Crafting.",
+                "Deadly Trap damage increases from 2d4 to 2d6 and conditions last 2 rounds instead of 1."
+            ]
+        },
+        {
+            "id": "feralConnection",
+            "name": "Feral Connection",
+            "modifiesTalent": "animalBond",
+            "description": "Animal companion's max and current health increase by 5 × your tier (scales with tier increases). Companion's Physical, Cognitive, and Spiritual defenses increase by 2 each. Companion adds your Survival ranks as bonus to their tests. Gain Animal Care utility expertise.",
+            "actionCost": "Passive",
+            "prerequisites": [
+                { "type": "skill", "target": "Survival", "value": 2 },
+                { "type": "talent", "target": "protectiveBond" }
+            ],
+            "tier": 3,
+            "bonuses": [],
+            "expertiseGrants": [
+                { "type": "fixed", "expertises": ["Animal Care"] }
+            ],
+            "otherEffects": [
+                "Companion's max and current health increase by 5 × your tier (scales when tier increases).",
+                "Companion's Physical, Cognitive, and Spiritual defenses each increase by 2.",
+                "Companion adds your Survival ranks as a bonus to their tests."
+            ]
+        },
+        {
+            "id": "huntersEdge",
+            "name": "Hunter's Edge",
+            "modifiesTalent": ["deadlyTrap", "animalBond"],
+            "description": "Your animal companion gains an advantage on tests against your quarry. Deadly Trap damage increases to 2d8 and conditions last 3 rounds.",
+            "actionCost": "Passive",
+            "prerequisites": [
+                { "type": "skill", "target": "Survival", "value": 3 },
+                { "type": "talent", "target": "experiencedTrapper" }
+            ],
+            "tier": 4,
+            "bonuses": [],
+            "grantsAdvantage": ["companion's tests against your quarry"],
+            "otherEffects": ["Deadly Trap damage increases from 2d6 to 2d8 and conditions last 3 rounds instead of 2."]
+        },
+        {
+            "id": "packHunting",
+            "name": "Pack Hunting",
+            "modifiesTalent": "seekQuarry",
+            "description": "When an ally in your line of effect attacks your quarry, you can use this reaction and spend 1 focus to add your ranks in Survival to either the result of their attack test or their damage roll (your choice).",
+            "actionCost": "Reaction",
+            "prerequisites": [
+                { "type": "skill", "target": "Perception", "value": 3 },
+                { "type": "talent", "target": "protectiveBond" }
+            ],
+            "tier": 4,
+            "bonuses": [],
+            "resourceTriggers": [ 
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "ally in line of effect attacks your quarry",
+                    "frequency": "unlimited"
+                }
+            ],
+            "otherEffects": ["Add your Survival ranks to the ally's attack roll result or their damage roll (your choice)."]
+        },
+        {
+            "id": "surefooted",
+            "name": "Surefooted",
+            "description": "Increase your movement rate by 10. Before taking damage from dangerous terrain or falling, reduce that damage by 2 times your tier.",
+            "actionCost": "Passive",
+            "prerequisites": [
+                { "type": "talent", "target": "experiencedTrapper" }
+            ],
+            "tier": 3,
+            "bonuses": [],
+            "movementEffects": [
+                {
+                    "type": "increase-rate",
+                    "amount": 10,
+                    "timing": "always",
+                    "movementType": "walk"
+                }
+            ],
+            "otherEffects": ["Reduce damage from dangerous terrain and falling by 2 times your tier."]
+        }
+    ]
+}

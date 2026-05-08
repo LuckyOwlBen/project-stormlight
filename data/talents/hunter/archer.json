@@ -1,0 +1,174 @@
+{
+    "id": "archer",
+    "parentId": "hunter",
+    "pathName": "Archer",
+    "nodes": [
+        {
+            "id": "combatTraining",
+            "name": "Combat Training",
+            "description": "Once per round, when you miss on a weapon attack, you can graze one target without spending focus. Additionally, when you acquire this talent, gain a weapon expertise and an armor expertise of your choice, and gain a cultural expertise in Military Life.",
+            "actionCost": "Special",
+            "specialActivation": "Once per round when you miss on a weapon attack, graze one target without spending focus.",
+            "prerequisites": [
+                { "type": "talent", "target": "seekQuarry" }
+            ],
+            "tier": 1,
+            "bonuses": [],
+            "expertiseGrants": [
+                { "type": "category", "choiceCount": 1, "category": "weapon" },
+                { "type": "category", "choiceCount": 1, "category": "armor" },
+                { "type": "fixed", "expertises": ["Military Life"] }
+            ],
+            "otherEffects": ["Once per round, when you miss on a weapon attack, you can graze one target without spending focus."]
+        },
+        {
+            "id": "steadyAim",
+            "name": "Steady Aim",
+            "description": "Until the end of your turn, both the short and long ranges of your ranged weapons increase by half, and when you hit with a ranged weapon attack, you deal extra damage equal to your ranks in Perception.",
+            "actionCost": 1,
+            "prerequisites": [
+                { "type": "skill", "target": "Agility", "value": 1 },
+                { "type": "talent", "target": "combatTraining" }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "attackDefinition": {
+                "weaponType": "any",
+                "targetDefense": "Physical",
+                "range": "ranged",
+                "specialMechanics": [
+                    "Ranged weapon short and long ranges increase by 50% until end of turn.",
+                    "On hit, deal extra damage equal to your ranks in Perception."
+                ]
+            }
+        },
+        {
+            "id": "taggingShot",
+            "name": "Tagging Shot",
+            "modifiesTalent": "seekQuarry",
+            "description": "Move up to 5 feet and make a ranged weapon attack against the Physical defense of a target. On a hit or a graze, you also make the target your quarry for your Seek Quarry talent.",
+            "actionCost": 3,
+            "prerequisites": [
+                { "type": "skill", "target": "Perception", "value": 2 },
+                { "type": "talent", "target": "seekQuarry" }
+            ],
+            "tier": 1,
+            "bonuses": [],
+            "attackDefinition": {
+                "weaponType": "any",
+                "targetDefense": "Physical",
+                "range": "ranged",
+                "specialMechanics": [
+                    "Move up to 5 feet before attacking.",
+                    "On hit or graze: target becomes your quarry."
+                ]
+            },
+            "movementEffects": [
+                {
+                    "type": "special-movement",
+                    "amount": 5,
+                    "timing": "before-attack",
+                    "actionCost": "part-of-action"
+                }
+            ]
+        },
+        {
+            "id": "backstep",
+            "name": "Backstep",
+            "description": "After you make a ranged attack, spend 2 focus to Disengage as a free action. If you then end your turn in cover or an area where your enemy's senses are obscured, you gain the benefit of the Brace action.",
+            "actionCost": "Free",
+            "prerequisites": [
+                { "type": "skill", "target": "Agility", "value": 2 },
+                { "type": "talent", "target": "steadyAim" }
+            ],
+            "tier": 3,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": 2,
+                    "trigger": "after making a ranged attack — Disengage as free action",
+                    "frequency": "unlimited"
+                }
+            ],
+            "actionGrants": [
+                {
+                    "type": "free-action",
+                    "count": 1,
+                    "restrictedTo": "Disengage",
+                    "frequency": "unlimited"
+                }
+            ],
+            "otherEffects": ["If ending turn in cover or an obscured area, gain the benefit of the Brace action."]
+        },
+        {
+            "id": "hardy",
+            "name": "Hardy",
+            "description": "When you acquire this talent, your maximum and current health increase by 1 per level. This applies to all previous and future levels.",
+            "actionCost": "Passive",
+            "prerequisites": [
+                { "type": "talent", "target": "steadyAim" }
+            ],
+            "tier": 4,
+            "bonuses": [
+                { "type": "RESOURCE", "target": "health", "formula": "level", "scaling": true }
+            ]
+        },
+        {
+            "id": "sharpEye",
+            "name": "Sharp Eye",
+            "description": "After you observe your quarry for an action, or after you observe another character for at least 1 minute, make a Perception test against their Cognitive defense. On a success, you learn one of the following: the target's lowest attribute score, the target's lowest defense, or whether the target has lost more than half of their maximum health, focus, or Investiture (choose one).",
+            "actionCost": "Special",
+            "specialActivation": "After observing quarry for 1 action, or any character for 1 minute.",
+            "prerequisites": [
+                { "type": "talent", "target": "taggingShot" }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "attackDefinition": {
+                "targetDefense": "Cognitive",
+                "range": "special",
+                "specialMechanics": [
+                    "Test Perception vs. Cognitive defense.",
+                    "On success, learn one: target's lowest attribute, target's lowest defense, or whether target has lost >50% of health/focus/Investiture."
+                ]
+            }
+        },
+        {
+            "id": "exploitWeakness",
+            "name": "Exploit Weakness",
+            "description": "Use the Gain Advantage action as a free action, targeting only your quarry.",
+            "actionCost": "Free",
+            "prerequisites": [
+                { "type": "skill", "target": "Perception", "value": 3 },
+                { "type": "talent", "target": "sharpEye" }
+            ],
+            "tier": 3,
+            "bonuses": [],
+            "actionGrants": [
+                {
+                    "type": "free-action",
+                    "count": 1,
+                    "restrictedTo": "Gain Advantage against quarry only",
+                    "timing": "always",
+                    "frequency": "unlimited"
+                }
+            ]
+        },
+        {
+            "id": "unrelentingSalvo",
+            "name": "Unrelenting Salvo",
+            "modifiesTalent": "seekQuarry",
+            "description": "You can use the same ranged weapon to Strike against your quarry more than once a turn, instead of being limited to one Strike per hand.",
+            "actionCost": "Passive",
+            "prerequisites": [
+                { "type": "skill", "target": "Agility", "value": 3 },
+                { "type": "talent", "target": "hardy" }
+            ],
+            "tier": 4,
+            "bonuses": [],
+            "otherEffects": ["Can Strike your quarry multiple times per turn with the same ranged weapon."]
+        }
+    ]
+}

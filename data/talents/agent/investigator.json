@@ -1,0 +1,187 @@
+{
+    "id": "investigator",
+    "parentId": "agent",
+    "pathName": "Investigator",
+    "nodes": [
+        {
+            "id": "watchfulEye",
+            "name": "Watchful Eye",
+            "modifiesTalent": "opportunist",
+            "description": "Use Opportunist on the plot die of a willing ally within 20 feet.",
+            "actionCost": "Reaction",
+            "prerequisites": [
+                { "type": "skill", "target": "Deduction", "value": 1 }
+            ],
+            "tier": 1,
+            "bonuses": [],
+            "grantsAdvantage": ["Opportunist on ally plot die within 20 feet"]
+        },
+        {
+            "id": "getEmTalking",
+            "name": "Get 'Em Talking",
+            "description": "Spend 1 focus to test Deduction vs. Spiritual to learn the target's motivation. During this scene, you can raise the stakes on tests to leverage this motivation.",
+            "actionCost": 2,
+            "prerequisites": [
+                { "type": "skill", "target": "Insight", "value": 2 }
+            ],
+            "tier": 1,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "activate Get 'Em Talking",
+                    "frequency": "once-per-scene"
+                }
+            ],
+            "attackDefinition": {
+                "targetDefense": "Spiritual",
+                "range": "special",
+                "specialMechanics": [
+                    "Test Deduction vs. Spiritual to learn the target's motivation.",
+                    "During this scene, you can raise the stakes on tests to leverage this motivation."
+                ]
+            }
+        },
+        {
+            "id": "quickAnalysis",
+            "name": "Quick Analysis",
+            "description": "Spend 2 focus to gain 2 action points for cognitive tests, use a skill, Gain Advantage, or an agent talent.",
+            "actionCost": "Free",
+            "prerequisites": [
+                { "type": "talent", "target": "watchfulEye" }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": 2,
+                    "trigger": "activate Quick Analysis",
+                    "frequency": "once-per-round"
+                }
+            ],
+            "actionGrants": [
+                {
+                    "type": "action",
+                    "count": 2,
+                    "restrictedTo": "cognitive tests, use a skill, Gain Advantage, or an agent talent",
+                    "frequency": "once-per-round"
+                }
+            ]
+        },
+        {
+            "id": "baleful",
+            "name": "Baleful",
+            "description": "To resist your influence, a character must spend additional focus equal to your tier.",
+            "actionCost": "Passive",
+            "prerequisites": [
+                { "type": "talent", "target": "getEmTalking" }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": "tier",
+                    "trigger": "target resists your influence",
+                    "frequency": "unlimited",
+                    "condition": "applies to the target, not you"
+                }
+            ]
+        },
+        {
+            "id": "gatherEvidence",
+            "name": "Gather Evidence",
+            "description": "Gain Legal codes expertise. When you succeed on a cognitive test against a target, you become focused.",
+            "actionCost": "Passive",
+            "prerequisites": [
+                { "type": "talent", "target": "quickAnalysis" },
+                { "type": "skill", "target": "Insight", "value": 2 }
+            ],
+            "tier": 3,
+            "bonuses": [],
+            "expertiseGrants": [
+                {
+                    "type": "fixed",
+                    "expertises": ["Legal codes"]
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "Focused",
+                    "trigger": "succeed on a cognitive test against a target",
+                    "target": "self"
+                }
+            ]
+        },
+        {
+            "id": "hardy",
+            "name": "Hardy",
+            "description": "Gain +1 max health per level (including previous levels).",
+            "actionCost": "Passive",
+            "prerequisites": [
+                { "type": "talent", "target": "baleful" }
+            ],
+            "tier": 3,
+            "bonuses": [
+                {
+                    "type": "RESOURCE",
+                    "target": "health",
+                    "formula": "level",
+                    "scaling": true
+                }
+            ]
+        },
+        {
+            "id": "sleuthsInstincts",
+            "name": "Sleuth's Instincts",
+            "description": "Gain an advantage on cognitive tests against characters whose motivation you know. You know when those characters lie to you.",
+            "actionCost": "Passive",
+            "prerequisites": [
+                { "type": "skill", "target": "Deduction", "value": 3 },
+                { "type": "talent", "target": "hardy" }
+            ],
+            "tier": 4,
+            "bonuses": [],
+            "grantsAdvantage": ["cognitive tests against characters whose motivation you know"],
+            "otherEffects": ["You know when characters whose motivation you know are lying to you."]
+        },
+        {
+            "id": "closeTheCase",
+            "name": "Close the Case",
+            "description": "Spend 3 focus to test Deduction vs. Cognitive, gaining an advantage if you know the target's motivation. On failure, the target gains an advantage against you. On success, they back down.",
+            "actionCost": 3,
+            "prerequisites": [
+                { "type": "talent", "target": "hardy" },
+                { "type": "skill", "target": "Deduction", "value": 3 }
+            ],
+            "tier": 4,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": 3,
+                    "trigger": "activate Close the Case",
+                    "frequency": "unlimited"
+                }
+            ],
+            "attackDefinition": {
+                "targetDefense": "Cognitive",
+                "range": "special",
+                "conditionalAdvantages": [
+                    { "condition": "you know the target's motivation", "value": 1 }
+                ],
+                "specialMechanics": [
+                    "On failure, the target gains an advantage against you.",
+                    "On success, they back down."
+                ]
+            }
+        }
+    ]
+}

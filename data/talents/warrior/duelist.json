@@ -1,0 +1,180 @@
+{
+    "id": "duelist",
+    "parentId": "warrior",
+    "pathName": "Duelist",
+    "nodes": [
+        {
+            "id": "flamestance",
+            "name": "Flamestance",
+            "description": "When you acquire this talent, you learn a new stance, which you can enter as an action: Flamestance. While in this stance, you gain an advantage on Intimidation tests. Additionally, while there is exactly one enemy within your reach and none of your allies are within the reach of that enemy or you, you can use a reaction to gain an action, which you can spend only to Gain Advantage or use an action that includes an attack test targeting that enemy.",
+            "actionCost": 1,
+            "prerequisites": [
+                { "type": "skill", "target": "Intimidation", "value": 1 },
+                { "type": "talent", "target": "vigilantStance" }
+            ],
+            "tier": 1,
+            "bonuses": [],
+            "grantsAdvantage": ["On Intimidation tests while in Flamestance."],
+            "otherEffects": [
+                "While in Flamestance: if exactly 1 enemy is within your reach and no allies are within the reach of that enemy or you, use a reaction to gain 1 action (spend only to Gain Advantage or make an attack targeting that enemy)."
+            ]
+        },
+        {
+            "id": "practicedKata",
+            "name": "Practiced Kata",
+            "description": "When you acquire this talent, you can use fighting stances in conversation and endeavor scenes, in addition to combat. Activating or changing a stance during a conversation or endeavor costs 1 focus and counts as your contribution for the round. Additionally, if you aren't Surprised when a combat, conversation, or endeavor scene begins, you can enter Vigilant Stance at the beginning of that scene (no action required).",
+            "actionCost": "Special",
+            "specialActivation": "Activating or changing a stance in a non-combat scene costs 1 focus and counts as your contribution for the round.",
+            "prerequisites": [
+                { "type": "talent", "target": "vigilantStance" }
+            ],
+            "tier": 1,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "activating or changing a stance in a conversation or endeavor scene",
+                    "frequency": "unlimited"
+                }
+            ],
+            "otherEffects": [
+                "Fighting stances can be used in conversation and endeavor scenes.",
+                "If not Surprised when a scene begins, enter Vigilant Stance at the start of that scene (no action required)."
+            ]
+        },
+        {
+            "id": "ironstance",
+            "name": "Ironstance",
+            "description": "When you acquire this talent, you learn a new stance, which you can enter as an action: Ironstance. While in this stance, you gain an advantage on Insight tests. Additionally, when a character within your reach misses you or grazes you with an attack, you can use Reactive Strike against them as if they had voluntarily left your reach.",
+            "actionCost": 1,
+            "prerequisites": [
+                { "type": "skill", "target": "Athletics", "value": 2 },
+                { "type": "talent", "target": "practicedKata" }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "grantsAdvantage": ["On Insight tests while in Ironstance."],
+            "otherEffects": [
+                "While in Ironstance: when a character within your reach misses or grazes you with an attack, you can use Reactive Strike against them as if they had voluntarily left your reach."
+            ]
+        },
+        {
+            "id": "signatureWeapon",
+            "name": "Signature Weapon",
+            "description": "When you acquire this talent, gain one weapon expertise. Then choose one weapon type in which you have an expertise and denote it in parentheses after this talent's name on your character sheet. Your Opportunity range for tests using this weapon type expands by 1. When you reach tier 3, this Opportunity range instead expands by 2.",
+            "actionCost": "Passive",
+            "prerequisites": [
+                { "type": "talent", "target": "flamestance" }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "expertiseGrants": [
+                { "type": "category", "choiceCount": 1, "category": "weapon" }
+            ],
+            "otherEffects": [
+                "Choose a signature weapon type (must already have an expertise in it); Opportunity range expands by 1 with that weapon type (+2 at tier 3)."
+            ]
+        },
+        {
+            "id": "feintingStrike",
+            "name": "Feinting Strike",
+            "description": "Spend 2 focus to make a melee weapon attack against a target's Cognitive defense. On a hit, your target also loses one reaction and loses focus equal to your ranks in Intimidation. On a graze, they lose half as much focus (rounded up) and don't lose 1 reaction. You can spend an opportunity from this test to gain 2 actions, which you can use only to Strike or activate a stance.",
+            "actionCost": 1,
+            "prerequisites": [
+                { "type": "skill", "target": "Intimidation", "value": 2 },
+                { "type": "talent", "target": "flamestance" }
+            ],
+            "tier": 3,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": 2,
+                    "trigger": "activate Feinting Strike",
+                    "frequency": "unlimited"
+                }
+            ],
+            "attackDefinition": {
+                "weaponType": "any",
+                "targetDefense": "Cognitive",
+                "range": "melee",
+                "specialMechanics": [
+                    "On hit: target loses 1 reaction and loses focus equal to your Intimidation ranks.",
+                    "On graze: target loses half that focus (rounded up) and keeps their reaction.",
+                    "Spend opportunity: gain 2 actions (spend only to Strike or activate a stance)."
+                ]
+            }
+        },
+        {
+            "id": "surefooted",
+            "name": "Surefooted",
+            "description": "When you acquire this talent, increase your movement rate by 10. Additionally, before you take damage from dangerous terrain or falling, reduce that damage by 2 × your tier.",
+            "actionCost": "Passive",
+            "prerequisites": [
+                { "type": "talent", "target": "ironstance" }
+            ],
+            "tier": 3,
+            "bonuses": [],
+            "movementEffects": [
+                { "type": "increase-rate", "amount": 10, "timing": "always", "movementType": "walk" }
+            ],
+            "otherEffects": ["Before taking damage from dangerous terrain or falling, reduce that damage by 2 × your tier."]
+        },
+        {
+            "id": "vinestance",
+            "name": "Vinestance",
+            "description": "When you acquire this talent, you learn a new stance, which you can enter as an action: Vinestance. Your Physical and Cognitive defenses increase by 1. Additionally, after you're hit or grazed by a melee attack, you can use a reaction to make an Athletics test against your attacker's Cognitive defense. On a success, your target loses 1d4 focus, and you can push them horizontally up to 5 feet × your ranks in Athletics.",
+            "actionCost": 1,
+            "prerequisites": [
+                { "type": "skill", "target": "Athletics", "value": 3 },
+                { "type": "talent", "target": "feintingStrike" }
+            ],
+            "tier": 4,
+            "bonuses": [
+                { "type": "DEFENSE", "target": "Physical", "value": 1, "condition": "while in Vinestance" },
+                { "type": "DEFENSE", "target": "Cognitive", "value": 1, "condition": "while in Vinestance" }
+            ],
+            "otherEffects": [
+                "While in Vinestance: after being hit or grazed by a melee attack, use a reaction to test Athletics vs. attacker's Cognitive defense.",
+                "On success: attacker loses 1d4 focus and you can push them horizontally up to 5 feet × your Athletics ranks."
+            ]
+        },
+        {
+            "id": "witsEnd",
+            "name": "Wit's End",
+            "description": "Spend 1 focus to move up to half your movement rate, then make a melee weapon attack against the Cognitive defense of a target who has 0 focus. This attack ignores your target's deflect value and deals an extra 4d6 damage on a hit. It can't graze, only miss or hit. This talent becomes more powerful as your tier increases: at tier 3, you roll an extra 6d6 damage (instead of 4d6); at tier 4, you instead roll an extra 8d6 damage; and at tier 5, you instead roll an extra 10d6 damage.",
+            "actionCost": 2,
+            "prerequisites": [
+                { "type": "skill", "target": "Intimidation", "value": 3 },
+                { "type": "talent", "target": "feintingStrike" }
+            ],
+            "tier": 4,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "activate Wits End",
+                    "frequency": "unlimited"
+                }
+            ],
+            "attackDefinition": {
+                "weaponType": "any",
+                "targetDefense": "Cognitive",
+                "range": "melee",
+                "baseDamage": "4d6",
+                "specialMechanics": [
+                    "Move up to half your movement rate before attacking.",
+                    "Target must have 0 focus.",
+                    "Ignores the target's deflect value.",
+                    "Cannot graze — only miss or hit.",
+                    "Tier 3: extra 6d6 damage; Tier 4: extra 8d6; Tier 5: extra 10d6."
+                ]
+            }
+        }
+    ]
+}
