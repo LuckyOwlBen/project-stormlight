@@ -1,10 +1,18 @@
 package character
 
+type TalentModule struct {
+	PrimaryPath Path
+	SubPaths    map[string]Talents
+	Talents     map[string]Talent
+
+	PointTracker
+}
+
 // Parent Class/Tree
-type ClassDefinition struct {
+type Path struct {
 	ID          string   `json:"id"`
 	Name        string   `json:"name"`
-	Paths       []string `json:"paths"` // e.g. ["investigator", "spy"]
+	SubPaths    []string `json:"paths"` // e.g. ["investigator", "spy"]
 	TalentNodes []Talent `json:"talentNodes"`
 }
 
@@ -17,43 +25,60 @@ type Talents struct {
 }
 
 type Talent struct {
-	Id                 string   `json:"id"` // Unique identifier for the talent
-	Name               string   `json:"name"`
-	Description        string   `json:"description"`
-	ActionCost         string   `json:"actionCost"`
-	SpecialActivation  string   `json:"specialActivation,omitempty"`
-	Prerequisites      []string `json:"prerequisites"`
-	Tier               int      `json:"tier"`
-	PathRequirement    string   `json:"pathRequirement,omitempty"`
-	Bonuses            []string `json:"bonuses"`
-	GrantsAdvantage    []string `json:"grantsAdvantage,omitempty"`
-	GrantsDisadvantage []string `json:"grantsDisadvantage,omitempty"`
-	OtherEffects       []string `json:"otherEffects,omitempty"`
+	Id                 string         `json:"id"` // Unique identifier for the talent
+	Name               string         `json:"name"`
+	Description        string         `json:"description"`
+	ActionType         string         `json:"actionType"`
+	ActionCost         int            `json:"actionCost,omitempty"`
+	SpecialActivation  string         `json:"specialActivation,omitempty"`
+	Prerequisites      []Prerequisite `json:"prerequisites"`
+	Tier               int            `json:"tier"`
+	PathRequirement    string         `json:"pathRequirement,omitempty"`
+	Bonuses            []Bonus        `json:"bonuses"`
+	GrantsAdvantage    []string       `json:"grantsAdvantage,omitempty"`
+	GrantsDisadvantage []string       `json:"grantsDisadvantage,omitempty"`
+	OtherEffects       []string       `json:"otherEffects,omitempty"`
 
 	// Structured data fields - these replace otherEffects wherever possible
 	/** Structured expertise grants - replaces text parsing */
-	ExpertiseGrants []ExpertiseGrant `json:"expertiseGrant"`
+	ExpertiseGrants []ExpertiseGrant `json:"expertiseGrants,omitempty"`
 
 	/** Structured trait grants to items */
-	TraitGrants []TraitGrant `json:"traitGrants"`
+	TraitGrants []TraitGrant `json:"traitGrants,omitempty"`
 
 	/** Structured attack definition for combat talents */
-	AttackDefinition AttackDefinition `json:"attackDefinition"`
+	AttackDefinition *AttackDefinition `json:"attackDefinition,omitempty"`
 
 	/** Action economy modifications */
-	ActionGrants []ActionGrant `json:"actionGrants"`
+	ActionGrants []ActionGrant `json:"actionGrants,omitempty"`
 
 	/** Condition application, immunity, or removal */
-	ConditionEffects []ConditionEffect `json:"conditionEffects"`
+	ConditionEffects []ConditionEffect `json:"conditionEffects,omitempty"`
 
 	/** Resource triggers and manipulations */
-	ResourceTriggers []ResourceTrigger `json:"resourceTriggers"`
+	ResourceTriggers []ResourceTrigger `json:"resourceTriggers,omitempty"`
 
 	/** Movement modifications and special movement */
-	MovementEffects []MovementEffect `json:"movementEffects"`
+	MovementEffects []MovementEffect `json:"movementEffects,omitempty"`
 
 	/** ID(s) of the base talent(s) this talent modifies/enhances (for character sheet grouping) */
-	ModifiesTalent []string `json:"modifiesTalent"`
+	ModifiesTalent interface{} `json:"modifiesTalent,omitempty"`
+}
+
+type Prerequisite struct {
+	Type         string `json:"type"`
+	Target       string `json:"target"`
+	Value        int    `json:"value,omitempty"`
+	ValueFormula string `json:"valueFormula,omitempty"`
+}
+
+type Bonus struct {
+	Type         string `json:"type"`
+	Target       string `json:"target"`
+	Formula      string `json:"formula,omitempty"`
+	Scaling      bool   `json:"scaling,omitempty"`
+	Value        int    `json:"value,omitempty"`
+	ValueFormula string `json:"valueFormula,omitempty"`
 }
 
 type ExpertiseGrant struct {
@@ -167,7 +192,8 @@ type ResourceTrigger struct {
 	Effect string `json:"effect"` // "recover", "spend", or "reduce-cost"
 
 	/** Amount (can be formula) */
-	Amount string `json:"amount"` // number or formula like "tier" or "1 + tier"
+	Amount        int    `json:"amount,omitempty"`
+	AmountFormula string `json:"amountFormula,omitempty"`
 
 	/** When this trigger activates */
 	Trigger string `json:"trigger"` // e.g., "on kill", "on hit", "start of turn", "when you miss"
@@ -184,7 +210,8 @@ type MovementEffect struct {
 	Type string `json:"type"` // "increase-rate", "special-movement", "ignore-terrain", or "teleport"
 
 	/** Amount of movement (in feet) or formula */
-	Amount string `json:"amount,omitempty"`
+	Amount        int    `json:"amount,omitempty"`
+	AmountFormula string `json:"amountFormula,omitempty"`
 
 	/** When this movement is available */
 	Timing string `json:"timing,omitempty"` // "before-attack", "after-attack", "as-part-of-action", or "always"

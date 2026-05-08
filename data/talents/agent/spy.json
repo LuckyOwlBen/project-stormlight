@@ -8,11 +8,17 @@
             "name": "Sure Outcome",
             "modifiesTalent": "opportunist",
             "description": "When you use Opportunist, spend 2 focus to change an opportunity to 4 consequences, or change any consequence to an opportunity.",
-            "actionCost": "Special",
             "specialActivation": "When you use Opportunist, spend 2 focus to change an opportunity to 4 consequences, or change any consequence to an opportunity.",
             "prerequisites": [
-                { "type": "talent", "target": "opportunist" },
-                { "type": "skill", "target": "Insight", "value": 2 }
+                {
+                    "type": "talent",
+                    "target": "opportunist"
+                },
+                {
+                    "type": "skill",
+                    "target": "Insight",
+                    "value": 2
+                }
             ],
             "tier": 1,
             "bonuses": [],
@@ -24,23 +30,32 @@
                     "trigger": "use Sure Outcome on an Opportunist result",
                     "frequency": "unlimited"
                 }
-            ]
+            ],
+            "actionType": "Special"
         },
         {
             "id": "plausibleExcuse",
             "name": "Plausible Excuse",
             "description": "Gain Sleight of Hand expertise. When discovered skulking, spend 2 focus to feign innocence.",
-            "actionCost": "Reaction",
             "prerequisites": [
-                { "type": "talent", "target": "opportunist" },
-                { "type": "skill", "target": "Deception", "value": 1 }
+                {
+                    "type": "talent",
+                    "target": "opportunist"
+                },
+                {
+                    "type": "skill",
+                    "target": "Deception",
+                    "value": 1
+                }
             ],
             "tier": 1,
             "bonuses": [],
             "expertiseGrants": [
                 {
                     "type": "fixed",
-                    "expertises": ["Sleight of Hand"]
+                    "expertises": [
+                        "Sleight of Hand"
+                    ]
                 }
             ],
             "resourceTriggers": [
@@ -48,32 +63,46 @@
                     "resource": "focus",
                     "effect": "spend",
                     "amount": 2,
-                    "trigger": "discovered skulking — feign innocence",
+                    "trigger": "discovered skulking \u00e2\u20ac\u201d feign innocence",
                     "frequency": "unlimited"
                 }
-            ]
+            ],
+            "actionType": "Reaction"
         },
         {
             "id": "collected",
             "name": "Collected",
             "description": "Increase your Cognitive and Spiritual defenses by 2.",
-            "actionCost": "Passive",
             "prerequisites": [
-                { "type": "talent", "target": "sureOutcome" }
+                {
+                    "type": "talent",
+                    "target": "sureOutcome"
+                }
             ],
             "tier": 2,
             "bonuses": [
-                { "type": "DEFENSE", "target": "Cognitive", "value": 2 },
-                { "type": "DEFENSE", "target": "Spiritual", "value": 2 }
-            ]
+                {
+                    "type": "DEFENSE",
+                    "target": "Cognitive",
+                    "value": 2
+                },
+                {
+                    "type": "DEFENSE",
+                    "target": "Spiritual",
+                    "value": 2
+                }
+            ],
+            "actionType": "Passive"
         },
         {
             "id": "coverStory",
             "name": "Cover Story",
             "description": "Gain a false identity and a relevant cultural expertise.",
-            "actionCost": "Passive",
             "prerequisites": [
-                { "type": "talent", "target": "plausibleExcuse" }
+                {
+                    "type": "talent",
+                    "target": "plausibleExcuse"
+                }
             ],
             "tier": 2,
             "bonuses": [],
@@ -84,7 +113,10 @@
                     "category": "cultural"
                 }
             ],
-            "otherEffects": ["Gain a false identity in addition to the cultural expertise."]
+            "otherEffects": [
+                "Gain a false identity in addition to the cultural expertise."
+            ],
+            "actionType": "Passive"
         },
         {
             "id": "subtleTakedown",
@@ -92,8 +124,15 @@
             "description": "Make an unarmed attack with Insight vs. an unsuspecting target's Cognitive, raising the stakes. On a hit, they can't communicate.",
             "actionCost": 2,
             "prerequisites": [
-                { "type": "talent", "target": "coverStory" },
-                { "type": "skill", "target": "Insight", "value": 3 }
+                {
+                    "type": "talent",
+                    "target": "coverStory"
+                },
+                {
+                    "type": "skill",
+                    "target": "Insight",
+                    "value": 3
+                }
             ],
             "tier": 3,
             "bonuses": [],
@@ -114,15 +153,18 @@
                     "trigger": "hit with Subtle Takedown",
                     "target": "target"
                 }
-            ]
+            ],
+            "actionType": "Action"
         },
         {
             "id": "mighty",
             "name": "Mighty",
             "description": "When you hit with a weapon or unarmed attack, for each action point spent deal extra damage equal to 1 + your tier.",
-            "actionCost": "Passive",
             "prerequisites": [
-                { "type": "talent", "target": "coverStory" }
+                {
+                    "type": "talent",
+                    "target": "coverStory"
+                }
             ],
             "tier": 3,
             "bonuses": [],
@@ -133,24 +175,33 @@
                 "specialMechanics": [
                     "On hit, deal extra damage equal to (1 + tier) for each action point spent on the attack."
                 ]
-            }
+            },
+            "actionType": "Passive"
         },
         {
             "id": "highSocietyContacts",
             "name": "High Society Contacts",
             "description": "Gain High Society expertise. Spend 2 focus to add an opportunity to a test to interact in high society.",
-            "actionCost": "Special",
             "specialActivation": "Spend 2 focus to add an opportunity to a test to interact in high society.",
             "prerequisites": [
-                { "type": "talent", "target": "coverStory" },
-                { "type": "skill", "target": "High Society", "value": 2 }
+                {
+                    "type": "talent",
+                    "target": "coverStory"
+                },
+                {
+                    "type": "skill",
+                    "target": "High Society",
+                    "value": 2
+                }
             ],
             "tier": 4,
             "bonuses": [],
             "expertiseGrants": [
                 {
                     "type": "fixed",
-                    "expertises": ["High Society"]
+                    "expertises": [
+                        "High Society"
+                    ]
                 }
             ],
             "resourceTriggers": [
@@ -161,17 +212,24 @@
                     "trigger": "add an opportunity to a high society interaction test",
                     "frequency": "unlimited"
                 }
-            ]
+            ],
+            "actionType": "Special"
         },
         {
             "id": "mercurialFacade",
             "name": "Mercurial Facade",
             "description": "Disguise yourself using Deception without needing physical supplies. The first character to see through your disguise is surprised.",
-            "actionCost": "Special",
             "specialActivation": "Disguise yourself using Deception without needing physical supplies.",
             "prerequisites": [
-                { "type": "skill", "target": "Deception", "value": 3 },
-                { "type": "talent", "target": "subtleTakedown" }
+                {
+                    "type": "skill",
+                    "target": "Deception",
+                    "value": 3
+                },
+                {
+                    "type": "talent",
+                    "target": "subtleTakedown"
+                }
             ],
             "tier": 4,
             "bonuses": [],
@@ -182,7 +240,8 @@
                     "trigger": "first character to see through your disguise",
                     "target": "target"
                 }
-            ]
+            ],
+            "actionType": "Special"
         }
     ]
 }

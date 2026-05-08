@@ -22,7 +22,7 @@ type Character struct {
 	Paths        *[]Paths        `json:"paths,omitempty"`
 	Skills       *[]Skill        `json:"skills,omitempty"`
 	Inventory    *[]Inventory    `json:"inventory,omitempty"`
-	Talents      *[]Talents      `json:"talents,omitempty"`
+	Talents      *TalentModule   `json:"talents,omitempty"`
 	Expertises   *[]Expertise    `json:"expertises,omitempty"`
 	Resources    *Resources      `json:"resources,omitempty"`
 	RadiantPaths *[]RadiantPaths `json:"radiantPaths,omitempty"`

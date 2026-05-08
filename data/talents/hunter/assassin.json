@@ -7,19 +7,42 @@
             "id": "killingEdge",
             "name": "Killing Edge",
             "description": "When you acquire this talent, gain weapon expertises in Knives and Slings. Additionally, while you wield a knife or sling, it also has the Deadly and Quickdraw expert traits for you.",
-            "actionCost": "Passive",
             "prerequisites": [
-                { "type": "skill", "target": "Perception", "value": 2 },
-                { "type": "talent", "target": "seekQuarry" }
+                {
+                    "type": "skill",
+                    "target": "Perception",
+                    "value": 2
+                },
+                {
+                    "type": "talent",
+                    "target": "seekQuarry"
+                }
             ],
             "tier": 1,
             "bonuses": [],
             "expertiseGrants": [
-                { "type": "fixed", "expertises": ["Knives", "Slings"] }
+                {
+                    "type": "fixed",
+                    "expertises": [
+                        "Knives",
+                        "Slings"
+                    ]
+                }
             ],
             "traitGrants": [
-                { "targetItems": ["knife", "sling"], "traits": ["Deadly", "Quickdraw"], "expert": true }
-            ]
+                {
+                    "targetItems": [
+                        "knife",
+                        "sling"
+                    ],
+                    "traits": [
+                        "Deadly",
+                        "Quickdraw"
+                    ],
+                    "expert": true
+                }
+            ],
+            "actionType": "Passive"
         },
         {
             "id": "startlingBlow",
@@ -27,8 +50,15 @@
             "description": "Make an unarmed or improvised weapon attack against the Cognitive defense of a target of your size or smaller. On a hit or graze, the target also becomes Surprised until the end of your next turn.",
             "actionCost": 1,
             "prerequisites": [
-                { "type": "skill", "target": "Stealth", "value": 1 },
-                { "type": "talent", "target": "seekQuarry" }
+                {
+                    "type": "skill",
+                    "target": "Stealth",
+                    "value": 1
+                },
+                {
+                    "type": "talent",
+                    "target": "seekQuarry"
+                }
             ],
             "tier": 1,
             "bonuses": [],
@@ -51,41 +81,55 @@
                     "duration": "end of your next turn",
                     "details": "Only works on targets of the same size or smaller."
                 }
-            ]
+            ],
+            "actionType": "Action"
         },
         {
             "id": "shadowing",
             "name": "Shadowing",
             "modifiesTalent": "seekQuarry",
             "description": "You gain an advantage on tests to avoid being sensed by your quarry, and your quarry gains a disadvantage on tests to sense you. Additionally, when you succeed on a test against an enemy's Spiritual defense while you're in cover or an area where your target's senses are obscured, you can spend 3 focus to designate that target as your quarry for your Seek Quarry talent.",
-            "actionCost": "Special",
             "specialActivation": "When succeeding on a test vs. an enemy's Spiritual defense while in cover or obscured, spend 3 focus to designate them as your quarry.",
             "prerequisites": [
-                { "type": "skill", "target": "Stealth", "value": 2 },
-                { "type": "talent", "target": "killingEdge" }
+                {
+                    "type": "skill",
+                    "target": "Stealth",
+                    "value": 2
+                },
+                {
+                    "type": "talent",
+                    "target": "killingEdge"
+                }
             ],
             "tier": 2,
             "bonuses": [],
-            "grantsAdvantage": ["tests to avoid being sensed by your quarry"],
-            "grantsDisadvantage": ["quarry's tests to sense you"],
+            "grantsAdvantage": [
+                "tests to avoid being sensed by your quarry"
+            ],
+            "grantsDisadvantage": [
+                "quarry's tests to sense you"
+            ],
             "resourceTriggers": [
                 {
                     "resource": "focus",
                     "effect": "spend",
                     "amount": 3,
-                    "trigger": "succeed vs. Spiritual defense while in cover or obscured — designate target as quarry",
+                    "trigger": "succeed vs. Spiritual defense while in cover or obscured \u00e2\u20ac\u201d designate target as quarry",
                     "frequency": "unlimited"
                 }
-            ]
+            ],
+            "actionType": "Special"
         },
         {
             "id": "coldEyes",
             "name": "Cold Eyes",
             "modifiesTalent": "seekQuarry",
             "description": "After you kill or incapacitate an enemy who is your quarry, you recover 1 focus and can designate another enemy you can sense as your quarry for your Seek Quarry talent.",
-            "actionCost": "Passive",
             "prerequisites": [
-                { "type": "talent", "target": "shadowing" }
+                {
+                    "type": "talent",
+                    "target": "shadowing"
+                }
             ],
             "tier": 3,
             "bonuses": [],
@@ -98,7 +142,10 @@
                     "frequency": "unlimited"
                 }
             ],
-            "otherEffects": ["After killing or incapacitating your quarry, you can designate another enemy you can sense as your new quarry."]
+            "otherEffects": [
+                "After killing or incapacitating your quarry, you can designate another enemy you can sense as your new quarry."
+            ],
+            "actionType": "Passive"
         },
         {
             "id": "fatalThrust",
@@ -106,8 +153,15 @@
             "description": "Using a light weapon, make a melee attack against the Cognitive defense of a target who is Surprised, doesn't sense you, or doesn't view you as a threat. If this weapon has the Discreet trait, you gain two advantages on the test. When you roll damage for this attack, add an extra 4d4 damage, then count the number of your damage dice that rolled their maximum value. For each die that rolled its maximum, your target must subtract 2 from any injury roll they make for that attack. Scales with tier: tier 3 (6d4), tier 4 (8d4), tier 5 (10d4).",
             "actionCost": 2,
             "prerequisites": [
-                { "type": "skill", "target": "Perception", "value": 3 },
-                { "type": "talent", "target": "startlingBlow" }
+                {
+                    "type": "skill",
+                    "target": "Perception",
+                    "value": 3
+                },
+                {
+                    "type": "talent",
+                    "target": "startlingBlow"
+                }
             ],
             "tier": 2,
             "bonuses": [],
@@ -117,26 +171,41 @@
                 "range": "melee",
                 "baseDamage": "4d4",
                 "damageScaling": [
-                    { "tier": 3, "damage": "6d4" },
-                    { "tier": 4, "damage": "8d4" },
-                    { "tier": 5, "damage": "10d4" }
+                    {
+                        "tier": 3,
+                        "damage": "6d4"
+                    },
+                    {
+                        "tier": 4,
+                        "damage": "8d4"
+                    },
+                    {
+                        "tier": 5,
+                        "damage": "10d4"
+                    }
                 ],
                 "conditionalAdvantages": [
-                    { "condition": "weapon has Discreet trait", "value": 2 }
+                    {
+                        "condition": "weapon has Discreet trait",
+                        "value": 2
+                    }
                 ],
                 "specialMechanics": [
                     "Target must be Surprised, not sensing you, or not viewing you as a threat.",
                     "Each damage die that rolls its maximum subtracts 2 from the target's injury roll for this attack."
                 ]
-            }
+            },
+            "actionType": "Action"
         },
         {
             "id": "mighty",
             "name": "Mighty",
             "description": "When you hit with a weapon or unarmed attack, for each action you used on that attack, increase the damage you deal by 1 + your tier.",
-            "actionCost": "Passive",
             "prerequisites": [
-                { "type": "talent", "target": "coldEyes" }
+                {
+                    "type": "talent",
+                    "target": "coldEyes"
+                }
             ],
             "tier": 3,
             "bonuses": [],
@@ -147,24 +216,46 @@
                 "specialMechanics": [
                     "On hit, deal extra damage equal to (1 + tier) for each action point spent on the attack."
                 ]
-            }
+            },
+            "actionType": "Passive"
         },
         {
             "id": "sidestep",
             "name": "Sidestep",
             "description": "Gain an additional reaction at the start of combat and at the start of each of your turns, which you can use only to Dodge. You can't benefit from this talent while wearing armor with a deflect value of 2 or higher.",
-            "actionCost": "Passive",
             "prerequisites": [
-                { "type": "skill", "target": "Stealth", "value": 3 },
-                { "type": "talent", "target": "shadowing" }
+                {
+                    "type": "skill",
+                    "target": "Stealth",
+                    "value": 3
+                },
+                {
+                    "type": "talent",
+                    "target": "shadowing"
+                }
             ],
             "tier": 4,
             "bonuses": [],
             "actionGrants": [
-                { "type": "reaction", "count": 1, "restrictedTo": "Dodge only", "timing": "start-of-combat", "frequency": "unlimited" },
-                { "type": "reaction", "count": 1, "restrictedTo": "Dodge only", "timing": "start-of-turn", "frequency": "unlimited" }
+                {
+                    "type": "reaction",
+                    "count": 1,
+                    "restrictedTo": "Dodge only",
+                    "timing": "start-of-combat",
+                    "frequency": "unlimited"
+                },
+                {
+                    "type": "reaction",
+                    "count": 1,
+                    "restrictedTo": "Dodge only",
+                    "timing": "start-of-turn",
+                    "frequency": "unlimited"
+                }
             ],
-            "otherEffects": ["Cannot benefit from this talent while wearing armor with a deflect value of 2 or higher."]
+            "otherEffects": [
+                "Cannot benefit from this talent while wearing armor with a deflect value of 2 or higher."
+            ],
+            "actionType": "Passive"
         },
         {
             "id": "swiftStrikes",
@@ -172,7 +263,10 @@
             "description": "Spend 1 focus to make a second Strike action with a hand you already used for a Strike this turn.",
             "actionCost": 1,
             "prerequisites": [
-                { "type": "talent", "target": "coldEyes" }
+                {
+                    "type": "talent",
+                    "target": "coldEyes"
+                }
             ],
             "tier": 4,
             "bonuses": [],
@@ -192,7 +286,8 @@
                 "specialMechanics": [
                     "Make a second Strike with a hand already used for a Strike this turn."
                 ]
-            }
+            },
+            "actionType": "Action"
         }
     ]
 }

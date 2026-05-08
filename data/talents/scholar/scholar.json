@@ -11,15 +11,23 @@
             "id": "erudition",
             "name": "Erudition",
             "description": "Temporarily gain a cultural or utility expertise and a rank in two non-surge cognitive skills. Reassign these after a long rest with library access.",
-            "actionCost": "Special",
             "specialActivation": "After a long rest with library access, reassign expertise and skill ranks",
             "prerequisites": [],
             "tier": 0,
             "bonuses": [],
             "expertiseGrants": [
-                { "type": "choice", "options": ["cultural", "utility"] }
+                {
+                    "type": "choice",
+                    "options": [
+                        "cultural",
+                        "utility"
+                    ]
+                }
             ],
-            "otherEffects": ["Gain temporary rank in two non-surge cognitive skills"]
+            "otherEffects": [
+                "Gain temporary rank in two non-surge cognitive skills"
+            ],
+            "actionType": "Special"
         }
     ]
 }

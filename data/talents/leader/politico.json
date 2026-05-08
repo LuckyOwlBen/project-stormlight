@@ -1,4 +1,4 @@
- {
+{
     "id": "politico",
     "parentId": "leader",
     "pathName": "Politico",
@@ -8,11 +8,17 @@
             "name": "Cutthroat Tactics",
             "modifiesTalent": "decisiveCommand",
             "description": "Before an ally rolls your command die on a test, they can choose to instead raise the stakes on that test. If they do so and roll a Complication, you recover 1 focus.",
-            "actionCost": "Special",
-            "specialActivation": "Ally chooses to raise stakes before rolling command die — if they roll a Complication, you recover 1 focus.",
+            "specialActivation": "Ally chooses to raise stakes before rolling command die \u00e2\u20ac\u201d if they roll a Complication, you recover 1 focus.",
             "prerequisites": [
-                { "type": "skill", "target": "Deception", "value": 1 },
-                { "type": "talent", "target": "decisiveCommand" }
+                {
+                    "type": "skill",
+                    "target": "Deception",
+                    "value": 1
+                },
+                {
+                    "type": "talent",
+                    "target": "decisiveCommand"
+                }
             ],
             "tier": 1,
             "bonuses": [],
@@ -24,7 +30,8 @@
                     "trigger": "ally rolls Complication on raised-stakes command die test",
                     "frequency": "unlimited"
                 }
-            ]
+            ],
+            "actionType": "Special"
         },
         {
             "id": "tacticalPloy",
@@ -32,72 +39,99 @@
             "description": "Make a Deception test against the Cognitive defense of an enemy you can influence. On a success, your target loses one reaction and gains a disadvantage on their next cognitive or spiritual test. A target can resist this influence, but after they do, you gain an advantage on your next test targeting them before the end of your next turn.",
             "actionCost": 1,
             "prerequisites": [
-                { "type": "talent", "target": "decisiveCommand" }
+                {
+                    "type": "talent",
+                    "target": "decisiveCommand"
+                }
             ],
             "tier": 1,
             "bonuses": [],
             "attackDefinition": {
                 "targetDefense": "Cognitive",
                 "range": "special",
-                "specialMechanics": [ 
+                "specialMechanics": [
                     "Test Deception vs. Cognitive defense.",
                     "On success: target loses 1 reaction and has disadvantage on their next Cognitive or Spiritual test.",
                     "If target resists: you gain advantage on your next test targeting them before end of your next turn."
                 ]
-            }
+            },
+            "actionType": "Action"
         },
         {
             "id": "rumormonger",
             "name": "Rumormonger",
             "description": "When you make a test to spread misinformation or gather rumors, you can spend 2 focus to add an Opportunity to the result. Additionally, when you acquire this talent, gain a utility expertise in Scandal.",
-            "actionCost": "Special",
             "specialActivation": "When making a test to spread misinformation or gather rumors, spend 2 focus to add an Opportunity to the result.",
             "prerequisites": [
-                { "type": "talent", "target": "cutthroatTactics" }
+                {
+                    "type": "talent",
+                    "target": "cutthroatTactics"
+                }
             ],
             "tier": 2,
             "bonuses": [],
             "expertiseGrants": [
-                { "type": "fixed", "expertises": ["Scandal"] }
+                {
+                    "type": "fixed",
+                    "expertises": [
+                        "Scandal"
+                    ]
+                }
             ],
             "resourceTriggers": [
                 {
                     "resource": "focus",
                     "effect": "spend",
                     "amount": 2,
-                    "trigger": "making a test to spread misinformation or gather rumors — add Opportunity to result",
+                    "trigger": "making a test to spread misinformation or gather rumors \u00e2\u20ac\u201d add Opportunity to result",
                     "frequency": "unlimited"
                 }
             ],
-            "otherEffects": ["Requires having a patron."]
+            "otherEffects": [
+                "Requires having a patron."
+            ],
+            "actionType": "Special"
         },
         {
             "id": "wellDressed",
             "name": "Well Dressed",
             "description": "While visibly wearing Presentable armor or fashionable clothing, you gain an advantage on the first Deception, Leadership, or Persuasion test you make during each scene. Additionally, when you acquire this talent, gain a cultural expertise in Fashion.",
-            "actionCost": "Special",
             "specialActivation": "While visibly wearing Presentable armor or fashionable clothing, gain advantage on the first Deception, Leadership, or Persuasion test you make each scene.",
             "prerequisites": [
-                { "type": "talent", "target": "rumormonger" }
+                {
+                    "type": "talent",
+                    "target": "rumormonger"
+                }
             ],
             "tier": 2,
             "bonuses": [],
             "expertiseGrants": [
-                { "type": "fixed", "expertises": ["Fashion"] }
+                {
+                    "type": "fixed",
+                    "expertises": [
+                        "Fashion"
+                    ]
+                }
             ],
-            "otherEffects": []
+            "otherEffects": [],
+            "actionType": "Special"
         },
         {
             "id": "baleful",
             "name": "Baleful",
             "description": "To resist your influence, a character must spend additional focus equal to your tier.",
-            "actionCost": "Passive",
             "prerequisites": [
-                { "type": "talent", "target": "rumormonger" }
+                {
+                    "type": "talent",
+                    "target": "rumormonger"
+                }
             ],
             "tier": 3,
             "bonuses": [],
-            "otherEffects": ["Any character resisting your influence must spend additional focus equal to your tier."]
+            "otherEffects": [
+                "Any character resisting your influence must spend additional focus equal to your tier."
+            ],
+            "actionType": "Passive"
         },
         {
             "id": "setAtOdds",
@@ -105,8 +139,15 @@
             "description": "Choose two or more characters you can influence and spend that many focus to seed division among them. Describe a potential source of conflict, then make a Leadership test (DC equals highest Spiritual defense among those targets). On a success, you influence each target to become hostile toward the other targets, which sparks an argument, combat, or other conflict until they find a way to resolve it. A target can resist this influence, but after they do, they lose additional focus equal to your ranks in Leadership. If only some of the targets resist influence, the others remain hostile, but their conflict might become easier to resolve.",
             "actionCost": 2,
             "prerequisites": [
-                { "type": "skill", "target": "Leadership", "value": 3 },
-                { "type": "talent", "target": "baleful" }
+                {
+                    "type": "skill",
+                    "target": "Leadership",
+                    "value": 3
+                },
+                {
+                    "type": "talent",
+                    "target": "baleful"
+                }
             ],
             "tier": 3,
             "bonuses": [],
@@ -114,9 +155,9 @@
                 {
                     "resource": "focus",
                     "effect": "spend",
-                    "amount": "number of chosen targets",
                     "trigger": "activate Set at Odds",
-                    "frequency": "unlimited"
+                    "frequency": "unlimited",
+                    "amountFormula": "number of chosen targets"
                 }
             ],
             "attackDefinition": {
@@ -128,17 +169,24 @@
                     "If a target resists: they lose additional focus equal to your Leadership ranks.",
                     "If only some targets resist: remaining targets stay hostile, conflict may become easier to resolve."
                 ]
-            }
+            },
+            "actionType": "Action"
         },
         {
             "id": "shrewdCommand",
             "name": "Shrewd Command",
             "description": "Before you make a Deception, Insight, or Leadership test, you can spend 1 focus to roll your command die and add the result to your d20 roll. Additionally, when you acquire this talent, increase the size of your command die by one size (such as from a d4 to a d6).",
-            "actionCost": "Special",
             "specialActivation": "Before a Deception, Insight, or Leadership test, spend 1 focus to add your command die result to the roll.",
             "prerequisites": [
-                { "type": "skill", "target": "Leadership", "value": 2 },
-                { "type": "talent", "target": "rumormonger" }
+                {
+                    "type": "skill",
+                    "target": "Leadership",
+                    "value": 2
+                },
+                {
+                    "type": "talent",
+                    "target": "rumormonger"
+                }
             ],
             "tier": 4,
             "bonuses": [],
@@ -147,11 +195,14 @@
                     "resource": "focus",
                     "effect": "spend",
                     "amount": 1,
-                    "trigger": "before a Deception, Insight, or Leadership test — add command die result to roll",
+                    "trigger": "before a Deception, Insight, or Leadership test \u00e2\u20ac\u201d add command die result to roll",
                     "frequency": "unlimited"
                 }
             ],
-            "otherEffects": ["When you acquire this talent, increase your command die size by one step (e.g. d4 → d6)."]
+            "otherEffects": [
+                "When you acquire this talent, increase your command die size by one step (e.g. d4 \u00e2\u2020\u2019 d6)."
+            ],
+            "actionType": "Special"
         },
         {
             "id": "grandDeception",
@@ -159,8 +210,15 @@
             "description": "Spend 3 focus to make a DC 15 Deception test. On a success, choose a detail you established since the start of the last scene and reveal that it was actually a ruse. This ruse must be plausible. The GM is the final arbiter of what sort of ruse you can reveal.",
             "actionCost": 3,
             "prerequisites": [
-                { "type": "skill", "target": "Deception", "value": 3 },
-                { "type": "talent", "target": "shrewdCommand" }
+                {
+                    "type": "skill",
+                    "target": "Deception",
+                    "value": 3
+                },
+                {
+                    "type": "talent",
+                    "target": "shrewdCommand"
+                }
             ],
             "tier": 4,
             "bonuses": [],
@@ -181,7 +239,8 @@
                     "On success: choose a detail established since the start of last scene and reveal it as a plausible ruse.",
                     "GM is the final arbiter of valid ruses."
                 ]
-            }
+            },
+            "actionType": "Action"
         }
     ]
 }

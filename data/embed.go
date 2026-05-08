@@ -13,3 +13,6 @@ var ItemFiles embed.FS
 
 //go:embed skills/*.json
 var SkillFiles embed.FS
+
+//go:embed talents/*/*.json
+var TalentFiles embed.FS

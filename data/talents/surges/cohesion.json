@@ -1,0 +1,277 @@
+{
+    "id": "cohesion",
+    "parentId": "surges",
+    "pathName": "Cohesion",
+    "nodes": [
+        {
+            "id": "cohesion_base",
+            "name": "Cohesion",
+            "description": "Infuse 1 Investiture or more into an unattended object or portion of a surface within your reach that is made of stone; to do so, you must have a hand free and touch the target. This infusion uses 1 Investiture each round, and for the duration, the stone becomes moldable and soft like clay. When you activate this surge, you can immediately form the stone into a rough shape as part of that action, but any elaborate molding requires more time (see \"Shaping Stone\"). This object or portion of the surface can't exceed the surge size for your ranks in Cohesion. You can't use this surge on characters, Invested objects (like Shardplate), or objects that have been infused with Stormlight (like infused spheres or objects affected by surges).",
+            "actionCost": 1,
+            "prerequisites": [
+                {
+                    "type": "skill",
+                    "target": "COHESION",
+                    "value": 1
+                }
+            ],
+            "tier": 0,
+            "bonuses": [],
+            "otherEffects": [
+                "Soften stone to clay-like consistency",
+                "Uses 1 Investiture per round",
+                "Can shape stone roughly as part of action",
+                "Elaborate molding requires additional time",
+                "Can't affect characters, Invested objects, or Stormlight-infused objects"
+            ],
+            "actionType": "Action"
+        },
+        {
+            "id": "cohesion_memories_of_stone",
+            "name": "Memories of Stone",
+            "description": "Your deepening knowledge of the earth allows you to commune with stone itself, gaining visions of things the stone has seen. Spend 1 Investiture to communicate for 1 round with stone you're touching. The earth's knowledge reaches far, including the area's history and memories of nearby events, but it communicates in sculpted images and faint whispers that might be cryptic or incomplete. To interpret these communications, the GM might require you to succeed on a Cohesion test (DC determined by the GM). To communicate with the stone for more than 1 round, you must use this talent multiple times.",
+            "actionCost": 2,
+            "prerequisites": [
+                {
+                    "type": "ideal",
+                    "target": "first",
+                    "value": 1
+                },
+                {
+                    "type": "skill",
+                    "target": "COHESION",
+                    "value": 1
+                }
+            ],
+            "tier": 1,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "stone-communion",
+                    "frequency": "unlimited",
+                    "condition": "touching stone"
+                }
+            ],
+            "actionType": "Action"
+        },
+        {
+            "id": "cohesion_stone_spear",
+            "name": "Stone Spear",
+            "description": "You cause the surface of the stone to launch forward in tight pillars, solidifying mid-flight before slamming into your target. Spend 1 Investiture to make a ranged Cohesion attack against the Physical defense of a target within 60 feet of you, rolling 2d4 impact damage. On a hit, you can also spend C to knock the target Prone. The size of this attack's damage dice increases with your ranks in Cohesion; at 2 ranks, roll 2d6 (instead of 2d4), and so on.",
+            "actionCost": 2,
+            "prerequisites": [
+                {
+                    "type": "ideal",
+                    "target": "first",
+                    "value": 1
+                },
+                {
+                    "type": "skill",
+                    "target": "COHESION",
+                    "value": 1
+                }
+            ],
+            "tier": 1,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "ranged-attack",
+                    "frequency": "unlimited"
+                },
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "prone-on-hit",
+                    "frequency": "unlimited",
+                    "condition": "optional"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "Prone",
+                    "trigger": "on hit with focus spent",
+                    "target": "target",
+                    "duration": "end-of-next-turn"
+                }
+            ],
+            "actionType": "Action"
+        },
+        {
+            "id": "cohesion_sinkhole",
+            "name": "Sinkhole",
+            "description": "You cause the ground to soften so quickly that it can catch anyone standing in it by surprise. Spend 1 Investiture and choose an area of stone ground of a size you can affect with your ranks in Cohesion. Then choose one or more characters who are touching the ground in that area. Make one Cohesion test and compare the result to the Cognitive defense of each chosen character. If you succeed against a target, they sink into the ground and are Immobilized as you resolidify the rock. (See \"Using Cohesion\" for rules on escaping.)",
+            "actionCost": 1,
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "cohesion_stone_spear"
+                },
+                {
+                    "type": "skill",
+                    "target": "COHESION",
+                    "value": 2
+                }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "sinkhole-activation",
+                    "frequency": "unlimited"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "Immobilized",
+                    "trigger": "test-success-vs-cognitive-defense",
+                    "target": "target",
+                    "duration": "until-escape",
+                    "details": "Targets sink into ground and resolidify"
+                }
+            ],
+            "actionType": "Action"
+        },
+        {
+            "id": "cohesion_tunneling",
+            "name": "Tunneling",
+            "description": "You infuse yourself with Cohesion to shift stone from your path as you move. Spend 1 Investiture to infuse yourself with Cohesion. For the duration, you can move through stone surfaces and objects as if moving through difficult terrain. You leave a 5-foot-radius tunnel in your wake through which others can follow. At the start of each of your turns, you can spend 1 Investiture as Free to maintain this infusion. If you create tunnels near the surface, an observant character might detect ripples from the diverted material, potentially sensing your presence.",
+            "actionCost": 1,
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "cohesion_sinkhole"
+                },
+                {
+                    "type": "skill",
+                    "target": "COHESION",
+                    "value": 2
+                }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "self-infusion",
+                    "frequency": "unlimited"
+                },
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "maintenance",
+                    "frequency": "once-per-round",
+                    "condition": "as-free-action"
+                }
+            ],
+            "movementEffects": [
+                {
+                    "type": "special-movement",
+                    "movementType": "walk",
+                    "timing": "as-part-of-action",
+                    "condition": "Move through stone as difficult terrain while infused"
+                }
+            ],
+            "actionType": "Action"
+        },
+        {
+            "id": "cohesion_through_the_stone",
+            "name": "Through the Stone",
+            "description": "When you touch stone, you can sense and use your Cohesion through it from a much greater distance. You can use your surges and their talents as though your reach is 20 feet, as long as there is a stone surface between you and your target that you can touch.",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "cohesion_sinkhole"
+                },
+                {
+                    "type": "skill",
+                    "target": "COHESION",
+                    "value": 3
+                }
+            ],
+            "tier": 3,
+            "bonuses": [],
+            "actionType": "Passive"
+        },
+        {
+            "id": "cohesion_true_stoneshaping",
+            "name": "True Stoneshaping",
+            "description": "Your mastery of Cohesion allows you to shape stone with greater precision and control.",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "cohesion_tunneling"
+                },
+                {
+                    "type": "skill",
+                    "target": "COHESION",
+                    "value": 2
+                }
+            ],
+            "tier": 3,
+            "bonuses": [],
+            "actionType": "Passive"
+        },
+        {
+            "id": "cohesion_flowing_earth",
+            "name": "Flowing Earth",
+            "description": "Shaping stone with Cohesion has become so natural that you can mold the ground beneath your feet as you actively sculpt other stone. After you use Cohesion or spend at least C on one of its talents, you can shape the stone beneath your feet without spending additional Investiture to do so. The stone pushes you up to 5 feet × your ranks in Cohesion, and you can choose to be pushed in any direction, such as rising upward on a pillar. This movement doesn't trigger Reactive Strikes.",
+            "specialActivation": "After you use Cohesion or spend at least C on one of its talents",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "cohesion_true_stoneshaping"
+                },
+                {
+                    "type": "skill",
+                    "target": "COHESION",
+                    "value": 3
+                }
+            ],
+            "tier": 4,
+            "bonuses": [],
+            "movementEffects": [
+                {
+                    "type": "special-movement",
+                    "timing": "as-part-of-action",
+                    "condition": "After using Cohesion or spending confidence on its talents",
+                    "amountFormula": "5 * COHESION.ranks"
+                }
+            ],
+            "actionType": "Special"
+        },
+        {
+            "id": "cohesion_unbound_cohesion",
+            "name": "Unbound Cohesion",
+            "description": "Your Stoneshaping transcends a singular medium, allowing you to soften and shape nearly any material. You can use Cohesion and its talents not only on stone, but on any solid material that isn't alive, Invested, or infused with Stormlight. You no longer simply soften stone—you assert your will on it, molding it into complex shapes with a mere command. When you use Cohesion to shape an object or surface, you can automatically reshape it to your will without using additional actions or time. For example, you can instantly raise or lower elevation, form walls or pillars, create or remove difficult terrain, or create intricate shapes or images.",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "cohesion_through_the_stone"
+                },
+                {
+                    "type": "skill",
+                    "target": "COHESION",
+                    "value": 4
+                }
+            ],
+            "tier": 4,
+            "bonuses": [],
+            "actionType": "Passive"
+        }
+    ]
+}

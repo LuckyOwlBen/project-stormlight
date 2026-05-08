@@ -1,0 +1,414 @@
+{
+    "id": "transportation",
+    "parentId": "surges",
+    "pathName": "Transportation",
+    "nodes": [
+        {
+            "id": "transportation_base",
+            "name": "Transportation",
+            "description": "Spend 1 Investiture or more to look into the Cognitive Realm where it corresponds to your current location. This allows you to see the true nature of many things around you. For each Investiture you spend, you can use one of these effects within your spren bond range: Learn Emotions and Motives - You can observe what types of spren gather around people, helping you discern their true emotions or motives. This might grant you one or more advantages on a test to influence them, or you might learn their motive without an Insight test. Locate Characters - By watching the flames of other people and learning how to identify them, you can make a guess at their location in the Physical Realm (if they're close enough for you to spot their flame in Shadesmar). Sense Investiture - Objects and people Invested with Stormlight or other Investiture can be seen in the Cognitive Realm, revealing their true nature. This might be a Fused, another Radiant, or an object like a Shardblade or a fabrial. Spotting and identifying some of these things can be difficult, and at the GM's discretion, you might need to succeed on a Transportation test to do so.",
+            "actionCost": 1,
+            "prerequisites": [
+                {
+                    "type": "skill",
+                    "target": "TRANSPORTATION",
+                    "value": 1
+                }
+            ],
+            "tier": 0,
+            "bonuses": [],
+            "otherEffects": [
+                "Spend 1+ Investiture to peer into Cognitive Realm",
+                "Per Investiture: Learn emotions/motives, locate characters, or sense Investiture",
+                "Effects work within spren bond range"
+            ],
+            "actionType": "Action"
+        },
+        {
+            "id": "transportation_cognitive_farsight",
+            "name": "Cognitive Farsight",
+            "description": "You can see greater distances into Shadesmar, and you can use it to orient yourself. When you peer into the Cognitive Realm with Transportation, you can spot things up to a distance equal to 3 × your spren bond range. Additionally, while you have 1 Investiture or more, you always know both which direction is north and which direction you must travel to reach the nearest settlement or gathering of people.",
+            "prerequisites": [
+                {
+                    "type": "ideal",
+                    "target": "first",
+                    "value": 1
+                },
+                {
+                    "type": "skill",
+                    "target": "TRANSPORTATION",
+                    "value": 1
+                }
+            ],
+            "tier": 1,
+            "bonuses": [
+                {
+                    "type": "DERIVED",
+                    "target": "cognitive-realm-sight",
+                    "formula": "3 * spren-bond-range",
+                    "scaling": false,
+                    "condition": "See into Cognitive Realm extended distance"
+                }
+            ],
+            "resourceTriggers": [],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "direction-sense",
+                    "trigger": "investiture-active",
+                    "target": "self",
+                    "duration": "while-invested",
+                    "details": "Always know north and direction to nearest settlement"
+                }
+            ],
+            "actionType": "Passive"
+        },
+        {
+            "id": "transportation_realmic_evasion",
+            "name": "Realmic Evasion",
+            "description": "You dodge danger, momentarily transporting yourself between the Physical and Cognitive Realms, then return after the danger has passed. Before you're hit by an attack, you can use this reaction and spend 1 Investiture to make a Transportation test. The DC of this test equals the triggering attack's test result; you can choose whether to use this reaction after you learn the DC. On a failure, the attack grazes instead of hitting. On a success, the attack instead misses and can't graze.",
+            "prerequisites": [
+                {
+                    "type": "ideal",
+                    "target": "second",
+                    "value": 1
+                },
+                {
+                    "type": "skill",
+                    "target": "TRANSPORTATION",
+                    "value": 1
+                }
+            ],
+            "tier": 1,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "evasion-reaction",
+                    "frequency": "once-per-round"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "prevent",
+                    "condition": "hit",
+                    "trigger": "transportation-test-success",
+                    "target": "self",
+                    "duration": "immediate"
+                }
+            ],
+            "movementEffects": [
+                {
+                    "type": "teleport",
+                    "amount": 0,
+                    "timing": "before-attack",
+                    "condition": "Reaction before being hit; momentarily shift to Cognitive Realm and back"
+                }
+            ],
+            "actionType": "Reaction"
+        },
+        {
+            "id": "transportation_cognitive_vision",
+            "name": "Cognitive Vision",
+            "description": "You can glean even greater knowledge and spot even more hidden information when you peer into the Cognitive Realm. The following entries are added to the list of things you can spot when you use Transportation to look into the Cognitive Realm: Learn Intent: Make a Transportation test as Free against the Cognitive defense of an enemy you can sense. On a success, you extrapolate their likely intentions based on the spren lurking around them, and you can share that information with your allies. That enemy gains a disadvantage on their next test against you or one of your allies. Locate Objects: By briefly reaching into Shadesmar, you can examine the various soul beads and their relative locations in the bead ocean. This might reveal nearby objects or other information about your immediate environment, depending on which beads you touch. As usual, spotting more difficult things might require a Transportation test at the GM's discretion.",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "transportation_cognitive_farsight"
+                },
+                {
+                    "type": "skill",
+                    "target": "TRANSPORTATION",
+                    "value": 2
+                }
+            ],
+            "tier": 2,
+            "bonuses": [
+                {
+                    "type": "DERIVED",
+                    "target": "learn-intent",
+                    "value": 0,
+                    "scaling": false,
+                    "condition": "Enemy gains disadvantage on next test against you/allies"
+                }
+            ],
+            "resourceTriggers": [],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "intent-revealed",
+                    "trigger": "transportation-test-success",
+                    "target": "target",
+                    "duration": "until-next-action",
+                    "details": "Extrapolate enemy intentions based on spren"
+                },
+                {
+                    "type": "apply",
+                    "condition": "objects-located",
+                    "trigger": "cognitive-vision-use",
+                    "target": "self",
+                    "duration": "instantaneous",
+                    "details": "Reveal locations of nearby objects"
+                }
+            ],
+            "actionType": "Passive"
+        },
+        {
+            "id": "transportation_realmic_step",
+            "name": "Realmic Step",
+            "description": "You briefly slip into the Cognitive Realm, run a short distance there, then reappear in the Physical Realm. Make a DC 15 Transportation test. On a success, spend 2 Investiture to move through Shadesmar (along with each object you're wearing or carrying), transporting yourself to an unoccupied space you can sense within your spren bond range. This movement doesn't trigger Reactive Strikes. If you are on or above a large body of water, using this talent only costs 1 Investiture, as you don't have to shape the sea of beads beneath yourself to move around.",
+            "actionCost": 1,
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "transportation_realmic_evasion"
+                },
+                {
+                    "type": "skill",
+                    "target": "TRANSPORTATION",
+                    "value": 2
+                }
+            ],
+            "tier": 2,
+            "bonuses": [
+                {
+                    "type": "DERIVED",
+                    "target": "teleportation-range",
+                    "formula": "spren-bond-range",
+                    "scaling": false,
+                    "condition": "Teleport within spren bond range"
+                }
+            ],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 2,
+                    "trigger": "teleportation",
+                    "frequency": "once-per-round",
+                    "condition": "normal-terrain"
+                },
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "teleportation",
+                    "frequency": "once-per-round",
+                    "condition": "over-large-water"
+                }
+            ],
+            "conditionEffects": [],
+            "movementEffects": [
+                {
+                    "type": "teleport",
+                    "amount": 0,
+                    "timing": "as-part-of-action",
+                    "condition": "within-spren-bond-range; move through Shadesmar without triggering Reactive Strikes"
+                }
+            ],
+            "actionType": "Action"
+        },
+        {
+            "id": "transportation_elsecalling",
+            "name": "Elsecalling",
+            "description": "You temporarily open a miniature perpendicularity that allows you to travel between the Cognitive and Physical Realms. You can transport yourself from the Physical Realm to the same location within the Cognitive Realm, or vice versa, along with each object you're wearing or carrying. This movement doesn't trigger Reactive Strikes. If you're in the Physical Realm, spend 1 Investiture to transport yourself to the Cognitive Realm. Elsecalling in this way is simple, requiring no skill test. If you're in the Cognitive Realm, make a DC 20 Transportation test. On a success, spend 2 Investiture to transport yourself to the Physical Realm. On a failure, you don't spend Investiture or transport yourself; on a later turn, you can attempt to Elsecall again.",
+            "actionCost": 2,
+            "prerequisites": [
+                {
+                    "type": "ideal",
+                    "target": "third",
+                    "value": 1
+                },
+                {
+                    "type": "talent",
+                    "target": "transportation_realmic_step"
+                },
+                {
+                    "type": "skill",
+                    "target": "TRANSPORTATION",
+                    "value": 3
+                }
+            ],
+            "tier": 3,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "physical-to-cognitive",
+                    "frequency": "once-per-round",
+                    "condition": "no-test-required"
+                },
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 2,
+                    "trigger": "cognitive-to-physical",
+                    "frequency": "once-per-round",
+                    "condition": "dc-20-test-success"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "realm-crossed",
+                    "trigger": "elsecalling-activation",
+                    "target": "self",
+                    "duration": "instant",
+                    "details": "Transport self and equipment to same location in opposite realm"
+                }
+            ],
+            "movementEffects": [
+                {
+                    "type": "teleport",
+                    "amount": 0,
+                    "timing": "as-part-of-action",
+                    "condition": "perpendicularity-opened; movement does not trigger Reactive Strikes"
+                }
+            ],
+            "actionType": "Action"
+        },
+        {
+            "id": "transportation_shared_transportation",
+            "name": "Shared Transportation",
+            "description": "You can keep your miniature perpendicularities open long enough to bring others along. When you move yourself through Shadesmar with your Elsecalling or Realmic Step talent, you can spend additional Investiture to also transport willing characters within your reach, along with everything they're wearing or carrying. Spend 1 Investiture per additional character you choose to transport.",
+            "specialActivation": "When using Elsecalling or Realmic Step",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "transportation_elsecalling"
+                },
+                {
+                    "type": "skill",
+                    "target": "TRANSPORTATION",
+                    "value": 4
+                }
+            ],
+            "tier": 4,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "transport-additional-character",
+                    "frequency": "once-per-round",
+                    "condition": "within-reach-willing"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "transported-with-group",
+                    "trigger": "elsecalling-or-realmic-step-use",
+                    "target": "all-allies",
+                    "duration": "instant",
+                    "details": "Transport allies within reach along with self and equipment"
+                }
+            ],
+            "movementEffects": [
+                {
+                    "type": "teleport",
+                    "amount": 0,
+                    "timing": "as-part-of-action",
+                    "condition": "allies-in-reach; transport willing characters"
+                }
+            ],
+            "actionType": "Special"
+        },
+        {
+            "id": "transportation_elsegate",
+            "name": "Elsegate",
+            "description": "You can create more stable perpendicularities that allow you to transport yourself and others to highly Invested locations, even across a significant distance. After a long rest, you can instantly transport yourself and up to ten more willing characters, along with each object the targets are wearing or carrying. Choose an Oathgate platform or permanent perpendicularity you've visited before. After spending Investiture as described below, you and the other targets are transported to that destination. This Transportation requires significant Investiture; you must have infused spheres worth twice as many marks as the number of characters you're transporting, and when you arrive, those spheres all become dun. At the GM's discretion, you might be able to choose other destinations that are highly Invested locations you've visited before.",
+            "specialActivation": "After a long rest",
+            "prerequisites": [
+                {
+                    "type": "ideal",
+                    "target": "fourth",
+                    "value": 1
+                },
+                {
+                    "type": "talent",
+                    "target": "transportation_shared_transportation"
+                },
+                {
+                    "type": "skill",
+                    "target": "TRANSPORTATION",
+                    "value": 4
+                }
+            ],
+            "tier": 4,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 0,
+                    "trigger": "elsegate-activation",
+                    "frequency": "once-per-scene",
+                    "condition": "requires-infused-spheres-2x-character-count"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "long-distance-transported",
+                    "trigger": "elsegate-activation",
+                    "target": "all-allies",
+                    "duration": "instant",
+                    "details": "Transport up to 10 willing allies to known Oathgate/perpendicularity"
+                }
+            ],
+            "movementEffects": [
+                {
+                    "type": "teleport",
+                    "amount": 0,
+                    "timing": "as-part-of-action",
+                    "condition": "after-long-rest-known-destination; transport with equipment to visited location"
+                }
+            ],
+            "actionType": "Special"
+        },
+        {
+            "id": "transportation_realmwalker",
+            "name": "Realmwalker",
+            "description": "You effortlessly step between the Cognitive and Physical Realms. When you make a Transportation test to use a Transportation talent, you automatically succeed.",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "transportation_elsecalling"
+                },
+                {
+                    "type": "skill",
+                    "target": "TRANSPORTATION",
+                    "value": 4
+                }
+            ],
+            "tier": 4,
+            "bonuses": [
+                {
+                    "type": "DERIVED",
+                    "target": "transportation-talent-tests",
+                    "value": 0,
+                    "scaling": false,
+                    "condition": "Automatically succeed on Transportation tests for talents"
+                }
+            ],
+            "resourceTriggers": [],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "realms-effortless",
+                    "trigger": "transportation-talent-use",
+                    "target": "self",
+                    "duration": "permanent",
+                    "details": "No need to roll Transportation tests"
+                }
+            ],
+            "actionType": "Passive"
+        }
+    ]
+}

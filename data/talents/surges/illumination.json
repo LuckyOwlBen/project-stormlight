@@ -1,0 +1,353 @@
+{
+    "id": "illumination",
+    "parentId": "surges",
+    "pathName": "Illumination",
+    "nodes": [
+        {
+            "id": "illumination_base",
+            "name": "Illumination (Lightweaving)",
+            "description": "To Lightweave an illusion, spend 1 Investiture or more to infuse it into thin air in a space within your spren bond range. This illusion can't exceed the surge size for your ranks in Illumination. Lightweavings typically take the form of a three-dimensional hologram representing a character, object, or phenomenon you're familiar with. This illusion is composed of light, complete with animation and accompanying sounds produced by the vibrations of your bonded spren. Simple and Complex Illusions: If the illusion depicts a simple object with no sound or animations, the infusion uses 1 Investiture every 10 minutes. If the illusion depicts a character or more complex object, it instead uses 1 Investiture each round. For the duration, the illusion remains active even if you move out of range. You can move and control a complex illusion. Disguising Yourself: Alternatively, if you have 1 Investiture or more, you can use Illumination to create an illusory disguise on yourself without spending Investiture. This disguise lasts until you end it as Free or run out of Investiture. Deceiving Characters: Simple objects or self-disguises automatically convince characters unless they're suspicious. Complex illusions may require an Illumination test vs Cognitive defense. Characters can scrutinize illusions with opposed Perception test; if they exceed your Illumination test, they detect the illusion.",
+            "actionCost": 1,
+            "prerequisites": [
+                {
+                    "type": "skill",
+                    "target": "ILLUMINATION",
+                    "value": 1
+                }
+            ],
+            "tier": 0,
+            "bonuses": [],
+            "otherEffects": [
+                "Create illusions within spren bond range",
+                "Simple illusions: 1 Investiture per 10 minutes",
+                "Complex illusions: 1 Investiture per round",
+                "Self-disguise: Free with 1+ Investiture (no cost)",
+                "Illusion tests vs Cognitive defense or opposed Perception"
+            ],
+            "actionType": "Action"
+        },
+        {
+            "id": "illumination_distracting_illusion",
+            "name": "Distracting Illusion",
+            "description": "You create a moving, illusory copy of someone to distract your enemies. Spend 1 Investiture to Lightweave an illusory duplicate, either of yourself or an ally you can sense within your spren bond range. The illusion appears in that character's space and moves with them. Attacks against that character gain a disadvantage and can't graze. The illusion ends after an attack misses that character or at the end of the scene.",
+            "actionCost": 1,
+            "prerequisites": [
+                {
+                    "type": "ideal",
+                    "target": "first",
+                    "value": 1
+                },
+                {
+                    "type": "skill",
+                    "target": "ILLUMINATION",
+                    "value": 1
+                }
+            ],
+            "tier": 1,
+            "bonuses": [],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "distracting-illusion-active",
+                    "trigger": "create-duplicate",
+                    "target": "all-enemies",
+                    "details": "Attacks against target have disadvantage and cannot graze"
+                },
+                {
+                    "type": "apply",
+                    "condition": "illusion-ends",
+                    "trigger": "attack-misses-or-end-of-scene",
+                    "target": "target"
+                }
+            ],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "create-duplicate",
+                    "frequency": "unlimited"
+                }
+            ],
+            "actionType": "Action"
+        },
+        {
+            "id": "illumination_lingering_lightweaving",
+            "name": "Lingering Lightweaving",
+            "modifiesTalent": "illumination_base",
+            "description": "You infuse spheres with your Illumination, creating illusions that linger long after you've moved away. When you Lightweave an illusion, instead of creating it in thin air, you can instead infuse its Investiture in a sphere or unencased gem within 5 feet of that illusion. For the duration, the illusion moves with the gem; for example, an ally could carry this gem to extend the duration of an illusory disguise you created for them. Instead of the infusion expending 1 Investiture per round, it expends 1 Investiture per number of rounds equal to your ranks in Illumination; for example, if you have 3 ranks in Illumination, your infusions in spheres expend Investiture once every 3 rounds.",
+            "specialActivation": "When you Lightweave an illusion",
+            "prerequisites": [
+                {
+                    "type": "ideal",
+                    "target": "first",
+                    "value": 1
+                },
+                {
+                    "type": "skill",
+                    "target": "ILLUMINATION",
+                    "value": 1
+                }
+            ],
+            "tier": 1,
+            "bonuses": [
+                {
+                    "type": "DERIVED",
+                    "target": "infusion-range",
+                    "value": 5,
+                    "scaling": false,
+                    "condition": "Sphere or unencased gem within 5 feet"
+                }
+            ],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "reduce-cost",
+                    "trigger": "maintain-illusion",
+                    "frequency": "unlimited",
+                    "condition": "X = Illumination ranks",
+                    "amountFormula": "1 per X rounds"
+                }
+            ],
+            "movementEffects": [
+                {
+                    "type": "special-movement",
+                    "condition": "Illusion anchored to infused gem moves with it"
+                }
+            ],
+            "actionType": "Special"
+        },
+        {
+            "id": "illumination_disorienting_flash",
+            "name": "Disorienting Flash",
+            "description": "You create a brief burst of light and sound that attacks the senses of targets near you. Spend 1 Investiture to project a burst of light in an area within your reach, up to the size you can create with your ranks in Illumination. Make one Illumination test and compare the result against the Cognitive defense of each character in that area. If you succeed against a target, they become Disoriented until the end of their next turn.",
+            "actionCost": 2,
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "illumination_distracting_illusion"
+                },
+                {
+                    "type": "skill",
+                    "target": "ILLUMINATION",
+                    "value": 2
+                }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "project-burst",
+                    "frequency": "unlimited"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "illumination-test-success",
+                    "trigger": "apply-condition",
+                    "target": "all-enemies",
+                    "details": "Targets become Disoriented until end of their next turn"
+                }
+            ],
+            "actionType": "Action"
+        },
+        {
+            "id": "illumination_stormlight_reclamation",
+            "name": "Stormlight Reclamation",
+            "description": "You can reclaim Stormlight from active illusions. After your infusions expend their infused Investiture at the start of your turn, you can end any number of those infusions within your reach, recovering all remaining Investiture they were infused with.",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "illumination_distracting_illusion"
+                },
+                {
+                    "type": "skill",
+                    "target": "ILLUMINATION",
+                    "value": 2
+                }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "recover",
+                    "trigger": "end-infusion",
+                    "frequency": "unlimited",
+                    "condition": "infusion within reach",
+                    "amountFormula": "all-remaining"
+                }
+            ],
+            "actionType": "Free"
+        },
+        {
+            "id": "illumination_spiritual_illumination",
+            "name": "Spiritual Illumination",
+            "description": "You use Lightweaving to show your allies inspiring possibilities of who they could become. Spend 2 Investiture to create a momentary Lightweaving near an ally you can sense within your spren bond range. That ally becomes Determined and Focused until the end of their next turn.",
+            "actionCost": 1,
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "illumination_disorienting_flash"
+                },
+                {
+                    "type": "skill",
+                    "target": "ILLUMINATION",
+                    "value": 3
+                }
+            ],
+            "tier": 3,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 2,
+                    "trigger": "create-lightweaving",
+                    "frequency": "unlimited",
+                    "condition": "ally within spren bond range"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "lightweaving-created",
+                    "trigger": "apply-conditions",
+                    "target": "target",
+                    "details": "Ally becomes Determined and Focused until end of their next turn"
+                }
+            ],
+            "actionType": "Action"
+        },
+        {
+            "id": "illumination_multiplicative_lightweaving",
+            "name": "Multiplicative Lightweaving",
+            "modifiesTalent": "illumination_base",
+            "description": "You effortlessly Lightweave multiple illusions at once. When you Lightweave an illusion, you can create a number of additional illusions up to your ranks in Illumination. These infusions last for the duration of the original infusion and require no additional Investiture to create or maintain.",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "illumination_stormlight_reclamation"
+                },
+                {
+                    "type": "skill",
+                    "target": "ILLUMINATION",
+                    "value": 3
+                }
+            ],
+            "tier": 3,
+            "bonuses": [
+                {
+                    "type": "DERIVED",
+                    "target": "additional-illusions",
+                    "formula": "illumination-ranks",
+                    "scaling": true,
+                    "condition": "Create up to ranks additional illusions"
+                }
+            ],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "reduce-cost",
+                    "amount": 0,
+                    "trigger": "create-additional-illusions",
+                    "frequency": "unlimited",
+                    "condition": "included in original infusion"
+                }
+            ],
+            "actionType": "Passive"
+        },
+        {
+            "id": "illumination_painful_truth",
+            "name": "Painful Truth",
+            "description": "You create a haunting image of who an enemy could have been if they'd taken a better path. Spend 2 Investiture and make an Illumination test against the Spiritual defense of a target you can sense within your spren bond range. On a success, they stumble in shock, becoming Slowed until the end of their next turn. At the start of the target's next turn, they must either spend focus equal to your ranks in Illumination to end this effect as Free, or immediately use the Move action to move as far as possible away from you.",
+            "actionCost": 1,
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "illumination_spiritual_illumination"
+                },
+                {
+                    "type": "skill",
+                    "target": "ILLUMINATION",
+                    "value": 4
+                }
+            ],
+            "tier": 4,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 2,
+                    "trigger": "create-haunting-image",
+                    "frequency": "unlimited",
+                    "condition": "target within spren bond range"
+                },
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "trigger": "end-effect",
+                    "frequency": "once-per-round",
+                    "condition": "X = Illumination ranks, optional action",
+                    "amountFormula": "X"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "illumination-test-success",
+                    "trigger": "apply-condition",
+                    "target": "target",
+                    "details": "Target becomes Slowed until end of their next turn"
+                }
+            ],
+            "movementEffects": [
+                {
+                    "type": "special-movement",
+                    "timing": "as-part-of-action",
+                    "condition": "If focus not spent, forced to move away from caster"
+                }
+            ],
+            "actionType": "Action"
+        },
+        {
+            "id": "illumination_endless_illusions",
+            "name": "Endless Illusions",
+            "modifiesTalent": "illumination_base",
+            "description": "You've become so efficient at powering your illusions that you can maintain them indefinitely. While you have 1 Investiture or more, each of your Illumination infusions within your spren bond range expends no infused Investiture at the start of your turn.",
+            "prerequisites": [
+                {
+                    "type": "skill",
+                    "target": "ILLUMINATION",
+                    "value": 4
+                }
+            ],
+            "tier": 4,
+            "bonuses": [
+                {
+                    "type": "DERIVED",
+                    "target": "illusion-maintenance",
+                    "value": 0,
+                    "scaling": false,
+                    "condition": "No Investiture expended within spren bond range while at 1+ Investiture"
+                }
+            ],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "reduce-cost",
+                    "amount": 0,
+                    "trigger": "maintain-illusions",
+                    "frequency": "once-per-round",
+                    "condition": "with 1+ Investiture, within spren bond range"
+                }
+            ],
+            "actionType": "Passive"
+        }
+    ]
+}

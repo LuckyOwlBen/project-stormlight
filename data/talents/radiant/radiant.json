@@ -1,0 +1,18 @@
+{
+    "id": "radiant",
+    "name": "Radiant",
+    "subpaths": [
+        "bondsmith",
+        "dustbringer",
+        "edgedancer",
+        "elsecaller",
+        "lightweaver",
+        "skybreaker",
+        "stoneward",
+        "truthwatcher",
+        "futuresight",
+        "windrunner",
+        "willshaper"
+    ],
+    "talentNodes": []
+}

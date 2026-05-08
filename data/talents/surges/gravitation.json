@@ -1,0 +1,303 @@
+{
+    "id": "gravitation",
+    "parentId": "surges",
+    "pathName": "Gravitation",
+    "nodes": [
+        {
+            "id": "gravitation_base",
+            "name": "Gravitation (Basic Lashing)",
+            "description": "To perform a Basic Lashing, spend 1 Investiture or more to infuse a character or object within your reach; you must have a hand free and touch the target. Your target can't exceed the surge size for your ranks in Gravitation. The infusion uses 1 Investiture each round, and for the duration, the target's gravity changes directions. This change uses your gravitation rate, which begins at 25 feet. Your target doesn't move fast enough to deal damage on impact. However, if a target is aloft when the surge ends, they fall and take the usual damage from the fall. Targeting a Character: You can target a willing character, granting them a flying rate equal to your gravitation rate for the duration. Alternatively, you can infuse yourself with Gravitation regardless of your size, gaining the same flying rate and spending 1 Investiture each round to maintain the surge. To target an unwilling character, see \"Gravitation on Others.\" Targeting an Object: You can target an object, declaring a new direction for its gravity. At the start of each of your turns, after the infusion expends another 1 Investiture, move that object in a straight line up to your gravitation rate. You can't use this surge on Invested objects (like Shardplate) or objects that have been infused with Stormlight (like infused spheres or objects affected by surges).",
+            "actionCost": 1,
+            "prerequisites": [
+                {
+                    "type": "skill",
+                    "target": "GRAVITATION",
+                    "value": 1
+                }
+            ],
+            "tier": 0,
+            "bonuses": [],
+            "otherEffects": [
+                "Grant flying rate to willing characters (gravitation rate, starts at 25 feet)",
+                "Infuse self for flight regardless of size",
+                "Move objects by changing gravity direction",
+                "Uses 1 Investiture per round",
+                "Can't affect Invested or Stormlight-infused objects"
+            ],
+            "actionType": "Action"
+        },
+        {
+            "id": "gravitation_flying_ace",
+            "name": "Flying Ace",
+            "modifiesTalent": "gravitation_base",
+            "description": "You are a master of the skies, adeptly wielding your weapon while in flight. While maintaining a Basic Lashing on yourself, fly a distance up to your gravitation rate. Once during this movement, you can spend 1 focus to make a melee weapon attack as part of the same action. After resolving that attack, you can continue your movement. Additionally, when you acquire this talent, your gravitation rate increases to 40 feet.",
+            "actionCost": 1,
+            "prerequisites": [
+                {
+                    "type": "ideal",
+                    "target": "first",
+                    "value": 1
+                },
+                {
+                    "type": "skill",
+                    "target": "GRAVITATION",
+                    "value": 1
+                }
+            ],
+            "tier": 1,
+            "bonuses": [
+                {
+                    "type": "DERIVED",
+                    "target": "gravitation-rate",
+                    "value": 40
+                }
+            ],
+            "resourceTriggers": [
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "melee-attack-during-flight",
+                    "frequency": "unlimited"
+                }
+            ],
+            "movementEffects": [
+                {
+                    "type": "special-movement",
+                    "movementType": "fly",
+                    "timing": "as-part-of-action",
+                    "condition": "Can interrupt flight to make melee attack, then continue"
+                }
+            ],
+            "otherEffects": [],
+            "actionType": "Action"
+        },
+        {
+            "id": "gravitation_gravitational_slam",
+            "name": "Gravitational Slam",
+            "modifiesTalent": "gravitation_base",
+            "description": "Your Basic Lashings become more forceful and potentially dangerous on impact. When you use a Basic Lashing to move an unwilling creature or object into a solid surface, the collision stops that movement early, and you can choose for the Lashed target to take 1d4 impact damage for every 10 feet they were moved with that Lashing on this turn. For example, if you moved them 25 feet then they collide with a wall, they take 2d4 impact damage. Your target can use the Avoid Danger reaction to make an Agility test opposed by your Gravitation, taking half as much damage on a success. The size of these damage dice increases with your ranks in Gravitation; at 2 ranks, roll 1d6 (instead of 1d4), and so on.",
+            "prerequisites": [
+                {
+                    "type": "ideal",
+                    "target": "first",
+                    "value": 1
+                },
+                {
+                    "type": "skill",
+                    "target": "GRAVITATION",
+                    "value": 1
+                }
+            ],
+            "tier": 1,
+            "bonuses": [],
+            "otherEffects": [
+                "Lashed targets take impact damage on collision: 1d4 per 10 feet moved (scales: rank 2 = 1d6, rank 3 = 1d8, etc.)",
+                "Target can use Avoid Danger reaction for Agility test to halve damage"
+            ],
+            "actionType": "Passive"
+        },
+        {
+            "id": "gravitation_stable_flight",
+            "name": "Stable Flight",
+            "modifiesTalent": "gravitation_flying_ace",
+            "description": "You're an expert in launching attacks from afar in mid-flight. While maintaining a Basic Lashing on yourself, your ranged attacks don't gain a disadvantage due to flying or other causes of unstable footing.",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "gravitation_flying_ace"
+                },
+                {
+                    "type": "skill",
+                    "target": "GRAVITATION",
+                    "value": 2
+                }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "grantsAdvantage": [
+                "ranged attacks while flying or on unstable footing"
+            ],
+            "otherEffects": [],
+            "actionType": "Passive"
+        },
+        {
+            "id": "gravitation_multiple_lashings",
+            "name": "Multiple Lashings",
+            "modifiesTalent": "gravitation_base",
+            "description": "You can apply multiple Basic Lashings to an enemy. After you succeed on a Gravitation test to move an unwilling character, you can infuse them with an amount of Investiture up to your ranks in Gravitation (instead of only 1 Investiture). When you do, the effect continues until the infusion ends (instead of until the start of your next turn).",
+            "specialActivation": "After you succeed on a Gravitation test to move an unwilling character",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "gravitation_gravitational_slam"
+                },
+                {
+                    "type": "skill",
+                    "target": "GRAVITATION",
+                    "value": 2
+                }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "gravitation-success",
+                    "frequency": "unlimited",
+                    "condition": "Spend up to Gravitation ranks on unwilling target"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "Multiple Lashings",
+                    "trigger": "gravitation-success",
+                    "target": "target",
+                    "duration": "until-infusion-ends",
+                    "details": "Effect extends beyond start of next turn"
+                }
+            ],
+            "otherEffects": [],
+            "actionType": "Special"
+        },
+        {
+            "id": "gravitation_lashing_shot",
+            "name": "Lashing Shot",
+            "description": "You apply multiple Basic Lashings to an object, launching it with several times the force of gravity. You touch an unattended object of a size you can affect with your ranks in Gravitation, then you propel that object at a target in your line of effect, spending Investiture equal to the distance to that target divided by your gravitation rate (rounded up). Make a ranged Gravitation attack against the Physical defense of that target, rolling 2d4 impact damage. The size of these damage dice increases with your ranks in Gravitation; at 2 ranks, roll 2d6 (instead of 2d4), and so on.",
+            "actionCost": 2,
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "gravitation_gravitational_slam"
+                },
+                {
+                    "type": "skill",
+                    "target": "GRAVITATION",
+                    "value": 2
+                }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "activation",
+                    "frequency": "unlimited",
+                    "condition": "Spend distance divided by gravitation rate (rounded up)"
+                }
+            ],
+            "otherEffects": [
+                "Launch object at target within line of effect",
+                "Damage: 2d4 (rank 1), 2d6 (rank 2), 2d8 (rank 3), etc."
+            ],
+            "actionType": "Action"
+        },
+        {
+            "id": "gravitation_group_flight",
+            "name": "Group Flight",
+            "modifiesTalent": "gravitation_base",
+            "description": "You can infuse multiple allies with Gravitation at once. While not in combat, when you spend 1 Investiture or more to infuse yourself or a willing character with a Basic Lashing, you can also infuse a number of additional willing characters up to your ranks in Gravitation. Each target must be within your reach. These infusions last for the duration of the original infusion and require no additional Investiture to create or maintain.",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "gravitation_stable_flight"
+                },
+                {
+                    "type": "skill",
+                    "target": "GRAVITATION",
+                    "value": 3
+                }
+            ],
+            "tier": 3,
+            "bonuses": [],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "Basic Lashing",
+                    "trigger": "group-infusion",
+                    "target": "all-allies",
+                    "duration": "original-infusion-duration",
+                    "details": "A number of willing allies up to your Gravitation ranks within reach"
+                }
+            ],
+            "otherEffects": [
+                "Only usable while not in combat",
+                "Each target must be within reach"
+            ],
+            "actionType": "Passive"
+        },
+        {
+            "id": "gravitation_aerial_squadron",
+            "name": "Aerial Squadron",
+            "modifiesTalent": "gravitation_group_flight",
+            "description": "You've trained your allies in aerial combat scenarios, readying them to fly together at a moment's notice. You can use your Group Flight in combat.",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "gravitation_group_flight"
+                },
+                {
+                    "type": "skill",
+                    "target": "GRAVITATION",
+                    "value": 3
+                }
+            ],
+            "tier": 4,
+            "bonuses": [],
+            "conditionEffects": [
+                {
+                    "type": "prevent",
+                    "condition": "combat-restriction",
+                    "trigger": "group-flight",
+                    "target": "self",
+                    "duration": "permanent",
+                    "details": "Can use Group Flight in combat"
+                }
+            ],
+            "otherEffects": [],
+            "actionType": "Passive"
+        },
+        {
+            "id": "gravitation_master_of_the_skies",
+            "name": "Master of the Skies",
+            "modifiesTalent": "gravitation_base",
+            "description": "You've become so efficient at infusing yourself with Gravitation that it becomes subconscious, allowing you to endlessly soar. While you have 1 Investiture or more, you gain the benefits of being infused with Gravitation without spending Investiture.",
+            "prerequisites": [
+                {
+                    "type": "skill",
+                    "target": "GRAVITATION",
+                    "value": 4
+                }
+            ],
+            "tier": 4,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "reduce-cost",
+                    "amount": 0,
+                    "trigger": "maintenance",
+                    "frequency": "once-per-round",
+                    "condition": "Gain infusion benefits with 1+ Investiture without spending"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "Gravitation infusion",
+                    "trigger": "passive",
+                    "target": "self",
+                    "duration": "permanent",
+                    "details": "Gain benefits without spending Investiture while holding 1+"
+                }
+            ],
+            "otherEffects": [],
+            "actionType": "Passive"
+        }
+    ]
+}

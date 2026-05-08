@@ -1,0 +1,400 @@
+{
+    "id": "adhesion",
+    "parentId": "surges",
+    "pathName": "Adhesion",
+    "nodes": [
+        {
+            "id": "adhesion_base",
+            "name": "Adhesion (Full Lashing)",
+            "description": "To perform a Full Lashing, spend 1 Investiture or more, infusing it into two unsecured objects within your reach and within 5 feet of each other; you must have a hand free and touch the targets. The infusion uses 1 Investiture each round, and the two objects become stuck together for the duration. Each object you target can't exceed the surge size for your ranks in Adhesion. If you wish, one of these two objects can instead be the ground, wall, ceiling, or similar surface; you can target this surface regardless of its size. You can't use this surge on characters, Invested objects (like Shardplate), or objects that have been infused with Stormlight (like infused spheres or objects affected by surges).",
+            "actionCost": 1,
+            "prerequisites": [
+                {
+                    "type": "skill",
+                    "target": "ADHESION",
+                    "value": 1
+                }
+            ],
+            "tier": 0,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "activation",
+                    "frequency": "once-per-round"
+                },
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "maintenance",
+                    "frequency": "once-per-round"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "Adhesion",
+                    "trigger": "activation",
+                    "target": "target",
+                    "duration": "investiture-maintained",
+                    "details": "Two objects within 5 feet stuck together"
+                }
+            ],
+            "otherEffects": [
+                "Stick two objects together",
+                "Objects must be within 5 feet of each other",
+                "Uses 1 Investiture per round",
+                "One object can be a surface (ground, wall, ceiling) of any size",
+                "Can't affect characters, Invested objects, or Stormlight-infused objects"
+            ],
+            "actionType": "Action"
+        },
+        {
+            "id": "adhesion_binding_strike",
+            "name": "Binding Strike",
+            "modifiesTalent": "adhesion_base",
+            "description": "You can seamlessly use Adhesion while performing your melee attacks. After you hit with a melee attack, you can spend 1 or 2 focus to use Adhesion, infusing Investiture as usual but without spending an action. At least one target must be an object the target is holding or wearing, and you automatically succeed on the test to infuse it. As usual, the other object or surface must be within 5 feet of the first object, but you don't need to touch it or have a hand free.",
+            "specialActivation": "After you hit with a melee attack",
+            "prerequisites": [
+                {
+                    "type": "ideal",
+                    "target": "first",
+                    "value": 1
+                },
+                {
+                    "type": "skill",
+                    "target": "ADHESION",
+                    "value": 1
+                }
+            ],
+            "tier": 1,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "melee-hit",
+                    "frequency": "unlimited"
+                },
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "maintenance",
+                    "frequency": "once-per-round"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "Adhesion",
+                    "trigger": "melee-hit",
+                    "target": "target",
+                    "duration": "investiture-maintained",
+                    "details": "Applies to objects the target is holding or wearing; auto-succeed infusion test"
+                }
+            ],
+            "otherEffects": [
+                "Use Adhesion after melee hit for 1-2 focus without spending an action",
+                "Auto-succeed on infusion test for objects target is holding/wearing",
+                "Don't need to touch targets or have hand free"
+            ],
+            "actionType": "Special"
+        },
+        {
+            "id": "adhesion_stormlight_reclamation",
+            "name": "Stormlight Reclamation",
+            "description": "You can reclaim Stormlight from active infusions. After your infusions expend their infused Investiture at the start of your turn, you can end any number of those infusions within your reach, recovering all remaining Investiture they were infused with.",
+            "prerequisites": [
+                {
+                    "type": "ideal",
+                    "target": "first",
+                    "value": 1
+                },
+                {
+                    "type": "skill",
+                    "target": "ADHESION",
+                    "value": 1
+                }
+            ],
+            "tier": 1,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "recover",
+                    "amount": 0,
+                    "trigger": "end-infusion",
+                    "frequency": "unlimited",
+                    "condition": "remaining"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "adhesion-ended",
+                    "trigger": "free-action",
+                    "target": "target",
+                    "duration": "instant",
+                    "details": "Recover remaining Investiture within reach"
+                }
+            ],
+            "otherEffects": [
+                "Recover Investiture from infusions within reach"
+            ],
+            "actionType": "Free"
+        },
+        {
+            "id": "adhesion_binding_shot",
+            "name": "Binding Shot",
+            "modifiesTalent": "adhesion_binding_strike",
+            "description": "You \"paint\" your ammunition with Adhesion before throwing or firing it at a target, transferring the infusion to one of your target's possessions. You can use Binding Strike when you hit with a ranged attack at any distance, and you don't need to touch the infused targets or have a hand free.",
+            "specialActivation": "After you hit with a ranged attack",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "adhesion_binding_strike"
+                },
+                {
+                    "type": "skill",
+                    "target": "ADHESION",
+                    "value": 2
+                }
+            ],
+            "tier": 2,
+            "bonuses": [
+                {
+                    "type": "DERIVED",
+                    "target": "adhesion-range",
+                    "condition": "Can apply Adhesion at any distance"
+                }
+            ],
+            "resourceTriggers": [
+                {
+                    "resource": "focus",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "ranged-hit",
+                    "frequency": "unlimited"
+                },
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "maintenance",
+                    "frequency": "once-per-round"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "Adhesion",
+                    "trigger": "ranged-hit",
+                    "target": "target",
+                    "duration": "investiture-maintained",
+                    "details": "Applies to possessions at any distance"
+                }
+            ],
+            "otherEffects": [
+                "Use Binding Strike benefits on ranged attacks at any distance",
+                "Don't need to touch targets or have hand free"
+            ],
+            "actionType": "Special"
+        },
+        {
+            "id": "adhesion_distant_surgebinding",
+            "name": "Distant Surgebinding",
+            "description": "You can infuse targets from a greater distance. You can use your surges and their talents as though your reach is 20 feet, and you don't need to touch the target. (As usual, if you adhere two objects together, they must be within 5 feet of each other.)",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "adhesion_stormlight_reclamation"
+                },
+                {
+                    "type": "skill",
+                    "target": "ADHESION",
+                    "value": 2
+                }
+            ],
+            "tier": 2,
+            "bonuses": [
+                {
+                    "type": "DERIVED",
+                    "target": "reach",
+                    "value": 20
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "prevent",
+                    "condition": "touch-requirement",
+                    "trigger": "activation",
+                    "target": "self",
+                    "duration": "permanent",
+                    "details": "No touch required for infusion"
+                }
+            ],
+            "otherEffects": [
+                "Use surges and talents with 20 feet reach",
+                "No touch required for infusion",
+                "Objects being adhered still must be within 5 feet of each other"
+            ],
+            "actionType": "Passive"
+        },
+        {
+            "id": "adhesion_adhesive_trap",
+            "name": "Adhesive Trap",
+            "description": "You can infuse Adhesion into surfaces, causing anyone who touches them to become stuck. When you use Adhesion, you can choose to infuse no objects, and instead only infuse a portion of one surface, up to the size you can affect with your ranks in Adhesion. When another character touches this infused area, they become subject to a Full Lashing with that surface for the duration of the infusion, and your test to Lash them in this way automatically succeeds. For example, a character becomes Lashed to the surface if they're touching it when you infuse it, if they later touch it while moving through its space, or if they're forcibly moved into its space (such as with a gravitational Lashing).",
+            "specialActivation": "When you use Adhesion",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "adhesion_binding_shot"
+                },
+                {
+                    "type": "skill",
+                    "target": "ADHESION",
+                    "value": 3
+                }
+            ],
+            "tier": 3,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "maintenance",
+                    "frequency": "once-per-round"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "Adhesion Trap",
+                    "trigger": "contact",
+                    "target": "all-enemies",
+                    "duration": "investiture-maintained",
+                    "details": "Auto-succeed on lash test, triggers on contact or forced movement"
+                }
+            ],
+            "otherEffects": [
+                "Infuse surface area instead of objects",
+                "Characters touching infused surface become Lashed to it automatically",
+                "Works when they touch it initially or move into the space"
+            ],
+            "actionType": "Special"
+        },
+        {
+            "id": "adhesion_extended_adhesion",
+            "name": "Extended Adhesion",
+            "modifiesTalent": "adhesion_base",
+            "description": "Your Full Lashings use less Stormlight, allowing them to last much longer. When you perform a Full Lashing, instead of the infusion using 1 Investiture per round, it expends 1 Investiture per number of rounds equal to your ranks in Adhesion. For example, if you have 3 ranks in Adhesion, those infusions expend Investiture once every 3 rounds.",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "adhesion_distant_surgebinding"
+                },
+                {
+                    "type": "skill",
+                    "target": "ADHESION",
+                    "value": 3
+                }
+            ],
+            "tier": 3,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "reduce-cost",
+                    "amount": 0,
+                    "trigger": "maintenance",
+                    "frequency": "once-per-round",
+                    "condition": "Expends per X rounds; X = adhesion-skill-ranks"
+                }
+            ],
+            "otherEffects": [
+                "Full Lashings expend 1 Investiture per X rounds (where X = Adhesion ranks)"
+            ],
+            "actionType": "Passive"
+        },
+        {
+            "id": "adhesion_living_adhesion",
+            "name": "Living Adhesion",
+            "modifiesTalent": "adhesion_base",
+            "description": "You can apply Adhesion directly to other living beings, sticking their bodies to surfaces. You can use Adhesion on characters, making a test as if you were targeting an object in their possession. When you Lash a character to an object or surface that's larger than them, that character becomes Restrained, they gain a disadvantage on all physical tests, and all attack tests against them gain an advantage.",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "adhesion_extended_adhesion"
+                },
+                {
+                    "type": "skill",
+                    "target": "ADHESION",
+                    "value": 4
+                }
+            ],
+            "tier": 4,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "maintenance",
+                    "frequency": "once-per-round"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "Restrained",
+                    "trigger": "lashed-to-larger-surface",
+                    "target": "target",
+                    "duration": "investiture-maintained",
+                    "details": "Character becomes Restrained"
+                }
+            ],
+            "otherEffects": [
+                "Can target characters directly with Adhesion",
+                "Character Lashed to larger surface becomes Restrained",
+                "Lashed character has disadvantage on physical tests",
+                "Attacks against Lashed character gain advantage"
+            ],
+            "actionType": "Passive"
+        },
+        {
+            "id": "adhesion_superior_bond",
+            "name": "Superior Bond",
+            "description": "Your Full Lashings can be broken only by the strongest of individuals. When a character attempts to break one of your Full Lashings, if their Strength attribute is lower than or equal to your ranks in Adhesion, you automatically succeed on the opposed test without either of you rolling.",
+            "prerequisites": [
+                {
+                    "type": "skill",
+                    "target": "ADHESION",
+                    "value": 4
+                }
+            ],
+            "tier": 4,
+            "bonuses": [],
+            "conditionEffects": [
+                {
+                    "type": "immune",
+                    "condition": "break-adhesion",
+                    "trigger": "opponent-break-attempt",
+                    "target": "self",
+                    "duration": "permanent",
+                    "details": "Auto-succeed if opponent Strength ≤ Adhesion ranks"
+                }
+            ],
+            "otherEffects": [
+                "Auto-succeed on opposed tests to break Full Lashings if target Strength ≤ your Adhesion ranks",
+                "No roll needed when this applies"
+            ],
+            "actionType": "Passive"
+        }
+    ]
+}

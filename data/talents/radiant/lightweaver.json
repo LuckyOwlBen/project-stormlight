@@ -1,0 +1,216 @@
+{
+    "id": "lightweaver",
+    "parentId": "radiant",
+    "name": "Lightweaver",
+    "nodes": [
+        {
+            "id": "lightweaver_key_talent",
+            "name": "First Ideal (Lightweaver Key)",
+            "description": "You begin bonding a Cryptic, allowing you to breathe in and use Stormlight. You might be aware of this nascent bond, or you might use the powers subconsciously until you get closer to speaking the First Ideal. When you acquire this talent, you gain access to Investiture, beginning with a maximum Investiture of 2 + your Awareness or Presence (whichever is higher). You can now use the Breathe Stormlight, Enhance, and Regenerate actions. Additionally, you gain the goal \"Speak the First Ideal.\" After you complete this goal, you gain the following reward: You become Empowered until the end of that scene. You gain the Illumination and Transformation surges. You gain an additional skill on your character sheet for the above surges, starting with 1 rank in each.",
+            "actionType": "Special",
+            "specialActivation": "When bonding a Cryptic at level 2+",
+            "prerequisites": [
+                {
+                    "type": "level",
+                    "target": "character",
+                    "value": 2
+                }
+            ],
+            "tier": 0,
+            "bonuses": [],
+            "otherEffects": [
+                "Grants Investiture resource (max = 2 + higher of Awareness or Presence)",
+                "Unlocks Breathe Stormlight, Enhance, and Regenerate actions",
+                "Grants goal: Speak the First Ideal",
+                "Reward: Become Empowered until end of scene",
+                "Reward: Gain Illumination and Transformation surge skills at rank 1",
+                "Reward: Grants access to Illumination and Transformation surge trees"
+            ]
+        },
+        {
+            "id": "lightweaver_invested",
+            "name": "Invested",
+            "description": "You learn to hold and wield greater quantities of Stormlight within yourself. When you acquire this talent, your maximum Investiture increases by a number equal to your tier. When your tier increases by 1, your maximum Investiture does as well.",
+            "actionType": "Passive",
+            "prerequisites": [
+                {
+                    "type": "ideal",
+                    "target": "first",
+                    "value": 1
+                }
+            ],
+            "tier": 1,
+            "bonuses": [],
+            "otherEffects": [
+                "Increases max Investiture by tier value permanently"
+            ]
+        },
+        {
+            "id": "lightweaver_second_ideal",
+            "name": "Second Ideal (Lightweaver)",
+            "description": "You seek to deepen your Nahel bond with your Cryptic by speaking the Second Ideal. You gain the goal \"Speak the Second Ideal.\" After you complete this goal, you gain the following reward: You become Empowered until the end of that scene. Your Enhance action becomes more powerful. While you have 1 Investiture or more, you can use Enhance as a free action, and you don't need to spend Investiture to use this action or maintain its effect.",
+            "actionType": "Special",
+            "specialActivation": "Upon acquiring this talent",
+            "prerequisites": [
+                {
+                    "type": "level",
+                    "target": "character",
+                    "value": 4
+                },
+                {
+                    "type": "ideal",
+                    "target": "first",
+                    "value": 1
+                }
+            ],
+            "tier": 3,
+            "bonuses": [],
+            "otherEffects": [
+                "Grants goal: Speak the Second Ideal",
+                "Reward: Become Empowered until end of scene",
+                "Reward: Enhance becomes free action while having 1+ Investiture",
+                "Reward: Enhance no longer costs Investiture to use or maintain"
+            ]
+        },
+        {
+            "id": "lightweaver_wound_regeneration",
+            "name": "Wound Regeneration",
+            "description": "You can use Stormlight to rapidly recover from injuries. When you use the Regenerate free action, you can spend Investiture to instantly recover from an injury of your choice (either instead of or in addition to healing yourself). Spend 2 Investiture to recover from a temporary injury, or spend 3 Investiture to recover from a permanent one.",
+            "actionType": "Special",
+            "specialActivation": "When you use the Regenerate action",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "lightweaver_invested"
+                }
+            ],
+            "tier": 4,
+            "bonuses": [],
+            "otherEffects": [
+                "Can heal temporary injury for 2 Investiture",
+                "Can heal permanent injury for 3 Investiture"
+            ]
+        },
+        {
+            "id": "lightweaver_third_ideal",
+            "name": "Third Ideal (Lightweaver)",
+            "description": "You seek to advance your Nahel bond even further by speaking the Third Ideal. You gain the goal \"Speak the Third Ideal.\" After you complete this goal, you gain the following reward: You become Empowered until the end of that scene. You can summon your spren as a Radiant Shardblade (see chapter 7).",
+            "actionType": "Special",
+            "specialActivation": "Upon acquiring this talent",
+            "prerequisites": [
+                {
+                    "type": "level",
+                    "target": "character",
+                    "value": 8
+                },
+                {
+                    "type": "ideal",
+                    "target": "second",
+                    "value": 2
+                }
+            ],
+            "tier": 5,
+            "bonuses": [],
+            "otherEffects": [
+                "Grants goal: Speak the Third Ideal",
+                "Reward: Become Empowered until end of scene",
+                "Reward: Can summon Radiant Shardblade"
+            ]
+        },
+        {
+            "id": "lightweaver_deepened_bond",
+            "name": "Deepened Bond",
+            "description": "The strength of your Nahel bond now allows your spren to manifest more fully in the Physical Realm. Your spren bond range increases from 30 feet to 100 feet. Additionally, when you spend focus to give your spren a task, it costs you 1 fewer focus (to a minimum cost of 1).",
+            "actionType": "Passive",
+            "prerequisites": [
+                {
+                    "type": "ideal",
+                    "target": "third",
+                    "value": 3
+                }
+            ],
+            "tier": 6,
+            "bonuses": [],
+            "otherEffects": [
+                "Spren bond range increases to 100 feet",
+                "Spren tasks cost 1 fewer focus (minimum 1)"
+            ]
+        },
+        {
+            "id": "lightweaver_take_squire",
+            "name": "Take Squire (Lightweaver)",
+            "description": "You begin taking other people under your wing, allowing them to breathe Stormlight and use surges before they've established their own Nahel bond. After a long rest, choose a companion or player character you can influence to take as your squire. To choose them, they must be willing and sapient, you must have known them for at least 1 game session, and they must not have bonded a Radiant spren. When you choose a squire, decide whether you want to grant them both of your surges, one of them, or none. That character becomes your squire, gaining the surges you chose plus the other benefits in the 'Squires' section earlier in this chapter. You can have a maximum number of squires up to your current Ideal (such as three for the Third Ideal). If you already have the maximum number of squires, you must choose one to dismiss as your squire before choosing a new one.",
+            "actionType": "Special",
+            "specialActivation": "After a long rest",
+            "prerequisites": [
+                {
+                    "type": "ideal",
+                    "target": "third",
+                    "value": 3
+                }
+            ],
+            "tier": 6,
+            "bonuses": [],
+            "otherEffects": [
+                "Can choose willing, sapient, non-Radiant character as squire",
+                "Must have known them for at least 1 session",
+                "Grant 0, 1, or both surges to squire",
+                "Max squires equals current Ideal level"
+            ]
+        },
+        {
+            "id": "lightweaver_fourth_ideal",
+            "name": "Fourth Ideal (Lightweaver)",
+            "description": "You seek to become a full Knight Radiant by speaking the Fourth Ideal. You gain the goal \"Speak the Fourth Ideal.\" After you complete this goal, you gain the following reward: You become Empowered until the end of that scene. You can call a swarm of creationspren as Radiant Shardplate (see chapter 7).",
+            "actionType": "Special",
+            "specialActivation": "Upon acquiring this talent",
+            "prerequisites": [
+                {
+                    "type": "level",
+                    "target": "character",
+                    "value": 13
+                },
+                {
+                    "type": "ideal",
+                    "target": "third",
+                    "value": 3
+                }
+            ],
+            "tier": 7,
+            "bonuses": [],
+            "otherEffects": [
+                "Grants goal: Speak the Fourth Ideal",
+                "Reward: Become Empowered until end of scene",
+                "Reward: Can summon Radiant Shardplate"
+            ]
+        },
+        {
+            "id": "lightweaver_physical_illusion",
+            "name": "Physical Illusion",
+            "modifiesTalent": "illumination_base",
+            "description": "By mixing Transformation and Illumination, you create illusions with weight and tangibility. Spend 1 Investiture or more to use your Illumination surge to infuse a physical illusion in thin air, following the normal rules for either a simple or complex illusion. However, unlike other illusions, this physical illusion occupies its space as if it were real; objects can't pass through it, and if it's Medium or larger, it can be used as cover. This illusion weighs half as much as the real version would (maximum of 25 pounds per surge rank). Though it isn't a character, it has health equal to 5 times your ranks in Transformation, and each of its defenses equals 10 + your Transformation modifier. If the illusion is reduced to 0 health, its infusion ends early and any infused Investiture is lost. When you control your physical illusion, it can interact with its environment (such as an illusionary chicken flying into a windowpane). You can use focus to task one of your physical illusions with something that requires a test (such as attacking someone) or your careful attention (such as writing a note). When the illusion's task requires a test, you must be able to sense its target, and you use your Illumination instead of that test's usual skill. For example, if the illusion is attacking with a real weapon, test your Illumination but otherwise follow the normal rules for that attack. While wielding an illusionary weapon, the illusion can make a melee attack against the Physical defense of a target within its reach. This attack deals either keen or impact damage depending on the illusionary weapon, and the size of its damage dice increases with your ranks in Transformation: at 2 ranks, roll 2d6 damage; at 3 ranks, roll 2d8 damage; and so on. As usual, on a hit, add your Illumination modifier to damage, and on a miss, you can spend 1 focus to graze with that attack.",
+            "actionCost": 2,
+            "prerequisites": [
+                {
+                    "type": "ideal",
+                    "target": "fourth",
+                    "value": 4
+                },
+                {
+                    "type": "talent",
+                    "target": "lightweaver_wound_regeneration"
+                }
+            ],
+            "tier": 8,
+            "bonuses": [],
+            "otherEffects": [
+                "Creates tangible illusions that occupy space",
+                "Illusion has health = 5 times Transformation ranks",
+                "Illusion defenses = 10 + Transformation modifier",
+                "Can task illusions with focus to make tests using Illumination skill",
+                "Illusionary weapon damage scales with Transformation ranks (2d6 at rank 2, 2d8 at rank 3, etc.)"
+            ],
+            "actionType": "Action"
+        }
+    ]
+}

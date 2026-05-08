@@ -1,4 +1,4 @@
- {
+{
     "id": "champion",
     "parentId": "leader",
     "pathName": "Champion",
@@ -8,10 +8,16 @@
             "name": "Combat Coordination",
             "modifiesTalent": "decisiveCommand",
             "description": "After you use the Strike action, use Decisive Command as a free action. If your Strike didn't hit, you also don't have to spend the usual focus for Decisive Command.",
-            "actionCost": "Free",
             "prerequisites": [
-                { "type": "skill", "target": "Leadership", "value": 2 },
-                { "type": "talent", "target": "decisiveCommand" }
+                {
+                    "type": "skill",
+                    "target": "Leadership",
+                    "value": 2
+                },
+                {
+                    "type": "talent",
+                    "target": "decisiveCommand"
+                }
             ],
             "tier": 1,
             "bonuses": [],
@@ -32,7 +38,8 @@
                     "frequency": "unlimited",
                     "condition": "only when the Strike did not hit"
                 }
-            ]
+            ],
+            "actionType": "Free"
         },
         {
             "id": "valiantIntervention",
@@ -40,8 +47,15 @@
             "description": "Spend 1 focus to move up to 10 feet, then make an Athletics test against the Spiritual defense of an enemy you can influence. On a success, they gain a disadvantage on tests against your allies until the end of the target's next turn. A target can resist this influence, but after they do, you gain an advantage on your next test against them until the end of your next turn.",
             "actionCost": 1,
             "prerequisites": [
-                { "type": "skill", "target": "Athletics", "value": 1 },
-                { "type": "talent", "target": "decisiveCommand" }
+                {
+                    "type": "skill",
+                    "target": "Athletics",
+                    "value": 1
+                },
+                {
+                    "type": "talent",
+                    "target": "decisiveCommand"
+                }
             ],
             "tier": 1,
             "bonuses": [],
@@ -80,29 +94,46 @@
                     "duration": "until end of target's next turn"
                 }
             ],
-            "grantsAdvantage": ["next test against a target who resisted Valiant Intervention"]
+            "grantsAdvantage": [
+                "next test against a target who resisted Valiant Intervention"
+            ],
+            "actionType": "Action"
         },
         {
             "id": "hardy",
             "name": "Hardy",
             "description": "When you acquire this talent, your maximum and current health increase by 1 per level. This applies to all previous and future levels.",
-            "actionCost": "Passive",
             "prerequisites": [
-                { "type": "talent", "target": "valiantIntervention" }
+                {
+                    "type": "talent",
+                    "target": "valiantIntervention"
+                }
             ],
             "tier": 2,
             "bonuses": [
-                { "type": "RESOURCE", "target": "health", "formula": "level", "scaling": true }
-            ]
+                {
+                    "type": "RESOURCE",
+                    "target": "health",
+                    "formula": "level",
+                    "scaling": true
+                }
+            ],
+            "actionType": "Passive"
         },
         {
             "id": "imposingPosture",
             "name": "Imposing Posture",
             "description": "After an enemy resists your influence while within your weapon's reach, they become Disoriented until the end of their next turn.",
-            "actionCost": "Passive",
             "prerequisites": [
-                { "type": "skill", "target": "Athletics", "value": 2 },
-                { "type": "talent", "target": "combatCoordination" }
+                {
+                    "type": "skill",
+                    "target": "Athletics",
+                    "value": 2
+                },
+                {
+                    "type": "talent",
+                    "target": "combatCoordination"
+                }
             ],
             "tier": 2,
             "bonuses": [],
@@ -114,18 +145,25 @@
                     "target": "target",
                     "duration": "until end of their next turn"
                 }
-            ]
+            ],
+            "actionType": "Passive"
         },
         {
             "id": "resoluteStand",
             "name": "Resolute Stand",
             "modifiesTalent": "valiantIntervention",
             "description": "When you use your Valiant Intervention, you can spend focus up to your ranks in Leadership to target that many additional characters. Additionally, after you affect a target with Valiant Intervention, they can't make Reactive Strikes against your allies until the end of that target's next turn.",
-            "actionCost": "Special",
             "specialActivation": "When using Valiant Intervention, spend up to Leadership-ranks focus to target additional characters.",
             "prerequisites": [
-                { "type": "skill", "target": "Athletics", "value": 1 },
-                { "type": "talent", "target": "hardy" }
+                {
+                    "type": "skill",
+                    "target": "Athletics",
+                    "value": 1
+                },
+                {
+                    "type": "talent",
+                    "target": "hardy"
+                }
             ],
             "tier": 3,
             "bonuses": [],
@@ -133,10 +171,10 @@
                 {
                     "resource": "focus",
                     "effect": "spend",
-                    "amount": "leadership.ranks",
                     "trigger": "use Valiant Intervention to add additional targets",
                     "frequency": "unlimited",
-                    "condition": "amount spent determines number of extra targets; capped at Leadership ranks"
+                    "condition": "amount spent determines number of extra targets; capped at Leadership ranks",
+                    "amountFormula": "leadership.ranks"
                 }
             ],
             "conditionEffects": [
@@ -147,15 +185,18 @@
                     "target": "target",
                     "duration": "until end of their next turn"
                 }
-            ]
+            ],
+            "actionType": "Special"
         },
         {
             "id": "mighty",
             "name": "Mighty",
             "description": "When you hit with a weapon or unarmed attack, for each action you used on that attack, increase the damage you deal by 1 + your tier.",
-            "actionCost": "Passive",
             "prerequisites": [
-                { "type": "talent", "target": "imposingPosture" }
+                {
+                    "type": "talent",
+                    "target": "imposingPosture"
+                }
             ],
             "tier": 3,
             "bonuses": [],
@@ -166,17 +207,24 @@
                 "specialMechanics": [
                     "On hit, deal extra damage equal to (1 + tier) for each action point spent on the attack."
                 ]
-            }
+            },
+            "actionType": "Passive"
         },
         {
             "id": "demonstrativeCommand",
             "name": "Demonstrative Command",
             "description": "Before you make an Athletics, Agility, or Leadership test, you can spend 1 focus to roll your command die and add the result to your d20 roll. Additionally, when you acquire this talent, increase the size of your command die by one size (such as from a d4 to a d6).",
-            "actionCost": "Special",
             "specialActivation": "Before an Athletics, Agility, or Leadership test, spend 1 focus to add your command die result to the roll.",
             "prerequisites": [
-                { "type": "skill", "target": "Leadership", "value": 2 },
-                { "type": "talent", "target": "resoluteStand" }
+                {
+                    "type": "skill",
+                    "target": "Leadership",
+                    "value": 2
+                },
+                {
+                    "type": "talent",
+                    "target": "resoluteStand"
+                }
             ],
             "tier": 4,
             "bonuses": [],
@@ -185,20 +233,29 @@
                     "resource": "focus",
                     "effect": "spend",
                     "amount": 1,
-                    "trigger": "before an Athletics, Agility, or Leadership test — add command die result to roll",
+                    "trigger": "before an Athletics, Agility, or Leadership test \u00e2\u20ac\u201d add command die result to roll",
                     "frequency": "unlimited"
                 }
             ],
-            "otherEffects": ["When you acquire this talent, increase your command die size by one step (e.g. d4 → d6)."]
+            "otherEffects": [
+                "When you acquire this talent, increase your command die size by one step (e.g. d4 \u00e2\u2020\u2019 d6)."
+            ],
+            "actionType": "Special"
         },
         {
             "id": "resilientHero",
             "name": "Resilient Hero",
             "description": "Once per scene, before you are reduced to 0 health, you can use this reaction to instead change your health to equal your Athletics modifier.",
-            "actionCost": "Reaction",
             "prerequisites": [
-                { "type": "skill", "target": "Athletics", "value": 3 },
-                { "type": "talent", "target": "resoluteStand" }
+                {
+                    "type": "skill",
+                    "target": "Athletics",
+                    "value": 3
+                },
+                {
+                    "type": "talent",
+                    "target": "resoluteStand"
+                }
             ],
             "tier": 4,
             "bonuses": [],
@@ -209,7 +266,8 @@
                     "restrictedTo": "set health to Athletics modifier instead of reaching 0",
                     "frequency": "once-per-scene"
                 }
-            ]
+            ],
+            "actionType": "Reaction"
         }
     ]
 }

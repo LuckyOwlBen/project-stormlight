@@ -1,0 +1,17 @@
+{
+    "id": "bondsmith",
+    "parentId": "radiant",
+    "name": "Bondsmith",
+    "talentNodes": [ 
+        {
+            "id": "bondsmith_key_talent",
+            "name": "Bondsmith's Unity",
+            "description": "You have bonded a unique spren and become a Bondsmith. Philosophy: Unite before you divide, and strive for peace before engaging in war. You may now speak the First Ideal to unlock your Surges of Adhesion and Tension.",
+            "actionType": "passive",
+            "prerequisites": [],
+            "tier": 0,
+            "bonuses": [],
+            "otherEffects": ["Grants access to Adhesion and Tension surge trees upon speaking the First Ideal."]
+        }
+    ]
+}

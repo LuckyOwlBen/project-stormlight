@@ -1,0 +1,181 @@
+{
+    "id": "willshaper",
+    "parentId": "radiant",
+    "nodes": [
+        {
+            "id": "willshaper_key_talent",
+            "name": "First Ideal (Willshaper Key)",
+            "description": "You begin bonding a lightspren, allowing you to breathe in and use Stormlight. You might be aware of this nascent bond, or you might use the powers subconsciously until you get closer to speaking the First Ideal. When you acquire this talent, you gain access to Investiture, beginning with a maximum Investiture of 2 + your Awareness or Presence (whichever is higher). You can now use the Breathe Stormlight, Enhance, and Regenerate actions. Additionally, you gain the goal 'Speak the First Ideal.' After you complete this goal, you gain the following reward: You become Empowered until the end of that scene. You gain the Cohesion and Transportation surges. You gain an additional skill on your character sheet for the above surges, starting with 1 rank in each.",
+            "actionType": "Special",
+            "specialActivation": "When bonding a lightspren at level 2+",
+            "prerequisites": [{ "type": "level", "target": "character", "value": 2 }],
+            "tier": 0,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "recover",
+                    "amount": 0,
+                    "trigger": "activation",
+                    "frequency": "unlimited",
+                    "condition": "bonded to lightspren"
+                }
+            ],
+            "actionGrants": [
+                { "type": "free-action", "count": 3, "restrictedTo": "Breathe Stormlight, Enhance, Regenerate", "frequency": "unlimited" }
+            ],
+            "conditionEffects": [
+                { "type": "apply", "condition": "Empowered", "trigger": "goal-complete", "target": "self", "duration": "end-of-scene" },
+                { "type": "apply", "condition": "Cohesion Surge", "trigger": "goal-complete", "target": "self", "duration": "permanent" },
+                { "type": "apply", "condition": "Transportation Surge", "trigger": "goal-complete", "target": "self", "duration": "permanent" }
+            ],
+            "expertiseGrants": [
+                { "type": "fixed", "expertises": ["Cohesion", "Transportation"] }
+            ],
+            "otherEffects": [
+                "Grants goal: Speak the First Ideal",
+                "Reward: Grants access to Cohesion and Transportation surge trees"
+            ]
+        },
+        {
+            "id": "willshaper_spiritual_cohesion",
+            "name": "Spiritual Cohesion",
+            "description": "Willshapers lead by example, raising the spirits of those around them through radical acts of self-expression. Once per scene, choose one or more allies you can influence, up to a number equaling your current Ideal (such as two allies for the Second Ideal). Each target becomes Determined until the end of the scene. If a target uses that condition to add an Opportunity to a test, increase their Cognitive defense and Spiritual defense by 2 until the end of the scene.",
+            "actionType": "Action",
+            "actionCost": 2,
+            "prerequisites": [{ "type": "ideal", "target": "first", "value": 1 }],
+            "tier": 1,
+            "bonuses": [],
+            "otherEffects": [
+                "Once per scene only",
+                "Grant Determined condition to allies (max = current Ideal)",
+                "If ally uses Determined to add Opportunity, +2 to Cognitive and Spiritual defenses until end of scene"
+            ]
+        },
+        {
+            "id": "willshaper_invested",
+            "name": "Invested",
+            "description": "You learn to hold and wield greater quantities of Stormlight within yourself. When you acquire this talent, your maximum Investiture increases by a number equal to your tier. When your tier increases by 1, your maximum Investiture does as well.",
+            "actionType": "Passive",
+            "prerequisites": [{ "type": "talent", "target": "willshaper_spiritual_cohesion" }],
+            "tier": 2,
+            "bonuses": [
+                { "type": "RESOURCE", "target": "max-investiture", "formula": "tier", "scaling": true }
+            ],
+            "otherEffects": []
+        },
+        {
+            "id": "willshaper_second_ideal",
+            "name": "Second Ideal (Willshaper)",
+            "description": "You seek to deepen your Nahel bond with your lightspren by speaking the Second Ideal. You gain the goal \"Speak the Second Ideal.\" After you complete this goal, you gain the following reward: You become Empowered until the end of that scene. Your Enhance action becomes more powerful. While you have 1 Investiture or more, you can use Enhance as a free action, and you don't need to spend Investiture to use this action or maintain its effect.",
+            "actionType": "Special",
+            "specialActivation": "Upon acquiring this talent",
+            "prerequisites": [
+                { "type": "level", "target": "character", "value": 4 },
+                { "type": "ideal", "target": "first", "value": 1 }
+            ],
+            "tier": 3,
+            "bonuses": [],
+            "actionGrants": [
+                { "type": "free-action", "count": 1, "restrictedTo": "Enhance", "frequency": "unlimited" }
+            ],
+            "resourceTriggers": [
+                { "resource": "investiture", "effect": "spend", "amount": 0, "trigger": "enhance-action", "condition": "goal-complete" }
+            ],
+            "conditionEffects": [
+                { "type": "apply", "condition": "Empowered", "trigger": "goal-complete", "target": "self", "duration": "end-of-scene" }
+            ],
+            "otherEffects": [
+                "Grants goal: Speak the Second Ideal"
+            ]
+        },
+        {
+            "id": "willshaper_wound_regeneration",
+            "name": "Wound Regeneration",
+            "description": "You can use Stormlight to rapidly recover from injuries. When you use the Regenerate free action, you can spend Investiture to instantly recover from an injury of your choice (either instead of or in addition to healing yourself). Spend 2 Investiture to recover from a temporary injury, or spend 3 Investiture to recover from a permanent one.",
+            "actionType": "Special",
+            "specialActivation": "When you use the Regenerate action",
+            "prerequisites": [{ "type": "talent", "target": "willshaper_invested" }],
+            "tier": 4,
+            "bonuses": [],
+            "resourceTriggers": [
+                { "resource": "investiture", "effect": "spend", "amount": 2, "trigger": "regenerate-action", "frequency": "unlimited", "condition": "heal temporary injury" },
+                { "resource": "investiture", "effect": "spend", "amount": 3, "trigger": "regenerate-action", "frequency": "unlimited", "condition": "heal permanent injury" }
+            ],
+            "otherEffects": []
+        },
+        {
+            "id": "willshaper_third_ideal",
+            "name": "Third Ideal (Willshaper)",
+            "description": "You seek to advance your Nahel bond even further by speaking the Third Ideal. You gain the goal \"Speak the Third Ideal.\" After you complete this goal, you gain the following reward: You become Empowered until the end of that scene. You can summon your spren as a Radiant Shardblade (see chapter 7).",
+            "actionType": "Special",
+            "specialActivation": "Upon acquiring this talent",
+            "prerequisites": [
+                { "type": "level", "target": "character", "value": 8 },
+                { "type": "ideal", "target": "second", "value": 2 }
+            ],
+            "tier": 5,
+            "bonuses": [],
+            "conditionEffects": [
+                { "type": "apply", "condition": "Empowered", "trigger": "goal-complete", "target": "self", "duration": "end-of-scene" }
+            ],
+            "otherEffects": [
+                "Grants goal: Speak the Third Ideal",
+                "Reward: Can summon Radiant Shardblade"
+            ]
+        },
+        {
+            "id": "willshaper_deepened_bond",
+            "name": "Deepened Bond",
+            "description": "The strength of your Nahel bond now allows your spren to manifest more fully in the Physical Realm. Your spren bond range increases from 30 feet to 100 feet. Additionally, when you spend focus to give your spren a task, it costs you 1 fewer focus (to a minimum cost of 1).",
+            "actionType": "Passive",
+            "prerequisites": [{ "type": "ideal", "target": "third", "value": 3 }],
+            "tier": 6,
+            "bonuses": [
+                { "type": "DERIVED", "target": "spren-bond-range", "value": 100 },
+                { "type": "DEFENSE", "target": "focus-cost-reduction", "value": 1 }
+            ],
+            "otherEffects": [
+                "Spren bond range increases to 100 feet",
+                "Spren tasks cost 1 fewer focus (minimum 1)"
+            ]
+        },
+        {
+            "id": "willshaper_take_squire",
+            "name": "Take Squire (Willshaper)",
+            "description": "You begin taking other people under your wing, allowing them to breathe Stormlight and use surges before they've established their own Nahel bond. After a long rest, choose a companion or player character you can influence to take as your squire. To choose them, they must be willing and sapient, you must have known them for at least 1 game session, and they must not have bonded a Radiant spren. When you choose a squire, decide whether you want to grant them both of your surges, one of them, or none. That character becomes your squire, gaining the surges you chose plus the other benefits in the 'Squires' section earlier in this chapter. You can have a maximum number of squires up to your current Ideal (such as three for the Third Ideal). If you already have the maximum number of squires, you must choose one to dismiss as your squire before choosing a new one.",
+            "actionType": "Special",
+            "specialActivation": "After a long rest",
+            "prerequisites": [{ "type": "ideal", "target": "third", "value": 3 }],
+            "tier": 6,
+            "bonuses": [
+                { "type": "DERIVED", "target": "max-squires", "formula": "tier" }
+            ],
+            "otherEffects": [
+                "Can choose willing, sapient, non-Radiant character as squire",
+                "Must have known them for at least 1 session",
+                "Grant 0, 1, or both surges to squire"
+            ]
+        },
+        {
+            "id": "willshaper_fourth_ideal",
+            "name": "Fourth Ideal (Willshaper)",
+            "description": "You seek to become a full Knight Radiant by speaking the Fourth Ideal. You gain the goal \"Speak the Fourth Ideal.\" After you complete this goal, you gain the following reward: You become Empowered until the end of that scene. You can call a swarm of joyspren as Radiant Shardplate (see chapter 7).",
+            "actionType": "Special",
+            "specialActivation": "Upon acquiring this talent",
+            "prerequisites": [
+                { "type": "level", "target": "character", "value": 13 },
+                { "type": "ideal", "target": "third", "value": 3 }
+            ],
+            "tier": 7,
+            "bonuses": [],
+            "conditionEffects": [
+                { "type": "apply", "condition": "Empowered", "trigger": "goal-complete", "target": "self", "duration": "end-of-scene" }
+            ],
+            "otherEffects": [
+                "Grants goal: Speak the Fourth Ideal",
+                "Reward: Can summon Radiant Shardplate"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,360 @@
+{
+    "id": "transformation",
+    "parentId": "surges",
+    "pathName": "Transformation",
+    "nodes": [
+        {
+            "id": "transformation_base",
+            "name": "Transformation (Soulcasting)",
+            "description": "To Soulcast a material, choose a non-living object or portion of a surface within your reach and make a Transformation test. To do so, you must have a hand free and touch the target. This target can't exceed the surge size for your ranks in Transformation. You can't use this surge on Invested objects (like Shardplate) or objects that have been infused with Stormlight (like infused spheres or objects affected by surges). Additionally, you can't initially Soulcast living materials, including characters and plants (though talents can allow you to do so). Transformation DC: Each material falls into categories: 1. Solids (metal, stone, crystal), 2. Organics (flesh, bone, pulp), 3. Liquids (blood, water, oil), 4. Vapors (smoke, gas), 5. Clear Air, 6. Flame (Flamecasting talent only). DCs by transformation: Same category = DC 10. Solids→Organics/Organics→Solids/Organics→Liquids/Liquids→Organics/Liquids→Vapors/Vapors→Liquids/Vapors→Clear Air/Clear Air→Vapors/Clear Air→Flame = DC 10. Solids→Liquids/Liquids→Solids/Organics→Vapors/Vapors→Organics/Liquids→Clear Air/Clear Air→Liquids/Vapors→Flame = DC 15. Solids→Vapors/Vapors→Solids/Organics→Clear Air/Clear Air→Organics/Liquids→Flame = DC 20. Solids→Clear Air/Clear Air→Solids/Organics→Flame = DC 25. Solids→Flame/Flame→Clear Air = DC 30. Successful Transformation: Spend Investiture equal to object size (1 for Small, 2 for Medium, 3 for Large, 4 for Huge, 5 for Gargantuan). Failed Transformation: Don't spend Investiture, and can't attempt to Soulcast that same object again during this scene.",
+            "actionCost": 2,
+            "prerequisites": [
+                {
+                    "type": "skill",
+                    "target": "TRANSFORMATION",
+                    "value": 1
+                }
+            ],
+            "tier": 0,
+            "bonuses": [],
+            "otherEffects": [
+                "Soulcast non-living objects within reach",
+                "Categories: Solids, Organics, Liquids, Vapors, Clear Air, Flame",
+                "DC varies: 10 (adjacent), 15 (2 steps), 20 (3 steps), 25 (4 steps), 30 (5 steps)",
+                "Investiture cost: 1-5 based on object size",
+                "Can't affect Invested or Stormlight-infused objects"
+            ],
+            "actionType": "Action"
+        },
+        {
+            "id": "transformation_soulcast_defense",
+            "name": "Soulcast Defense",
+            "description": "You Soulcast near-instinctively, able to transform projectiles in flight. Before you or an ally within your reach is hit by a projectile from a ranged attack, you can use this reaction and spend 1 Investiture to make a Transformation test. The DC of this test equals the triggering attack's test result; you can choose whether to use this reaction after you learn the DC. On a failure, the attack grazes instead of hitting. On a success, the attack instead misses and can't graze, and you transform the projectile into a material of your choice. If you choose a non-solid material, this destroys the projectile.",
+            "prerequisites": [
+                {
+                    "type": "ideal",
+                    "target": "first",
+                    "value": 1
+                },
+                {
+                    "type": "skill",
+                    "target": "TRANSFORMATION",
+                    "value": 1
+                }
+            ],
+            "tier": 1,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "projectile-defense",
+                    "frequency": "once-per-round"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "prevent",
+                    "condition": "projectile-hit",
+                    "trigger": "transformation-test-success",
+                    "target": "self",
+                    "duration": "immediate",
+                    "details": "May apply to ally within reach"
+                }
+            ],
+            "actionType": "Reaction"
+        },
+        {
+            "id": "transformation_living_soulcasting",
+            "name": "Living Soulcasting",
+            "description": "You've mastered the subtleties of affecting living flesh with Soulcasting. Spend 1 Investiture and make a melee Transformation attack against the Spiritual defense of a character, plant, or other living organism within your reach. Roll 3d4 spirit damage. The size of these damage dice increases with your ranks in Transformation; at 2 ranks, roll 3d6 (instead of 3d4), and so on. If this reduces the target to 0 health, they die, and you transform their body into your choice of material without spending additional actions or Investiture.",
+            "actionCost": 2,
+            "prerequisites": [
+                {
+                    "type": "ideal",
+                    "target": "first",
+                    "value": 1
+                },
+                {
+                    "type": "skill",
+                    "target": "TRANSFORMATION",
+                    "value": 1
+                }
+            ],
+            "tier": 1,
+            "bonuses": [
+                {
+                    "type": "DERIVED",
+                    "target": "living-soulcasting-attack",
+                    "formula": "3d4 base, +1 die size per rank",
+                    "scaling": true,
+                    "condition": "3d4 (rank1), 3d6 (rank2), 3d8 (rank3)"
+                }
+            ],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "living-soulcast-attack",
+                    "frequency": "once-per-round"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "transformation-on-death",
+                    "trigger": "attack-reduces-to-zero-health",
+                    "target": "target",
+                    "duration": "permanent",
+                    "details": "Applies to defeated target"
+                }
+            ],
+            "actionType": "Action"
+        },
+        {
+            "id": "transformation_soulcast_parry",
+            "name": "Soulcast Parry",
+            "modifiesTalent": "transformation_soulcast_defense",
+            "description": "You can use Soulcasting to defend against even more immediate threats. You can now use Soulcast Defense on melee weapon attacks as well as ranged ones.",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "transformation_soulcast_defense"
+                },
+                {
+                    "type": "skill",
+                    "target": "TRANSFORMATION",
+                    "value": 2
+                }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "soulcast-defense-capability",
+                    "trigger": "melee-attack",
+                    "target": "self",
+                    "details": "Can use Soulcast Defense on melee weapon attacks; may protect ally within reach"
+                }
+            ],
+            "actionType": "Passive"
+        },
+        {
+            "id": "transformation_bloodcasting",
+            "name": "Bloodcasting",
+            "description": "You've practiced techniques for Soulcasting blood, allowing you to cleanse the body of poison and to speed recovery from injuries. While touching a character, spend 1 Investiture and make a DC 15 Transformation test to cleanse their blood. On a success, the effects of any poison end for the target, and you can reduce the recovery time of one of their injuries by 5 days. The GM can spend C from this test to reduce the target's maximum health by twice their level until after the target's next long rest.",
+            "actionCost": 2,
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "transformation_living_soulcasting"
+                },
+                {
+                    "type": "skill",
+                    "target": "TRANSFORMATION",
+                    "value": 2
+                }
+            ],
+            "tier": 2,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "amount": 1,
+                    "trigger": "bloodcast-cleanse",
+                    "frequency": "once-per-round"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "poison-removed",
+                    "trigger": "transformation-test-success-dc-15",
+                    "target": "target",
+                    "duration": "instant",
+                    "details": "Remove poison on success"
+                },
+                {
+                    "type": "apply",
+                    "condition": "injury-recovery-reduced",
+                    "trigger": "transformation-test-success",
+                    "target": "target",
+                    "duration": "scene",
+                    "details": "Reduce recovery time of one injury by 5 days"
+                }
+            ],
+            "actionType": "Action"
+        },
+        {
+            "id": "transformation_distant_surgebinding",
+            "name": "Distant Surgebinding",
+            "description": "You can Soulcast from a greater distance. You can use your surges and their talents as though your reach is 20 feet, and you don't need to touch the target.",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "transformation_soulcast_parry"
+                },
+                {
+                    "type": "skill",
+                    "target": "TRANSFORMATION",
+                    "value": 2
+                }
+            ],
+            "tier": 2,
+            "bonuses": [
+                {
+                    "type": "DERIVED",
+                    "target": "all-surge-talents-reach",
+                    "value": 20,
+                    "scaling": false,
+                    "condition": "Use surges at 20-foot reach without touch"
+                }
+            ],
+            "movementEffects": [
+                {
+                    "type": "special-movement",
+                    "amount": 20,
+                    "timing": "always",
+                    "condition": "Use surges/talents with 20 ft reach without touch"
+                }
+            ],
+            "actionType": "Passive"
+        },
+        {
+            "id": "transformation_flamecasting",
+            "name": "Flamecasting",
+            "description": "You've learned the difficult art of Soulcasting Essences directly into instantaneous bursts of flame. On your surge's list of Soulcasting materials, you gain a sixth category called \"Flame,\" which follows the entry for \"Clear Air.\" When Soulcasting a material that's five spaces away on this expanded list, the DC is 30 (such as when Soulcasting stone into flame). When you Soulcast an object into flame, the flames last for only a moment before dissipating. However, before they do, they can catch flammable objects on fire. Additionally, when you Soulcast an object into flame, use the result of that Transformation test to make an attack as Free against the Physical defense of each character within 5 feet of the Soulcast object. Roll 2d4 energy damage. The size of these damage dice increases with your ranks in Transformation; at 2 ranks, roll 2d6 (instead of 2d4), and so on.",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "transformation_soulcast_parry"
+                },
+                {
+                    "type": "skill",
+                    "target": "TRANSFORMATION",
+                    "value": 3
+                }
+            ],
+            "tier": 3,
+            "bonuses": [
+                {
+                    "type": "DERIVED",
+                    "target": "flame-area-attack",
+                    "formula": "2d4 base, +1 die size per rank",
+                    "scaling": true,
+                    "condition": "2d4 (rank1), 2d6 (rank2), 2d8 (rank3)"
+                }
+            ],
+            "resourceTriggers": [],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "flame-category-gain",
+                    "trigger": "passive",
+                    "target": "self",
+                    "duration": "permanent",
+                    "details": "Gain sixth Soulcasting category: Flame (DC 30 for 5-step transformation)"
+                },
+                {
+                    "type": "apply",
+                    "condition": "ignitable",
+                    "trigger": "soulcast-to-flame",
+                    "target": "target",
+                    "duration": "until-burned",
+                    "details": "Affects flammable objects near the Soulcast area"
+                }
+            ],
+            "actionGrants": [
+                {
+                    "type": "free-action",
+                    "count": 1,
+                    "timing": "always",
+                    "restrictedTo": "area-attack-within-5-feet after soulcast-to-flame",
+                    "frequency": "once-per-round"
+                }
+            ],
+            "actionType": "Passive"
+        },
+        {
+            "id": "transformation_persistent_transformation",
+            "name": "Persistent Transformation",
+            "description": "Your force of will is so great that objects have a hard time denying you. When transforming a non-living material, your Transformation test has a maximum DC of 15. Additionally, after you fail to Soulcast an object, you can attempt to do so again during the same scene. When you succeed on this test, you must spend 1 additional Investiture per time you failed to Soulcast that object during this scene; if you can't spend that much Investiture, the object isn't transformed.",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "transformation_distant_surgebinding"
+                },
+                {
+                    "type": "skill",
+                    "target": "TRANSFORMATION",
+                    "value": 2
+                }
+            ],
+            "tier": 3,
+            "bonuses": [
+                {
+                    "type": "DERIVED",
+                    "target": "non-living-transformations",
+                    "value": 15,
+                    "scaling": false,
+                    "condition": "Maximum DC reduced to 15"
+                }
+            ],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "spend",
+                    "trigger": "reattempt-soulcast",
+                    "frequency": "once-per-round",
+                    "condition": "after-failed-attempt-same-scene",
+                    "amountFormula": "1-per-previous-failure"
+                }
+            ],
+            "conditionEffects": [
+                {
+                    "type": "apply",
+                    "condition": "reattempt-soulcast",
+                    "trigger": "failed-previous-attempt",
+                    "target": "self",
+                    "duration": "scene",
+                    "details": "Can reattempt failed Soulcasting in same scene; target object same as failure"
+                }
+            ],
+            "actionType": "Passive"
+        },
+        {
+            "id": "transformation_expansive_transmuter",
+            "name": "Expansive Transmuter",
+            "description": "You've become so powerful that you can Soulcast larger objects with much greater efficiency. When you Soulcast non-living material, reduce the Investiture cost by 2 (to a minimum of 1 Investiture). For example, it now costs you only 1 Investiture to Soulcast either a Small, Medium, or Large object.",
+            "prerequisites": [
+                {
+                    "type": "talent",
+                    "target": "transformation_flamecasting"
+                },
+                {
+                    "type": "skill",
+                    "target": "TRANSFORMATION",
+                    "value": 4
+                }
+            ],
+            "tier": 4,
+            "bonuses": [],
+            "resourceTriggers": [
+                {
+                    "resource": "investiture",
+                    "effect": "reduce-cost",
+                    "amount": 2,
+                    "trigger": "non-living-soulcasting",
+                    "frequency": "once-per-round",
+                    "condition": "minimum-1-investiture"
+                }
+            ],
+            "conditionEffects": [],
+            "actionType": "Passive"
+        }
+    ]
+}

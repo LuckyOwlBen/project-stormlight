@@ -1,0 +1,17 @@
+{
+    "id": "surges",
+    "name": "Surges",
+    "subpaths": [
+        "abrasion",
+        "adhesion",
+        "cohesion",
+        "division",
+        "gravitation",
+        "illumination",
+        "progression",
+        "tension",
+        "transformation",
+        "transportation"
+    ],
+    "talentNodes": []
+}

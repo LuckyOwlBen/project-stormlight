@@ -1,4 +1,4 @@
- {
+{
     "id": "artifabrian",
     "parentId": "scholar",
     "pathName": "Artifabrian",
@@ -7,49 +7,73 @@
             "id": "efficientEngineer",
             "name": "Efficient Engineer",
             "description": "When you acquire this talent, gain a utility expertise in Armor Crafting, Equipment Crafting, or Weapon Crafting. You also gain one of the following: an amplifying painrial, a numbing painrial, or a pair of spanreeds plus an emotion bracelet. Additionally, when you attempt to craft an item or invent a fabrial, your Opportunity range on those tests expands by 2, and any cost to acquire raw materials is reduced by half.",
-            "actionCost": "Passive",
             "prerequisites": [
-                { "type": "skill", "target": "Crafting", "value": 1 },
-                { "type": "talent", "target": "erudition" }
+                {
+                    "type": "skill",
+                    "target": "Crafting",
+                    "value": 1
+                },
+                {
+                    "type": "talent",
+                    "target": "erudition"
+                }
             ],
             "tier": 1,
             "bonuses": [],
             "expertiseGrants": [
-                { "type": "choice", "options": ["Armor Crafting", "Equipment Crafting", "Weapon Crafting"] }
+                {
+                    "type": "choice",
+                    "options": [
+                        "Armor Crafting",
+                        "Equipment Crafting",
+                        "Weapon Crafting"
+                    ]
+                }
             ],
             "otherEffects": [
                 "Gain one of: amplifying painrial, numbing painrial, or spanreeds + emotion bracelet.",
                 "When crafting an item or inventing a fabrial, Opportunity range expands by 2 and raw material costs are halved."
-            ]
+            ],
+            "actionType": "Passive"
         },
         {
             "id": "prizedAcquisition",
             "name": "Prized Acquisition",
             "description": "When you acquire this talent, you gain a specialist expertise in Fabrial Crafting. Additionally, you gain a specially cut gemstone and can use it to craft a fabrial. The first time you attempt to craft a fabrial with this gem, you ignore the usual time requirements for attracting a spren and crafting the fabrial, though you still need raw materials. This gem fulfills the gem requirement for a unique fabrial with a tier equal to your current character tier. If you lose it, you can usually find an appropriate replacement after a long rest. During downtime, you can salvage your fabrial to recover this gem.",
-            "actionCost": "Special",
             "specialActivation": "First fabrial crafting with the Prized Acquisition gem ignores time requirements for attracting a spren and crafting.",
             "prerequisites": [
-                { "type": "talent", "target": "erudition" }
+                {
+                    "type": "talent",
+                    "target": "erudition"
+                }
             ],
             "tier": 1,
             "bonuses": [],
             "expertiseGrants": [
-                { "type": "fixed", "expertises": ["Fabrial Crafting"] }
+                {
+                    "type": "fixed",
+                    "expertises": [
+                        "Fabrial Crafting"
+                    ]
+                }
             ],
             "otherEffects": [
                 "Gem fulfills the gem requirement for a unique fabrial with tier equal to character tier.",
                 "Lost gem can be replaced after a long rest.",
                 "During downtime, can salvage the fabrial to recover the gem."
-            ]
+            ],
+            "actionType": "Special"
         },
         {
             "id": "deepStudy",
             "name": "Deep Study",
             "modifiesTalent": "erudition",
             "description": "When you acquire this talent, your Erudition talent grants you one additional cultural or utility expertise, and it grants you two additional cognitive skills that aren't surge skills. You can reassign these in the same way as the others you gained from that talent.",
-            "actionCost": "Passive",
             "prerequisites": [
-                { "type": "talent", "target": "efficientEngineer" }
+                {
+                    "type": "talent",
+                    "target": "efficientEngineer"
+                }
             ],
             "tier": 2,
             "bonuses": [],
@@ -57,60 +81,82 @@
                 "Erudition grants +1 additional cultural or utility expertise.",
                 "Erudition grants +2 additional cognitive skills (non-surge).",
                 "These can be reassigned like other Erudition benefits."
-            ]
+            ],
+            "actionType": "Passive"
         },
         {
             "id": "inventiveDesign",
             "name": "Inventive Design",
             "modifiesTalent": "prizedAcquisition",
             "description": "When you craft a fabrial using your gemstone from your Prized Acquisition, you can select an effect of 1 tier higher than the tier you're currently crafting.",
-            "actionCost": "Passive",
             "prerequisites": [
-                { "type": "skill", "target": "Crafting", "value": 2 },
-                { "type": "talent", "target": "prizedAcquisition" }
+                {
+                    "type": "skill",
+                    "target": "Crafting",
+                    "value": 2
+                },
+                {
+                    "type": "talent",
+                    "target": "prizedAcquisition"
+                }
             ],
             "tier": 2,
             "bonuses": [],
-            "otherEffects": ["When crafting a fabrial with the Prized Acquisition gem, select an effect 1 tier higher than the tier being crafted."]
+            "otherEffects": [
+                "When crafting a fabrial with the Prized Acquisition gem, select an effect 1 tier higher than the tier being crafted."
+            ],
+            "actionType": "Passive"
         },
         {
             "id": "fineHandiwork",
             "name": "Fine Handiwork",
             "description": "When you craft an item or invent a fabrial, you can spend one upgrade to apply an advanced feature, instead of spending two upgrades. You can only benefit from this talent once per item.",
-            "actionCost": "Special",
             "specialActivation": "When crafting an item or inventing a fabrial, spend 1 upgrade to apply an advanced feature instead of 2 (once per item).",
             "prerequisites": [
-                { "type": "talent", "target": "efficientEngineer" }
+                {
+                    "type": "talent",
+                    "target": "efficientEngineer"
+                }
             ],
             "tier": 3,
-            "bonuses": []
+            "bonuses": [],
+            "actionType": "Special"
         },
         {
             "id": "overcharge",
             "name": "Overcharge",
             "description": "Once per turn, when you make an attack test using a fabrial, you can raise the stakes. You can spend opportunity from this test to use the Strike action with that fabrial as a free action on the same turn; that Strike doesn't count against your allowed number of Strikes for the hands holding that weapon. The GM can spend opportunity from this test to add one new drawback to that fabrial. This drawback remains until you resolve the unexpected issue by succeeding on a DC 15 Crafting test made as a reaction.",
-            "actionCost": "Special",
             "specialActivation": "Once per turn when making an attack test with a fabrial, raise the stakes.",
             "prerequisites": [
-                { "type": "skill", "target": "Crafting", "value": 3 },
-                { "type": "talent", "target": "prizedAcquisition" }
+                {
+                    "type": "skill",
+                    "target": "Crafting",
+                    "value": 3
+                },
+                {
+                    "type": "talent",
+                    "target": "prizedAcquisition"
+                }
             ],
             "tier": 3,
             "bonuses": [],
             "otherEffects": [
                 "Spend opportunity to Strike with that fabrial as a free action (does not count against Strike limit for that weapon hand).",
                 "GM can spend opportunity to add a drawback to the fabrial until you succeed on a DC 15 Crafting test as a reaction."
-            ]
+            ],
+            "actionType": "Special"
         },
         {
             "id": "experimentalTinkering",
             "name": "Experimental Tinkering",
             "modifiesTalent": "prizedAcquisition",
             "description": "When you craft an item or invent a fabrial, your Opportunity range on those tests expands by 1, and your crafting time is halved. Additionally, you can forgo the usual benefits of a long rest to instead spend that time tinkering with a fabrial that uses your Prized Acquisition gem. After that long rest, you can attempt to reconfigure this fabrial to create a different fabrial of the same tier or lower; this follows the normal crafting process, except you don't need new materials and you ignore the usual time requirement for attracting a spren and crafting the fabrial. If you fail your Lore test to trap a spren, your previous fabrial remains intact, but you can't use this talent to reconfigure a fabrial again until your next long rest. After you finish crafting a new fabrial using this talent, the old fabrial is lost.",
-            "actionCost": "Special",
             "specialActivation": "Forgo long rest benefits to reconfigure the Prized Acquisition fabrial into a different fabrial of the same tier or lower (no materials, no time requirement).",
             "prerequisites": [
-                { "type": "talent", "target": "fineHandiwork" }
+                {
+                    "type": "talent",
+                    "target": "fineHandiwork"
+                }
             ],
             "tier": 4,
             "bonuses": [],
@@ -119,17 +165,24 @@
                 "Reconfiguration follows normal crafting except no new materials and no spren-attraction time required.",
                 "Failed Lore test to trap spren: old fabrial intact, cannot use this talent again until next long rest.",
                 "Successful reconfiguration: old fabrial is lost."
-            ]
+            ],
+            "actionType": "Special"
         },
         {
             "id": "overwhelmWithDetail",
             "name": "Overwhelm With Detail",
             "description": "Spend 2 focus to make a cognitive or spiritual test using your Lore modifier instead of the usual skill modifier for that test.",
-            "actionCost": "Special",
             "specialActivation": "Spend 2 focus to use your Lore modifier instead of the usual skill modifier for a cognitive or spiritual test.",
             "prerequisites": [
-                { "type": "skill", "target": "Lore", "value": 3 },
-                { "type": "talent", "target": "experimentalTinkering" }
+                {
+                    "type": "skill",
+                    "target": "Lore",
+                    "value": 3
+                },
+                {
+                    "type": "talent",
+                    "target": "experimentalTinkering"
+                }
             ],
             "tier": 4,
             "bonuses": [],
@@ -141,7 +194,8 @@
                     "trigger": "activate Overwhelm With Detail before a cognitive or spiritual test",
                     "frequency": "unlimited"
                 }
-            ]
+            ],
+            "actionType": "Special"
         }
     ]
 }

@@ -1,4 +1,4 @@
- {
+{
     "id": "agent",
     "name": "Agent",
     "paths": [
@@ -15,7 +15,8 @@
             "specialActivation": "Reroll your plot die once per round.",
             "prerequisites": [],
             "tier": 0,
-            "bonuses": []
+            "bonuses": [],
+            "actionType": "Action"
         }
     ]
 }

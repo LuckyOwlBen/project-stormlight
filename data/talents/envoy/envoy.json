@@ -16,8 +16,15 @@
             "tier": 0,
             "bonuses": [],
             "conditionEffects": [
-                { "type": "apply", "condition": "Determined", "trigger": "when using this talent", "target": "target", "duration": "end of scene" }
-            ]
+                {
+                    "type": "apply",
+                    "condition": "Determined",
+                    "trigger": "when using this talent",
+                    "target": "target",
+                    "duration": "end of scene"
+                }
+            ],
+            "actionType": "Action"
         }
     ]
 }
