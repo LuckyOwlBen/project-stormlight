@@ -1,0 +1,26 @@
+package views
+
+templ LoginForm(errors map[string]string) {
+    <html>
+        <body>
+            <h1>Login</h1>
+            <form method="post" action="/login">
+                <div>
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username"/>
+                    if errors["username"] != "" {
+                        <span style="color: red;">{ errors["username"] }</span>
+                    }
+                </div>
+                <div>
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password"/>
+                    if errors["password"] != "" {
+                        <span style="color: red;">{ errors["password"] }</span>
+                    }
+                </div>
+                <button type="submit">Login</button>
+            </form>
+        </body>
+    </html>
+}

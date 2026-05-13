@@ -27,13 +27,9 @@ func (s *Server) Mount() http.Handler {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	// Register routes
-	r.Get("/", s.handleHello)
+	//New User Registration
+	r.Get("/register", s.handleRegisterGet)
+	r.Post("/register", s.handleRegisterPost)
 
 	return r
-}
-
-// handleHello is our first handler method
-func (s *Server) handleHello(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello, world!"))
 }

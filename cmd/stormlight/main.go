@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -26,7 +27,8 @@ func main() {
 		user := os.Getenv("POSTGRES_USER")
 		pass := os.Getenv("POSTGRES_PASSWORD")
 		db := os.Getenv("POSTGRES_DB")
-		dbURL = "postgres://" + user + ":" + pass + "@" + host + ":" + port + "/" + db + "?sslmode=disable"
+		schema := os.Getenv("POSTGRES_SCHEMA")
+		dbURL = "postgres://" + user + ":" + pass + "@" + host + ":" + port + "/" + db + "?search_path=" + schema + "&sslmode=disable"
 	}
 
 	dbConn, err := database.Connect(dbURL)
@@ -37,6 +39,11 @@ func main() {
 
 	// Initialize our store
 	store := database.NewStore(dbConn)
+
+	// Create tables if they do not exist
+	if err := store.InitSchema(context.Background()); err != nil {
+		log.Fatalf("Could not initialize database schema: %v", err)
+	}
 
 	// Initialize our API server, injecting the store
 	server := api.NewServer(store)
