@@ -1,11 +1,17 @@
 package character
 
 type Paths struct {
-	ID           int    `json:"id"`
-	CharacterID  int    `json:"-"` // "-" means don't include this in JSON output
-	Name         string `json:"name"`
-	Description  string `json:"description"`
-	BaseTalentId string `json:"baseTalentId"` //base talent id for that path
+	ID           int    `json:"id" gorm:"primaryKey"`
+	CharacterID  int    `json:"-" gorm:"not null;index"`
+	Name         string `json:"name" gorm:"not null;size:100"`
+	Description  string `json:"description" gorm:"type:text"`
+	BaseTalentId string `json:"baseTalentId" gorm:"size:100"` //base talent id for that path
 
-	PointTracker
+	PointTracker `gorm:"embedded"`
+}
+
+func NewPath(characterID int) *Paths {
+	return &Paths{
+		CharacterID: characterID,
+	}
 }

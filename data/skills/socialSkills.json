@@ -1,4 +1,5 @@
-[
+{
+    "socialSkills": [
     {
         "name": "Deception",
         "attribute": "Presence"
@@ -24,3 +25,4 @@
         "attribute": "Awareness"
     }
 ]
+}

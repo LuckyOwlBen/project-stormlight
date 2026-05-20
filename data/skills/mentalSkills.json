@@ -1,4 +1,4 @@
-[
+{"mentalSkills": [
     {
         "name": "Crafting",
         "attribute": "Intellect"
@@ -23,4 +23,4 @@
         "name": "Medicine",
         "attribute": "Intellect"
     }
-]
+]}

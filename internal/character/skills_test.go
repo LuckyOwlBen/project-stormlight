@@ -8,7 +8,7 @@ func TestLoadSkills(t *testing.T) {
 		t.Fatalf("LoadSkills() returned an unexpected error: %v", err)
 	}
 
-	if len(Skills) == 0 {
+	if len(SkillList) == 0 {
 		t.Fatalf("Expected skills to be loaded into the map, but it was empty")
 	}
 }

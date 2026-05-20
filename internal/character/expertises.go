@@ -6,14 +6,14 @@ import (
 )
 
 type Expertise struct {
-	ID          int    `json:"id"`
-	CharacterID int    `json:"-"` // "-" means don't include this in JSON output
-	Name        string `json:"name"`
-	Source      string `json:"source"`
-	Category    string `json:"category"`
-	Description string `json:"description"`
+	ID          int    `json:"id" gorm:"primaryKey"`
+	CharacterID int    `json:"-" gorm:"not null;index"`
+	Name        string `json:"name" gorm:"not null"`
+	Source      string `json:"source" gorm:"size:100"`
+	Category    string `json:"category" gorm:"size:100"`
+	Description string `json:"description" gorm:"type:text"`
 
-	PointTracker
+	PointTracker `gorm:"embedded"`
 }
 
 var Expertises = map[string]Expertise{}

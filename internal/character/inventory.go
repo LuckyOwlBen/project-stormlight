@@ -1,13 +1,13 @@
 package character
 
 type Inventory struct {
-	ID          int    `json:"id"`
-	CharacterID int    `json:"-"` // "-" means don't include this in JSON output
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Quantity    int    `json:"quantity"`
-	Equipped    bool   `json:"equipped"`
+	ID          int    `json:"id" gorm:"primaryKey"`
+	CharacterID int    `json:"-" gorm:"not null;index"`
+	Name        string `json:"name" gorm:"not null"`
+	Description string `json:"description" gorm:"type:text"`
+	Quantity    int    `json:"quantity" gorm:"not null;default:1"`
+	Equipped    bool   `json:"equipped" gorm:"not null;default:false"`
 	Loadout     string `json:"loadout"`
 
-	PointTracker
+	PointTracker `gorm:"embedded"`
 }

@@ -6,14 +6,14 @@ import (
 )
 
 type Culture struct {
-	ID             int      `json:"id"`
-	CharacterID    int      `json:"-"` // "-" means don't include this in JSON output
-	Name           string   `json:"name"`
-	Description    string   `json:"description"`
+	ID             int      `json:"id" gorm:"primaryKey"`
+	CharacterID    int      `json:"-" gorm:"not null;index"`
+	Name           string   `json:"name" gorm:"not null"`
+	Description    string   `json:"description" gorm:"type:text"`
 	Expertises     string   `json:"expertises"`
-	SuggestedNames []string `json:"suggestedNames"`
+	SuggestedNames []string `json:"suggestedNames" gorm:"serializer:json"` // Storing arrays directly requires JSON serialization
 
-	PointTracker
+	PointTracker `gorm:"embedded"`
 }
 
 var Cultures = map[string]Culture{}

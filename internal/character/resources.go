@@ -1,14 +1,14 @@
 package character
 
 type Resources struct {
-	ID            int `json:"id"`
-	CharacterID   int `json:"-"` // "-" means don't include this in JSON output
-	HealthCurrent int `json:"healthCurrent"`
-	HealthMax     int `json:"healthMax"`
-	FocusCurrent  int `json:"focusCurrent"`
-	FocusMax      int `json:"focusMax"`
+	ID            int `json:"id" gorm:"primaryKey"`
+	CharacterID   int `json:"-" gorm:"not null;uniqueIndex"` // uniqueIndex creates a 1:1 relationship
+	HealthCurrent int `json:"healthCurrent" gorm:"not null;default:0"`
+	HealthMax     int `json:"healthMax" gorm:"not null;default:0"`
+	FocusCurrent  int `json:"focusCurrent" gorm:"not null;default:0"`
+	FocusMax      int `json:"focusMax" gorm:"not null;default:0"`
 
-	InvestitureCurrent int  `json:"investitureCurrent"`
-	InvestitureMax     int  `json:"investitureMax"`
-	InvestitureActive  bool `json:"investitureActive"`
+	InvestitureCurrent int  `json:"investitureCurrent" gorm:"not null;default:0"`
+	InvestitureMax     int  `json:"investitureMax" gorm:"not null;default:0"`
+	InvestitureActive  bool `json:"investitureActive" gorm:"not null;default:false"`
 }
