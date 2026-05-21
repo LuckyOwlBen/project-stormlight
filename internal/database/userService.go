@@ -7,7 +7,7 @@ import (
 
 // CreateUser inserts a new user into the database
 func (s *Store) CreateUser(ctx context.Context, user *models.User) error {
-	// GORM will automatically map the fields and insert them, 
+	// GORM will automatically map the fields and insert them,
 	// and populate the generated ID and CreatedAt fields back into the object.
 	return s.db.WithContext(ctx).Create(user).Error
 }

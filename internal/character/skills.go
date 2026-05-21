@@ -15,6 +15,8 @@ type Skills struct {
 	PointTracker `gorm:"embedded"`
 }
 
+func (Skills) TableName() string { return "character_skills" }
+
 type Skill struct {
 	ID        int    `json:"id" gorm:"primaryKey"`
 	SkillsID  int    `json:"-" gorm:"not null;index"` // Points back to the parent Skills tracking object

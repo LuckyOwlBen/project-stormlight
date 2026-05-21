@@ -61,8 +61,12 @@ func (s *Server) Mount() http.Handler {
 	r.Group(func(r chi.Router) {
 		r.Use(s.AuthMiddleware)
 		r.Get("/dashboard", s.handleDashboardGet)
+
 		r.Get("/characters/new", s.handleCharacterNew)
 		r.Post("/characters", s.handleCharacterCreate)
+
+		r.Get("/characters/{id}/attributes", s.handleCharacterAttributesGet)
+		r.Post("/characters/{id}/attributes", s.handleCharacterAttributesPost)
 	})
 
 	return r

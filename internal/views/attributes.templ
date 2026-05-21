@@ -1,0 +1,79 @@
+package views
+
+import (
+	"fmt"
+	"project-stormlight/internal/character"
+)
+
+templ AttributesForm(char *character.Character) {
+	@Layout("Allocate Attributes") {
+		<div class="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+			<div class="card w-full max-w-2xl bg-base-200 shadow-xl">
+				<div class="card-body">
+					<h2 class="card-title justify-center text-3xl mb-2">Attributes for { char.Name }</h2>
+					
+					<div class="alert alert-info shadow-lg mb-6">
+						<div>
+							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current flex-shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+							<span>Points Remaining: <strong id="pointsRemaining" class="text-xl" data-initial={ fmt.Sprintf("%d", char.Attributes.PointsRemaining) }>{ fmt.Sprintf("%d", char.Attributes.PointsRemaining) }</strong></span>
+						</div>
+					</div>
+
+					<form action={ templ.SafeURL(fmt.Sprintf("/characters/%d/attributes", char.ID)) } method="POST" id="attributesForm">
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+							@attributeInput("Strength", "strength", char.Attributes.Strength)
+							@attributeInput("Speed", "speed", char.Attributes.Speed)
+							@attributeInput("Willpower", "willpower", char.Attributes.Willpower)
+							@attributeInput("Intelligence", "intelligence", char.Attributes.Intelligence)
+							@attributeInput("Awareness", "awareness", char.Attributes.Awareness)
+							@attributeInput("Presence", "presence", char.Attributes.Presence)
+						</div>
+						
+						<div class="form-control mt-8">
+							<button type="submit" class="btn btn-primary w-full text-lg">Save Attributes</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			document.addEventListener("DOMContentLoaded", () => {
+				const form = document.getElementById("attributesForm");
+				const pointsDisplay = document.getElementById("pointsRemaining");
+				const initialPoints = parseInt(pointsDisplay.getAttribute("data-initial"), 10);
+				
+				const inputs = Array.from(form.querySelectorAll("input[type='number']"));
+				const initialVals = inputs.map(input => parseInt(input.value, 10) || 0);
+
+				const updateTotal = () => {
+					let spent = 0;
+					inputs.forEach((input, index) => {
+						const val = parseInt(input.value, 10) || 0;
+						spent += (val - initialVals[index]);
+					});
+					pointsDisplay.innerText = initialPoints - spent;
+				};
+
+				inputs.forEach(input => {
+					input.addEventListener("input", updateTotal);
+				});
+			});
+		</script>
+	}
+}
+
+templ attributeInput(label string, name string, value int) {
+	<div class="form-control w-full">
+		<label class="label">
+			<span class="label-text text-lg font-semibold">{ label }</span>
+		</label>
+		<input 
+			type="number" 
+			name={ name } 
+			value={ fmt.Sprintf("%d", value) } 
+			min={ fmt.Sprintf("%d", value) } 
+			class="input input-bordered w-full" 
+		/>
+	</div>
+}

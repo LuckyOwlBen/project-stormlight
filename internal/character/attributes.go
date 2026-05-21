@@ -1,6 +1,6 @@
 package character
 
-var attributePointsPerLevel = [12]int{0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0}
+var attributePointsPerLevel = [21]int{12, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0}
 
 type Attributes struct {
 	ID           int `json:"id" gorm:"primaryKey"`

@@ -1,9 +1,9 @@
 package character
 
-//HEALTH GAINED PER LEVEL WILL BE 10 + STR AT LEVEL 1 THEN +5 TO LEVEL 5, + 4 TO LEVEL 10, +3 TO LEVEL 15, +2 TO LVEL 20 AND 1 AT 21
+// HEALTH GAINED PER LEVEL WILL BE 10 + STR AT LEVEL 1 THEN +5 TO LEVEL 5, + 4 TO LEVEL 10, +3 TO LEVEL 15, +2 TO LVEL 20 AND 1 AT 21
 var HealthPerLevel = [21]int{10, 5, 5, 5, 5, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 1}
 
-//ADD STRENGTH TO HEALTH GAINED AT THESE LEVELS
+// ADD STRENGTH TO HEALTH GAINED AT THESE LEVELS
 var HealthStrengthBonusLevels = [21]bool{true, false, false, false, false, true, false, false, false, false, true, false, false, false, false, true, false, false, false, false, true}
 
 type Resources struct {
