@@ -34,3 +34,20 @@ type Character struct {
 
 	CreatedAt time.Time `json:"createdAt" gorm:"autoCreateTime"`
 }
+
+func NewCharacter(userID int, name string, level int) *Character {
+	return &Character{
+		UserID:       userID,
+		Name:         name,
+		Level:        level,
+		Ancestry:     Human,
+		Attributes:   NewAttributes(0, level),
+		Talents:      NewTalents(0, level),
+		Skills:       NewSkills(level),
+		Resources:    NewResources(0, level),
+		Inventory:    &[]Inventory{},
+		Paths:        &[]Paths{},
+		RadiantPaths: &[]RadiantPaths{},
+		SingerForms:  &[]SingerForms{},
+	}
+}

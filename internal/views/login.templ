@@ -1,26 +1,43 @@
 package views
 
 templ LoginForm(errors map[string]string) {
-    <html>
-        <body>
-            <h1>Login</h1>
-            <form method="post" action="/login">
-                <div>
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username"/>
-                    if errors["username"] != "" {
-                        <span style="color: red;">{ errors["username"] }</span>
-                    }
+    @Layout("Login") {
+        <div class="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+            <div class="card w-96 bg-base-200 shadow-xl">
+                <div class="card-body">
+                    <h2 class="card-title justify-center text-2xl mb-4">Login</h2>
+                    <form method="post" action="/login">
+                        <div class="form-control w-full">
+                            <label class="label" for="username">
+                                <span class="label-text">Username:</span>
+                            </label>
+                            <input type="text" id="username" name="username" class="input input-bordered w-full"/>
+                            if errors["username"] != "" {
+                                <label class="label">
+                                    <span class="label-text-alt text-error">{ errors["username"] }</span>
+                                </label>
+                            }
+                        </div>
+                        <div class="form-control w-full mt-4">
+                            <label class="label" for="password">
+                                <span class="label-text">Password:</span>
+                            </label>
+                            <input type="password" id="password" name="password" class="input input-bordered w-full"/>
+                            if errors["password"] != "" {
+                                <label class="label">
+                                    <span class="label-text-alt text-error">{ errors["password"] }</span>
+                                </label>
+                            }
+                        </div>
+                        <div class="form-control mt-6">
+                            <button type="submit" class="btn btn-primary w-full">Login</button>
+                        </div>
+                    </form>
+                    <div class="text-center mt-4 text-sm">
+                        <a href="/register" class="link link-hover">Don't have an account? Register here.</a>
+                    </div>
                 </div>
-                <div>
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password"/>
-                    if errors["password"] != "" {
-                        <span style="color: red;">{ errors["password"] }</span>
-                    }
-                </div>
-                <button type="submit">Login</button>
-            </form>
-        </body>
-    </html>
+            </div>
+        </div>
+    }
 }

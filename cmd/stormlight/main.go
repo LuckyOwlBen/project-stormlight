@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"project-stormlight/internal/api"
+	"project-stormlight/internal/character"
 	"project-stormlight/internal/database"
 
 	"github.com/joho/godotenv"
@@ -17,6 +18,11 @@ func main() {
 	// Load environment variables from .env file
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, relying on environment variables")
+	}
+
+	// Load Game Data
+	if err := character.LoadCultures(); err != nil {
+		log.Fatalf("Could not load cultures: %v", err)
 	}
 
 	// Read separate env vars and construct the DSN, or read a complete DATABASE_URL
@@ -35,7 +41,11 @@ func main() {
 	if err != nil {
 		log.Fatal("Could not connect to database:", err)
 	}
-	defer dbConn.Close()
+
+	sqlDB, _ := dbConn.DB()
+	if sqlDB != nil {
+		defer sqlDB.Close()
+	}
 
 	// Initialize our store
 	store := database.NewStore(dbConn)

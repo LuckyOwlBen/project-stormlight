@@ -24,7 +24,7 @@ type Skill struct {
 	// We ignore the association in the database, because it just holds static info like which attribute this pairs with!
 	// We can easily hydrate this whenever we load the character.
 	SkillAssociation `json:"association" gorm:"-"`
-	
+
 	// Track which tree (spread) the skill came from (e.g., "physicalSkills", "mentalSkills")
 	SpreadName string `json:"spreadName" gorm:"-"`
 }
@@ -69,7 +69,7 @@ func LoadSkills() error {
 		if err := json.Unmarshal(fileData, &spread); err != nil {
 			return err
 		}
-		
+
 		// The JSON is wrapped in a key like "physicalSkills", "mentalSkills", etc.
 		for spreadKey, skills := range spread {
 			for _, skill := range skills {
@@ -83,19 +83,19 @@ func LoadSkills() error {
 	return nil
 }
 
-// GenerateDefaultSkills creates a new Skills module, pre-populated with a 0-value
+// NewSkills creates a new Skills module, pre-populated with a 0-value
 // instance of every skill that exists in the game data, ready to be saved to the database.
-func GenerateDefaultSkills(level int) *Skills {
+func NewSkills(level int) *Skills {
 	availablePoints := calculateSkillPoints(level)
 	playerSkills := []Skill{}
 
 	// We loop through the master map of skills we loaded from JSON
 	for name, baseSkill := range SkillList {
 		playerSkills = append(playerSkills, Skill{
-			SkillName:        name,
-			Value:            0,
+			SkillName: name,
+			Value:     0,
 			// We can attach the association directly so it's ready in-memory immediately
-			SkillAssociation: baseSkill.SkillAssociation, 
+			SkillAssociation: baseSkill.SkillAssociation,
 			SpreadName:       baseSkill.SpreadName,
 		})
 	}

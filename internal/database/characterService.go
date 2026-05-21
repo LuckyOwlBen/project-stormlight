@@ -34,13 +34,23 @@ func (s *Store) GetCharacterByID(ctx context.Context, id int) (*character.Charac
 	return &char, nil
 }
 
+// GetCharactersByUserID fetches all characters for a specific user.
+func (s *Store) GetCharactersByUserID(ctx context.Context, userID int) ([]*character.Character, error) {
+	var chars []*character.Character
+	err := s.db.WithContext(ctx).Where("user_id = ?", userID).Find(&chars).Error
+	if err != nil {
+		return nil, err
+	}
+	return chars, nil
+}
+
 // UpdateCharacter fully updates the character and its relations.
 func (s *Store) UpdateCharacter(ctx context.Context, char *character.Character) error {
 	// Session uses Save which will update all fields, including nested relationships.
 	return s.db.WithContext(ctx).Session(&gorm.Session{FullSaveAssociations: true}).Save(char).Error
 }
 
-// DeleteCharacterByID deletes the character. 
+// DeleteCharacterByID deletes the character.
 // Because we set `constraint:OnDelete:CASCADE` on the foreign keys,
 // Postgres will automatically delete the related Attributes, Skills, etc.
 func (s *Store) DeleteCharacterByID(ctx context.Context, id int) error {

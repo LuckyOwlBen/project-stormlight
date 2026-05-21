@@ -21,12 +21,19 @@ func NewStore(db *gorm.DB) *Store {
 func (s *Store) InitSchema(ctx context.Context) error {
 	// GORM's AutoMigrate handles creating tables and matching constraints
 	// for the structs you pass to it automatically!
+
 	err := s.db.WithContext(ctx).AutoMigrate(
 		&models.User{},
 		&character.Character{},
-		// Note: we can add attributes, skills, etc. here once they're tagged
+		&character.Attributes{},
+		&character.Skills{},
+		&character.Inventory{},
+		&character.Expertise{},
+		&character.Resources{},
+		&character.RadiantPaths{},
+		&character.SingerForms{},
 	)
-	
+
 	return err
 }
 
@@ -42,7 +49,7 @@ func Connect(dsn string) (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	if err := sqlDB.Ping(); err != nil {
 		return nil, err
 	}

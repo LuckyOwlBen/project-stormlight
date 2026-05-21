@@ -23,7 +23,7 @@ func calculateAttributePoints(level int) int {
 	return attributePointsPerLevel[level-1]
 }
 
-func newAttributes(characterID int, level int) *Attributes {
+func NewAttributes(characterID int, level int) *Attributes {
 	availablePoints := calculateAttributePoints(level)
 	return &Attributes{
 		CharacterID: characterID,

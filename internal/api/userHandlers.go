@@ -75,5 +75,33 @@ func (s *Server) handleLoginPost(w http.ResponseWriter, r *http.Request) {
 		views.LoginForm(errors).Render(r.Context(), w)
 		return
 	}
+
+	// Set session
+	session, _ := s.sessionStore.Get(r, "session-name")
+	session.Values["userID"] = user.ID
+	err = session.Save(r, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+}
+
+// GET /dashboard
+func (s *Server) handleDashboardGet(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(int)
+	if !ok {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	chars, err := s.store.GetCharactersByUserID(r.Context(), userID)
+	if err != nil {
+		http.Error(w, "Failed to load characters", http.StatusInternalServerError)
+		return
+	}
+
+	component := views.Dashboard(nil, chars)
+	component.Render(r.Context(), w)
 }
