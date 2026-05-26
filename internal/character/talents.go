@@ -3,18 +3,36 @@ package character
 import (
 	"encoding/json"
 	"project-stormlight/data"
-	"strings"
 )
 
 var talentPointsPerLevel = [21]int{2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1}
 
-type TalentModule struct {
-	PrimaryPath Path
-	SubPaths    map[string]Talents
-	Talents     map[string]Talent
+type TalentsTracker struct {
+	ID           int             `json:"id" gorm:"primaryKey"`
+	CharacterID  int             `json:"-" gorm:"not null;uniqueIndex"`
+	List         []TalentHistory `json:"list" gorm:"foreignKey:TalentsTrackerID;constraint:OnDelete:CASCADE;"`
+	PointTracker `gorm:"embedded"`
 
-	PointTracker
+	PrimaryPath Path               `json:"-" gorm:"-"`
+	SubPaths    map[string]Talents `json:"-" gorm:"-"`
+	TalentMap   map[string]Talent  `json:"-" gorm:"-"`
 }
+
+func (TalentsTracker) TableName() string { return "talents" }
+
+type TalentHistory struct {
+	ID               int    `json:"id" gorm:"primaryKey"`
+	TalentsTrackerID int    `json:"-" gorm:"not null;index"`
+	CharacterID      int    `json:"-" gorm:"not null;index"`
+	TalentID         string `json:"talentId" gorm:"not null"`
+	Source      string `json:"source" gorm:"size:100"`
+	Finalized   bool   `json:"finalized" gorm:"not null;default:false"`
+
+	// Easy access to the raw talent definitions via hydration without persisting them directly to DB again
+	Talent `json:"talent" gorm:"-"`
+}
+
+func (TalentHistory) TableName() string { return "talents_history" }
 
 // Parent Class/Tree
 type Path struct {
@@ -234,55 +252,66 @@ type MovementEffect struct {
 	ActionCost string `json:"actionCost,omitempty"` // "free", "part-of-action", or "full-action"
 }
 
-var TalentMap = map[string]Path{}
+var (
+	PathMap    = map[string]Path{}
+	SubPathMap = map[string]Talents{}
+	AllTalents = map[string]Talent{}
+)
 
 func LoadTalents() error {
+	PathMap = make(map[string]Path)
+	SubPathMap = make(map[string]Talents)
+	AllTalents = make(map[string]Talent)
 
 	entries, err := data.TalentFiles.ReadDir("talents")
 	if err != nil {
 		return err
 	}
 
-	TalentMap = make(map[string]Path)
-	ChildTalentsMap := make(map[string]Talents)
-
 	for _, entry := range entries {
-		if entry.IsDir() {
-			folderName := entry.Name()
-			subEntries, err := data.TalentFiles.ReadDir("talents/" + folderName)
+		if !entry.IsDir() {
+			continue
+		}
+
+		category := entry.Name() // e.g., "agent", "envoy"
+		files, err := data.TalentFiles.ReadDir("talents/" + category)
+		if err != nil {
+			return err
+		}
+
+		for _, file := range files {
+			if file.IsDir() {
+				continue
+			}
+
+			filePath := "talents/" + category + "/" + file.Name()
+			fileData, err := data.TalentFiles.ReadFile(filePath)
 			if err != nil {
 				return err
 			}
 
-			for _, subEntry := range subEntries {
-				if subEntry.IsDir() || !strings.HasSuffix(subEntry.Name(), ".json") {
-					continue
-				}
-
-				filePath := "talents/" + folderName + "/" + subEntry.Name()
-				fileData, err := data.TalentFiles.ReadFile(filePath)
-				if err != nil {
+			if file.Name() == category+".json" {
+				var path Path
+				if err := json.Unmarshal(fileData, &path); err != nil {
 					return err
 				}
-
-				// If the filename matches the folder name (e.g. "agent.json" in "agent/"), it's the parent Path
-				if subEntry.Name() == folderName+".json" {
-					var pathData Path
-					if err := json.Unmarshal(fileData, &pathData); err != nil {
-						return err
-					}
-					TalentMap[pathData.ID] = pathData
-				} else {
-					// Otherwise, it's a child Talents struct
-					var childData Talents
-					if err := json.Unmarshal(fileData, &childData); err != nil {
-						return err
-					}
-					ChildTalentsMap[childData.ID] = childData
+				PathMap[path.ID] = path
+				for _, t := range path.TalentNodes {
+					AllTalents[t.Id] = t
+				}
+			} else {
+				var subPath Talents
+				if err := json.Unmarshal(fileData, &subPath); err != nil {
+					return err
+				}
+				SubPathMap[subPath.ID] = subPath
+				for _, t := range subPath.Nodes {
+					AllTalents[t.Id] = t
 				}
 			}
 		}
 	}
+
 	return nil
 }
 
@@ -293,13 +322,15 @@ func calculateTalentPoints(level int) int {
 	return talentPointsPerLevel[level-1]
 }
 
-func NewTalents(characterID int, level int) *TalentModule {
+func NewTalents(characterID int, level int) *TalentsTracker {
 
 	availablePoints := calculateTalentPoints(level)
-	return &TalentModule{
+	return &TalentsTracker{
+		CharacterID: characterID,
+		List:        []TalentHistory{},
 		PrimaryPath: Path{},
 		SubPaths:    make(map[string]Talents),
-		Talents:     make(map[string]Talent),
+		TalentMap:   make(map[string]Talent),
 		PointTracker: PointTracker{
 			TotalPoints:     availablePoints,
 			PendingPoints:   0,

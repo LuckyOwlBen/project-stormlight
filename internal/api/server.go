@@ -45,6 +45,8 @@ func (s *Server) Mount() http.Handler {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
+	r.Get("/", s.handleLoginGet)
+
 	// User Registration
 	r.Get("/register", s.handleRegisterGet)
 	r.Post("/register", s.handleRegisterPost)
@@ -64,9 +66,19 @@ func (s *Server) Mount() http.Handler {
 
 		r.Get("/characters/new", s.handleCharacterNew)
 		r.Post("/characters", s.handleCharacterCreate)
+		r.Post("/characters/{id}/delete", s.handleCharacterDelete)
 
 		r.Get("/characters/{id}/attributes", s.handleCharacterAttributesGet)
 		r.Post("/characters/{id}/attributes", s.handleCharacterAttributesPost)
+
+		r.Get("/characters/{id}/expertises", s.handleCharacterExpertisesGet)
+		r.Post("/characters/{id}/expertises", s.handleCharacterExpertisesPost)
+
+		r.Get("/characters/{id}/skills", s.handleCharacterSkillsGet)
+		r.Post("/characters/{id}/skills", s.handleCharacterSkillsPost)
+
+		r.Get("/characters/{id}/talents", s.handleCharacterTalentsGet)
+		r.Post("/characters/{id}/talents", s.handleCharacterTalentsPost)
 	})
 
 	return r

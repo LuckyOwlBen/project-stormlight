@@ -1,0 +1,47 @@
+package views
+
+import (
+	"strconv"
+	"project-stormlight/internal/character"
+)
+
+templ ExpertiseSelection(char *character.Character, expertiseGroups map[string][]character.Expertise) {
+    @Layout("Select Expertise") {
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold">Select Your Expertise ({ strconv.Itoa(char.Attributes.Intelligence) } Available)</h1>
+        </div>
+        
+        <form action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/expertises") } method="POST">
+            <section class="expertise-list">
+                if len(expertiseGroups) == 0 {
+                    <div class="alert alert-info shadow-lg">
+                        <div>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current flex-shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span>No expertises found.</span>
+                        </div>
+                    </div>
+                } else {
+                    for groupName, expertises := range expertiseGroups {
+                        <div class="mb-8">
+                            <h2 class="text-2xl font-semibold mb-4 capitalize">{ groupName }</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                for _, exp := range expertises {
+                                    <div class="card w-full bg-base-200 shadow-xl">
+                                        <div class="card-body">
+                                            <label class="label cursor-pointer flex justify-start gap-4">
+                                                <input type="checkbox" name="expertises" value={ exp.Name } class="checkbox checkbox-primary" />
+                                                <h2 class="card-title m-0">{ exp.Name }</h2>
+                                            </label>
+                                            <p class="text-sm opacity-70 mt-2">{ exp.Description }</p>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    <button type="submit" class="btn btn-primary w-full md:w-auto mt-4">Save Expertises</button>
+                }
+            </section>
+        </form>
+    }
+}

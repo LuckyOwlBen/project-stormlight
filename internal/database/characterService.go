@@ -20,17 +20,18 @@ func (s *Store) GetCharacterByID(ctx context.Context, id int) (*character.Charac
 
 	err := s.db.WithContext(ctx).
 		Preload("Attributes").
-		Preload("Skills").
+		Preload("PathsTracker.List").
+		Preload("Skills.PlayerSkills").
 		Preload("Inventory").
-		Preload("Expertises").
+		Preload("Talents.List").
+		Preload("Expertises.List").
 		Preload("Resources").
-		Preload("RadiantPaths").
-		Preload("SingerForms").
 		First(&char, id).Error
 
 	if err != nil {
 		return nil, err
 	}
+	char.Hydrate()
 	return &char, nil
 }
 
@@ -41,11 +42,28 @@ func (s *Store) GetCharactersByUserID(ctx context.Context, userID int) ([]*chara
 	if err != nil {
 		return nil, err
 	}
+	for _, char := range chars {
+		char.Hydrate()
+	}
 	return chars, nil
 }
 
 // UpdateCharacter fully updates the character and its relations.
 func (s *Store) UpdateCharacter(ctx context.Context, char *character.Character) error {
+	// Clears removed entries from nested relationships that would otherwise be orphaned during Save
+	if char.Expertises != nil {
+		s.db.WithContext(ctx).Model(char.Expertises).Association("List").Replace(char.Expertises.List)
+	}
+	if char.Skills != nil {
+		s.db.WithContext(ctx).Model(char.Skills).Association("PlayerSkills").Replace(char.Skills.PlayerSkills)
+	}
+	if char.PathsTracker != nil {
+		s.db.WithContext(ctx).Model(char.PathsTracker).Association("List").Replace(char.PathsTracker.List)
+	}
+	if char.Talents != nil {
+		s.db.WithContext(ctx).Model(char.Talents).Association("List").Replace(char.Talents.List)
+	}
+
 	// Session uses Save which will update all fields, including nested relationships.
 	return s.db.WithContext(ctx).Session(&gorm.Session{FullSaveAssociations: true}).Save(char).Error
 }

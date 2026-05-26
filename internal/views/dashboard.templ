@@ -27,6 +27,9 @@ templ Dashboard(errors map[string]string, characters []*character.Character) {
                                 <p>Level { fmt.Sprintf("%d", char.Level) } { string(char.Ancestry) }</p>
                                 <div class="card-actions justify-end mt-4">
                                     <button class="btn btn-sm btn-outline">View</button>
+                                    <form action={ templ.URL(fmt.Sprintf("/characters/%v/delete", char.ID)) } method="POST" class="inline">
+                                        <button type="submit" class="btn btn-sm btn-outline btn-error">Delete</button>
+                                    </form>
                                 </div>
                             </div>
                         </div>

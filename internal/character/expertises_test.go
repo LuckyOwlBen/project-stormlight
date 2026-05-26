@@ -10,7 +10,7 @@ func TestLoadExpertises(t *testing.T) {
 		t.Fatalf("Failed to load expertises: %v", err)
 	}
 
-	if len(Expertises) == 0 {
+	if len(ExpertiseList) == 0 {
 		t.Fatalf("Expected expertises to be loaded, but got an empty map")
 	}
 }

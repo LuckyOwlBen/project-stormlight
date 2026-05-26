@@ -24,6 +24,15 @@ func main() {
 	if err := character.LoadCultures(); err != nil {
 		log.Fatalf("Could not load cultures: %v", err)
 	}
+	if err := character.LoadExpertises(); err != nil {
+		log.Fatalf("Could not load expertises: %v", err)
+	}
+	if err := character.LoadSkills(); err != nil {
+		log.Fatalf("Could not load skills: %v", err)
+	}
+	if err := character.LoadTalents(); err != nil {
+		log.Fatalf("Could not load talents: %v", err)
+	}
 
 	// Read separate env vars and construct the DSN, or read a complete DATABASE_URL
 	dbURL := os.Getenv("DATABASE_URL")

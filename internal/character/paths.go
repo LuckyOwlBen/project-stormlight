@@ -1,17 +1,33 @@
 package character
 
-type Paths struct {
-	ID           int    `json:"id" gorm:"primaryKey"`
-	CharacterID  int    `json:"-" gorm:"not null;index"`
-	Name         string `json:"name" gorm:"not null;size:100"`
-	Description  string `json:"description" gorm:"type:text"`
-	BaseTalentId string `json:"baseTalentId" gorm:"size:100"` //base talent id for that path
+type PathsTracker struct {
+	ID          int           `json:"id" gorm:"primaryKey"`
+	CharacterID int           `json:"-" gorm:"not null;uniqueIndex"`
+	List        []PathHistory `json:"list" gorm:"foreignKey:PathsTrackerID;constraint:OnDelete:CASCADE;"`
 
-	PointTracker `gorm:"embedded"`
+	// This gives easy access to the actual paths via hydration
+	PathMap map[string]Path `json:"-" gorm:"-"`
 }
 
-func NewPath(characterID int) *Paths {
-	return &Paths{
+func (PathsTracker) TableName() string { return "paths" }
+
+type PathHistory struct {
+	ID             int    `json:"id" gorm:"primaryKey"`
+	PathsTrackerID int    `json:"-" gorm:"not null;index"`
+	CharacterID    int    `json:"-" gorm:"not null;index"`
+	PathID         string `json:"pathId" gorm:"not null"`
+	Source      string `json:"source" gorm:"size:100"`
+	Finalized   bool   `json:"finalized" gorm:"not null;default:false"`
+
+	// Just for hydration so we can access Path data easily
+	Path Path `json:"-" gorm:"-"`
+}
+
+func (PathHistory) TableName() string { return "paths_history" }
+
+func NewPathsTracker(characterID int) *PathsTracker {
+	return &PathsTracker{
 		CharacterID: characterID,
+		List:        []PathHistory{},
 	}
 }

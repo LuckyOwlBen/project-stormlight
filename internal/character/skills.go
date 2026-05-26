@@ -9,19 +9,20 @@ var skillPointsPerLevel = [21]int{4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
 
 type Skills struct {
 	ID           int     `json:"id" gorm:"primaryKey"`
-	CharacterID  int     `json:"-" gorm:"not null;uniqueIndex"`                                        // 1:1 relationship with Character
+	CharacterID  int     `json:"-" gorm:"not null;uniqueIndex"`                                                                    // 1:1 relationship with Character
 	PlayerSkills []Skill `json:"playerSkills" gorm:"foreignKey:SkillsID;constraint:OnDelete:CASCADE;"` // Many player skills to this 1 Skills tracker
 
 	PointTracker `gorm:"embedded"`
 }
 
-func (Skills) TableName() string { return "character_skills" }
+func (Skills) TableName() string { return "skills" }
 
 type Skill struct {
-	ID        int    `json:"id" gorm:"primaryKey"`
-	SkillsID  int    `json:"-" gorm:"not null;index"` // Points back to the parent Skills tracking object
-	SkillName string `json:"skillName" gorm:"not null;size:100"`
-	Value     int    `json:"value" gorm:"not null;default:0"`
+	ID          int    `json:"id" gorm:"primaryKey"`
+	SkillsID    int    `json:"-" gorm:"not null;index"`
+	CharacterID int    `json:"-" gorm:"not null;index"`
+	SkillName   string `json:"skillName" gorm:"not null;size:100"`
+	Value       int    `json:"value" gorm:"not null;default:0"`
 
 	// We ignore the association in the database, because it just holds static info like which attribute this pairs with!
 	// We can easily hydrate this whenever we load the character.
@@ -29,7 +30,10 @@ type Skill struct {
 
 	// Track which tree (spread) the skill came from (e.g., "physicalSkills", "mentalSkills")
 	SpreadName string `json:"spreadName" gorm:"-"`
+	Finalized  bool   `json:"finalized" gorm:"not null;default:false"`
 }
+
+func (Skill) TableName() string { return "skills_history" }
 
 type SkillSpread struct {
 	PhysicalSkills []SkillAssociation `json:"physicalSkills" gorm:"-"`
@@ -51,6 +55,7 @@ func calculateSkillPoints(level int) int {
 }
 
 var SkillList = map[string]Skill{}
+var SkillGroups = map[string][]Skill{}
 
 func LoadSkills() error {
 	entries, err := data.SkillFiles.ReadDir("skills")
@@ -59,6 +64,7 @@ func LoadSkills() error {
 	}
 
 	SkillList = make(map[string]Skill)
+	SkillGroups = make(map[string][]Skill)
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
@@ -75,10 +81,13 @@ func LoadSkills() error {
 		// The JSON is wrapped in a key like "physicalSkills", "mentalSkills", etc.
 		for spreadKey, skills := range spread {
 			for _, skill := range skills {
-				SkillList[skill.Name] = Skill{
+				s := Skill{
+					SkillName:        skill.Name,
 					SkillAssociation: skill,
 					SpreadName:       spreadKey, // e.g., "physicalSkills"
 				}
+				SkillList[skill.Name] = s
+				SkillGroups[spreadKey] = append(SkillGroups[spreadKey], s)
 			}
 		}
 	}
@@ -87,15 +96,20 @@ func LoadSkills() error {
 
 // NewSkills creates a new Skills module, pre-populated with a 0-value
 // instance of every skill that exists in the game data, ready to be saved to the database.
-func NewSkills(level int) *Skills {
+func NewSkills(characterID int, level int) *Skills {
 	availablePoints := calculateSkillPoints(level)
 	playerSkills := []Skill{}
 
 	// We loop through the master map of skills we loaded from JSON
 	for name, baseSkill := range SkillList {
+		if baseSkill.SpreadName == "surgeSkills" {
+			continue // Skip surge skills on character creation
+		}
+		
 		playerSkills = append(playerSkills, Skill{
-			SkillName: name,
-			Value:     0,
+			CharacterID: characterID,
+			SkillName:   name,
+			Value:       0,
 			// We can attach the association directly so it's ready in-memory immediately
 			SkillAssociation: baseSkill.SkillAssociation,
 			SpreadName:       baseSkill.SpreadName,
@@ -103,6 +117,7 @@ func NewSkills(level int) *Skills {
 	}
 
 	return &Skills{
+		CharacterID:  characterID,
 		PlayerSkills: playerSkills,
 		PointTracker: PointTracker{
 			TotalPoints:     availablePoints,
