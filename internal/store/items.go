@@ -77,7 +77,7 @@ func LoadItems() error {
 			return err
 		}
 		for _, item := range itemList {
-			Items[item.Name] = item
+			Items[item.Id] = item
 		}
 	}
 

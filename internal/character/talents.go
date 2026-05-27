@@ -25,8 +25,8 @@ type TalentHistory struct {
 	TalentsTrackerID int    `json:"-" gorm:"not null;index"`
 	CharacterID      int    `json:"-" gorm:"not null;index"`
 	TalentID         string `json:"talentId" gorm:"not null"`
-	Source      string `json:"source" gorm:"size:100"`
-	Finalized   bool   `json:"finalized" gorm:"not null;default:false"`
+	Source           string `json:"source" gorm:"size:100"`
+	Finalized        bool   `json:"finalized" gorm:"not null;default:false"`
 
 	// Easy access to the raw talent definitions via hydration without persisting them directly to DB again
 	Talent `json:"talent" gorm:"-"`

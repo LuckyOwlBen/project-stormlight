@@ -2,7 +2,9 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"project-stormlight/internal/character"
+	"project-stormlight/internal/store"
 
 	"gorm.io/gorm"
 )
@@ -73,4 +75,99 @@ func (s *Store) UpdateCharacter(ctx context.Context, char *character.Character) 
 // Postgres will automatically delete the related Attributes, Skills, etc.
 func (s *Store) DeleteCharacterByID(ctx context.Context, id int) error {
 	return s.db.WithContext(ctx).Delete(&character.Character{}, id).Error
+}
+
+// ApplyStartingKit populates a character's inventory and currency from a starting kit.
+func (s *Store) ApplyStartingKit(ctx context.Context, charID int, kit store.Kit) error {
+	allKitItems := append(append([]store.KitItem{}, kit.Weapons...), append(kit.Armor, kit.Equipment...)...)
+
+	var items []character.Inventory
+	for _, kitItem := range allKitItems {
+		storeItem, ok := store.Items[kitItem.ItemId]
+		if !ok {
+			continue
+		}
+		items = append(items, character.Inventory{
+			CharacterID: charID,
+			ItemID:      storeItem.Id,
+			Name:        storeItem.Name,
+			Quantity:    kitItem.Quantity,
+			Equipped:    false,
+			Price:       int(storeItem.Price),
+		})
+	}
+
+	return s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("character_id = ?", charID).Delete(&character.Inventory{}).Error; err != nil {
+			return err
+		}
+		if len(items) > 0 {
+			if err := tx.Create(&items).Error; err != nil {
+				return err
+			}
+		}
+		return tx.Model(&character.Character{}).Where("id = ?", charID).
+			Updates(map[string]interface{}{
+				"currency_in_chips": kit.Currency,
+				"starting_kit_id":   kit.Id,
+			}).Error
+	})
+}
+
+// BuyItem adds one of an item to a character's inventory and deducts its price in chips.
+func (s *Store) BuyItem(ctx context.Context, charID int, item store.Item) error {
+	price := int(item.Price)
+	return s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var char character.Character
+		if err := tx.Select("currency_in_chips").First(&char, charID).Error; err != nil {
+			return err
+		}
+		if char.CurrencyInChips < price {
+			return fmt.Errorf("insufficient funds: need %d chips, have %d", price, char.CurrencyInChips)
+		}
+
+		if item.Stackable {
+			var existing character.Inventory
+			err := tx.Where("character_id = ? AND item_id = ?", charID, item.Id).First(&existing).Error
+			if err == nil {
+				if err := tx.Model(&existing).Update("quantity", existing.Quantity+1).Error; err != nil {
+					return err
+				}
+			} else {
+				newItem := character.Inventory{CharacterID: charID, ItemID: item.Id, Name: item.Name, Quantity: 1, Price: price}
+				if err := tx.Create(&newItem).Error; err != nil {
+					return err
+				}
+			}
+		} else {
+			newItem := character.Inventory{CharacterID: charID, ItemID: item.Id, Name: item.Name, Quantity: 1, Price: price}
+			if err := tx.Create(&newItem).Error; err != nil {
+				return err
+			}
+		}
+
+		return tx.Model(&character.Character{}).Where("id = ?", charID).
+			Update("currency_in_chips", gorm.Expr("currency_in_chips - ?", price)).Error
+	})
+}
+
+// SellItem removes one quantity of an inventory item and refunds its price in chips.
+func (s *Store) SellItem(ctx context.Context, inventoryItemID int) error {
+	return s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var item character.Inventory
+		if err := tx.First(&item, inventoryItemID).Error; err != nil {
+			return err
+		}
+		if item.Quantity > 1 {
+			if err := tx.Model(&item).Update("quantity", item.Quantity-1).Error; err != nil {
+				return err
+			}
+		} else {
+			if err := tx.Delete(&item).Error; err != nil {
+				return err
+			}
+		}
+		return tx.Model(&character.Character{}).Where("id = ?", item.CharacterID).
+			Update("currency_in_chips", gorm.Expr("currency_in_chips + ?", item.Price)).Error
+	})
 }

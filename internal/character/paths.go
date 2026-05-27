@@ -16,8 +16,8 @@ type PathHistory struct {
 	PathsTrackerID int    `json:"-" gorm:"not null;index"`
 	CharacterID    int    `json:"-" gorm:"not null;index"`
 	PathID         string `json:"pathId" gorm:"not null"`
-	Source      string `json:"source" gorm:"size:100"`
-	Finalized   bool   `json:"finalized" gorm:"not null;default:false"`
+	Source         string `json:"source" gorm:"size:100"`
+	Finalized      bool   `json:"finalized" gorm:"not null;default:false"`
 
 	// Just for hydration so we can access Path data easily
 	Path Path `json:"-" gorm:"-"`

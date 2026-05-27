@@ -9,6 +9,7 @@ import (
 	"project-stormlight/internal/api"
 	"project-stormlight/internal/character"
 	"project-stormlight/internal/database"
+	"project-stormlight/internal/store"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -32,6 +33,12 @@ func main() {
 	}
 	if err := character.LoadTalents(); err != nil {
 		log.Fatalf("Could not load talents: %v", err)
+	}
+	if err := store.LoadItems(); err != nil {
+		log.Fatalf("Could not load items: %v", err)
+	}
+	if err := store.LoadStartingKits(); err != nil {
+		log.Fatalf("Could not load starting kits: %v", err)
 	}
 
 	// Read separate env vars and construct the DSN, or read a complete DATABASE_URL

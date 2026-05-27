@@ -1,0 +1,199 @@
+package views
+
+import (
+	"strconv"
+
+	"project-stormlight/internal/character"
+	"project-stormlight/internal/store"
+)
+
+// orderedStoreGroups returns item type keys in a fixed display order, skipping any absent types.
+func orderedStoreGroups(storeItems map[string][]store.Item) []string {
+	order := []string{"weapon", "armor", "equipment", "crafting", "fabrial", "mount", "vehicle", "pet"}
+	var result []string
+	for _, t := range order {
+		if _, ok := storeItems[t]; ok {
+			result = append(result, t)
+		}
+	}
+	return result
+}
+
+func humanizeItemType(t string) string {
+	switch t {
+	case "weapon":
+		return "Weapons"
+	case "armor":
+		return "Armor"
+	case "equipment":
+		return "Equipment"
+	case "crafting":
+		return "Crafting Materials"
+	case "fabrial":
+		return "Fabrials"
+	case "mount":
+		return "Mounts"
+	case "vehicle":
+		return "Vehicles"
+	case "pet":
+		return "Pets"
+	default:
+		return t
+	}
+}
+
+// InventoryPage is the top-level layout for the inventory wizard step.
+// It shows KitSelect if no kit has been chosen, otherwise the full InventoryView.
+templ InventoryPage(char *character.Character, kits []store.Kit, storeItems map[string][]store.Item) {
+	@Layout("Inventory") {
+		if char.StartingKitID == "" {
+			@KitSelect(char, kits)
+		} else {
+			@InventoryView(char, storeItems)
+		}
+	}
+}
+
+// KitSelect shows a card grid of starting kit options.
+templ KitSelect(char *character.Character, kits []store.Kit) {
+	<div>
+		<h1 class="text-3xl font-bold mb-2">Choose Your Starting Kit</h1>
+		<p class="opacity-70 mb-6">Select the kit that best fits your character's background.</p>
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+			for _, kit := range kits {
+				<div class="card bg-base-200 shadow-xl">
+					<div class="card-body">
+						<h2 class="card-title">{ kit.Name }</h2>
+						<p class="text-sm opacity-70 flex-1">{ kit.Description }</p>
+						<p class="text-sm font-semibold mt-2">Starting Currency: { strconv.Itoa(kit.Currency) } chips</p>
+						<div class="card-actions justify-end mt-4">
+							<form
+								action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/inventory/kit") }
+								method="POST"
+							>
+								<input type="hidden" name="kitId" value={ kit.Id }/>
+								<button type="submit" class="btn btn-primary">Select</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			}
+		</div>
+	</div>
+}
+
+// InventoryView is the two-column inventory + store layout shown after a kit is chosen.
+templ InventoryView(char *character.Character, storeItems map[string][]store.Item) {
+	<div>
+		<div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+			<h1 class="text-3xl font-bold">Inventory</h1>
+			@CurrencyDisplay(char.CurrencyInChips)
+			<a href={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/review") } class="btn btn-success">Review &amp; Finalize →</a>
+		</div>
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+			<div>
+				<h2 class="text-xl font-bold mb-3">Your Items</h2>
+				@InventoryList(char)
+			</div>
+			<div>
+				<h2 class="text-xl font-bold mb-3">Store</h2>
+				@StoreAccordion(char, storeItems)
+			</div>
+		</div>
+	</div>
+}
+
+// CurrencyDisplay renders the currency bar showing broams, marks, and chips.
+templ CurrencyDisplay(chips int) {
+	<div id="currency-display" class="flex items-center gap-3 font-semibold">
+		<span class="badge badge-warning badge-lg">{ strconv.Itoa(chips / 20) } Broams</span>
+		<span class="badge badge-secondary badge-lg">{ strconv.Itoa((chips % 20) / 5) } Marks</span>
+		<span class="badge badge-accent badge-lg">{ strconv.Itoa(chips % 5) } Chips</span>
+		<span class="text-xs opacity-60">({ strconv.Itoa(chips) } chips total)</span>
+	</div>
+}
+
+// currencyDisplayOOB is the out-of-band version returned in HTMX buy/sell responses.
+templ currencyDisplayOOB(chips int) {
+	<div id="currency-display" hx-swap-oob="true" class="flex items-center gap-3 font-semibold">
+		<span class="badge badge-warning badge-lg">{ strconv.Itoa(chips / 20) } Broams</span>
+		<span class="badge badge-secondary badge-lg">{ strconv.Itoa((chips % 20) / 5) } Marks</span>
+		<span class="badge badge-accent badge-lg">{ strconv.Itoa(chips % 5) } Chips</span>
+		<span class="text-xs opacity-60">({ strconv.Itoa(chips) } chips total)</span>
+	</div>
+}
+
+// InventoryList is the HTMX-swappable list of the player's current items.
+templ InventoryList(char *character.Character) {
+	<div id="inventory-list" class="flex flex-col gap-2 max-h-[32rem] overflow-y-auto pr-1">
+		if char.Inventory == nil || len(*char.Inventory) == 0 {
+			<p class="text-sm opacity-60 italic p-4">No items in inventory.</p>
+		} else {
+			for _, item := range *char.Inventory {
+				<div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
+					<div class="flex flex-col">
+						<span class="font-medium">{ item.Name }</span>
+						<span class="text-xs opacity-60">
+							Qty: { strconv.Itoa(item.Quantity) }
+							if item.Equipped {
+								· Equipped
+							}
+							· { strconv.Itoa(item.Price) } chips
+						</span>
+					</div>
+					<form
+						method="POST"
+						action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/inventory/sell") }
+						hx-post={ "/characters/" + strconv.Itoa(char.ID) + "/inventory/sell" }
+						hx-target="#inventory-list"
+						hx-swap="outerHTML"
+					>
+						<input type="hidden" name="inventoryItemId" value={ strconv.Itoa(item.ID) }/>
+						<button type="submit" class="btn btn-xs btn-ghost">Sell</button>
+					</form>
+				</div>
+			}
+		}
+	</div>
+}
+
+// StoreAccordion renders the right-column store grouped by item type.
+templ StoreAccordion(char *character.Character, storeItems map[string][]store.Item) {
+	<div class="flex flex-col gap-2">
+		for _, typeName := range orderedStoreGroups(storeItems) {
+			<div class="collapse collapse-arrow bg-base-200 rounded-lg">
+				<input type="checkbox"/>
+				<div class="collapse-title font-semibold">{ humanizeItemType(typeName) }</div>
+				<div class="collapse-content">
+				<div class="flex flex-col gap-2 pt-2 max-h-60 overflow-y-auto pr-1">
+						for _, item := range storeItems[typeName] {
+							<div class="flex items-center justify-between py-1">
+								<div class="flex flex-col">
+									<span class="text-sm font-medium">{ item.Name }</span>
+									<span class="text-xs opacity-60">{ strconv.Itoa(int(item.Price)) } chips</span>
+								</div>
+							<form
+								method="POST"
+								action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/inventory/buy") }
+								hx-post={ "/characters/" + strconv.Itoa(char.ID) + "/inventory/buy" }
+								hx-target="#inventory-list"
+								hx-swap="outerHTML"
+							>
+								<input type="hidden" name="itemId" value={ item.Id }/>
+								<button type="submit" class="btn btn-xs btn-primary">Buy</button>
+							</form>
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+}
+
+// InventoryAndCurrencyPartial is returned by buy/sell handlers.
+// InventoryList is the primary swap target; currencyDisplayOOB updates #currency-display out-of-band.
+templ InventoryAndCurrencyPartial(char *character.Character) {
+	@InventoryList(char)
+	@currencyDisplayOOB(char.CurrencyInChips)
+}

@@ -19,9 +19,7 @@ func NewStore(db *gorm.DB) *Store {
 
 // InitSchema creates the necessary database tables if they do not exist
 func (s *Store) InitSchema(ctx context.Context) error {
-	// Let's drop the dirty old ones here if necessary, though it probably was just missing.
-	s.db.Exec("DROP TABLE IF EXISTS paths CASCADE")
-	s.db.Exec("DROP TABLE IF EXISTS paths_history CASCADE")
+
 	// GORM's AutoMigrate handles creating tables and matching constraints
 	// for the structs you pass to it automatically!
 

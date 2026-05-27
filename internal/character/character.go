@@ -14,19 +14,20 @@ type Character struct {
 	Ancestry        Ancestry `json:"ancestry" gorm:"not null;size:50"`
 	SessionNotes    string   `json:"-" gorm:"type:text"` // "-" means don't include this in JSON output
 	CurrencyInChips int      `json:"currencyInChips" gorm:"not null;default:0"`
+	StartingKitID   string   `json:"startingKitId" gorm:"not null;default:''"`
 	PortraitURL     string   `json:"portraitURL"`
 
 	// Relationships
 	// We use a pointer (*Attributes) so it can be 'nil' if we fetch a character WITHOUT fetching their attributes
-	Cultures           *[]Culture    `json:"cultures,omitempty" gorm:"-"`
-	UnlockedCultureIDs []string      `json:"-" gorm:"serializer:json;type:jsonb"`
-	Attributes         *Attributes   `json:"attributes,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
-	PathsTracker       *PathsTracker `json:"pathsTracker,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
-	Skills             *Skills       `json:"skills,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
-	Inventory          *[]Inventory  `json:"inventory,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
+	Cultures           *[]Culture      `json:"cultures,omitempty" gorm:"-"`
+	UnlockedCultureIDs []string        `json:"-" gorm:"serializer:json;type:jsonb"`
+	Attributes         *Attributes     `json:"attributes,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
+	PathsTracker       *PathsTracker   `json:"pathsTracker,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
+	Skills             *Skills         `json:"skills,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
+	Inventory          *[]Inventory    `json:"inventory,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
 	Talents            *TalentsTracker `json:"talents,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
-	Expertises         *Expertises   `json:"expertises,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
-	Resources          *Resources    `json:"resources,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
+	Expertises         *Expertises     `json:"expertises,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
+	Resources          *Resources      `json:"resources,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
 
 	CreatedAt time.Time `json:"createdAt" gorm:"autoCreateTime"`
 }
@@ -45,8 +46,8 @@ func NewCharacter(userID int, name string, level int) *Character {
 		Resources:    NewResources(0, level),
 		Inventory:    &[]Inventory{},
 	}
-	
-	// Create skills, which requires characterID (temporarily 0 until db insertion sets it, or if you prefer you can map foreign keys later, but it needs the initial array generated). 
+
+	// Create skills, which requires characterID (temporarily 0 until db insertion sets it, or if you prefer you can map foreign keys later, but it needs the initial array generated).
 	c.Skills = NewSkills(0, level)
 	return c
 }

@@ -9,7 +9,7 @@ var skillPointsPerLevel = [21]int{4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
 
 type Skills struct {
 	ID           int     `json:"id" gorm:"primaryKey"`
-	CharacterID  int     `json:"-" gorm:"not null;uniqueIndex"`                                                                    // 1:1 relationship with Character
+	CharacterID  int     `json:"-" gorm:"not null;uniqueIndex"`                                        // 1:1 relationship with Character
 	PlayerSkills []Skill `json:"playerSkills" gorm:"foreignKey:SkillsID;constraint:OnDelete:CASCADE;"` // Many player skills to this 1 Skills tracker
 
 	PointTracker `gorm:"embedded"`
@@ -105,7 +105,7 @@ func NewSkills(characterID int, level int) *Skills {
 		if baseSkill.SpreadName == "surgeSkills" {
 			continue // Skip surge skills on character creation
 		}
-		
+
 		playerSkills = append(playerSkills, Skill{
 			CharacterID: characterID,
 			SkillName:   name,
