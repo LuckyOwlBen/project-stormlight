@@ -16,12 +16,14 @@ type Character struct {
 	CurrencyInChips int      `json:"currencyInChips" gorm:"not null;default:0"`
 	StartingKitID   string   `json:"startingKitId" gorm:"not null;default:''"`
 	PortraitURL     string   `json:"portraitURL"`
+	CreationStep    string   `json:"creationStep" gorm:"not null;default:'cultures'"`
 
 	// Relationships
 	// We use a pointer (*Attributes) so it can be 'nil' if we fetch a character WITHOUT fetching their attributes
 	Cultures           *[]Culture      `json:"cultures,omitempty" gorm:"-"`
 	UnlockedCultureIDs []string        `json:"-" gorm:"serializer:json;type:jsonb"`
 	CulturesFinalized  bool            `json:"culturesFinalized" gorm:"not null;default:false"`
+	IsFinalized        bool            `json:"isFinalized" gorm:"not null;default:false"`
 	Attributes         *Attributes     `json:"attributes,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
 	PathsTracker       *PathsTracker   `json:"pathsTracker,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
 	Skills             *Skills         `json:"skills,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
@@ -40,6 +42,7 @@ func NewCharacter(userID int, name string, level int) *Character {
 		Name:         name,
 		Level:        level,
 		Ancestry:     Human,
+		CreationStep: "cultures",
 		Attributes:   NewAttributes(0, level),
 		Talents:      NewTalents(0, level),
 		Expertises:   NewExpertises(level),

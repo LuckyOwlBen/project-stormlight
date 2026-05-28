@@ -33,7 +33,15 @@ func (s *Server) handleCharacterTalentsGet(w http.ResponseWriter, r *http.Reques
 	selectedPath := r.URL.Query().Get("path")
 
 	// If a primary path is already known but not in URL, we could default it, but URL drives UI purely.
-	component := views.TalentSelection(char, character.PathMap, character.SubPathMap, selectedPath)
+        filteredPaths := make(map[string]character.Path)
+        for id, path := range character.PathMap {
+                if id == "radiant" || id == "surges" {
+                        continue
+                }
+                filteredPaths[id] = path
+        }
+
+        component := views.TalentSelection(char, filteredPaths, character.SubPathMap, selectedPath)
 	component.Render(r.Context(), w)
 }
 
@@ -152,6 +160,8 @@ func (s *Server) handleCharacterTalentsPost(w http.ResponseWriter, r *http.Reque
 	char.Talents.List = append(char.Talents.List, newUnlocks...)
 	char.Talents.PointsRemaining -= totalSpent
 	char.Talents.PendingPoints += totalSpent
+
+	char.CreationStep = "inventory"
 
 	err = s.store.UpdateCharacter(r.Context(), char)
 	if err != nil {

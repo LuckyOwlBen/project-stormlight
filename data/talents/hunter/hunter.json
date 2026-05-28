@@ -2,9 +2,9 @@
     "id": "hunter",
     "name": "Hunter",
     "paths": [
-        "Archer",
-        "Assassin",
-        "Tracker"
+        "archer",
+        "assassin",
+        "tracker"
     ],
     "talentNodes": [
         {

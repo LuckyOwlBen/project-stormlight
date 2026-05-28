@@ -5,6 +5,7 @@ import "fmt"
 
 templ Dashboard(errors map[string]string, characters []*character.Character) {
     @Layout("Dashboard") {
+        <main class="container mx-auto p-4">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold">Welcome to the Dashboard</h1>
             <form action="/characters" method="POST">
@@ -25,10 +26,20 @@ templ Dashboard(errors map[string]string, characters []*character.Character) {
                     for _, char := range characters {
                         <div class="card w-full bg-base-200 shadow-xl">
                             <div class="card-body">
-                                <h2 class="card-title">{ char.Name }</h2>
-                                <p>Level { fmt.Sprintf("%d", char.Level) } { string(char.Ancestry) }</p>
+                                <h2 class="card-title">
+                                    if char.Name == "" {
+                                        Unnamed
+                                    } else {
+                                        { char.Name }
+                                    }
+                                </h2>
+                                <p>Step: { char.CreationStep }</p>
                                 <div class="card-actions justify-end mt-4">
-                                    <button class="btn btn-sm btn-outline">View</button>
+                                    if char.IsFinalized {
+                                        <a href={ templ.URL(fmt.Sprintf("/playspace/%v", char.ID)) } class="btn btn-sm btn-outline">Play</a>
+                                    } else {
+                                        <a href={ templ.URL(fmt.Sprintf("/characters/%v/%s", char.ID, char.CreationStep)) } class="btn btn-sm btn-primary">Resume</a>
+                                    }
                                     <form action={ templ.URL(fmt.Sprintf("/characters/%v/delete", char.ID)) } method="POST" class="inline">
                                         <button type="submit" class="btn btn-sm btn-outline btn-error">Delete</button>
                                     </form>
@@ -39,5 +50,6 @@ templ Dashboard(errors map[string]string, characters []*character.Character) {
                 </div>
             }
         </section>
+        </main>
     }
 }

@@ -102,6 +102,7 @@ func (s *Server) handleCharacterCulturesPost(w http.ResponseWriter, r *http.Requ
 
 	char.UnlockedCultureIDs = selectedNames
 	char.CulturesFinalized = true
+	char.CreationStep = "basics"
 
 	err = s.store.UpdateCharacter(r.Context(), char)
 	if err != nil {

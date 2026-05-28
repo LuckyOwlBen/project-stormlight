@@ -30,7 +30,15 @@ func (s *Server) handleCharacterSkillsGet(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	component := views.SkillSelection(char, character.SkillGroups)
+	filteredGroups := make(map[string][]character.Skill)
+	for groupName, skills := range character.SkillGroups {
+		if groupName == "surgeSkills" {
+			continue
+		}
+		filteredGroups[groupName] = skills
+	}
+
+	component := views.SkillSelection(char, filteredGroups)
 	component.Render(r.Context(), w)
 }
 
@@ -131,6 +139,8 @@ func (s *Server) handleCharacterSkillsPost(w http.ResponseWriter, r *http.Reques
 	char.Skills.PlayerSkills = newSkills
 	char.Skills.PointsRemaining -= totalSpent
 	char.Skills.PendingPoints += totalSpent
+
+	char.CreationStep = "talents"
 
 	err = s.store.UpdateCharacter(r.Context(), char)
 	if err != nil {

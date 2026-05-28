@@ -95,6 +95,10 @@ func (s *Server) Mount() http.Handler {
 		r.Post("/characters/{id}/inventory/sell", s.handleCharacterInventorySellPost)
 
 		r.Get("/characters/{id}/review", s.handleCharacterReviewGet)
+		r.Post("/characters/{id}/finalize", s.handleCharacterFinalizePost)
+
+		// Playspace integration
+		r.Get("/playspace/{id}", s.handlePlayspaceGet)
 	})
 
 	return r

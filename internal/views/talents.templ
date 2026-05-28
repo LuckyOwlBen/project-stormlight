@@ -18,7 +18,7 @@ func hasTalent(char *character.Character, talentID string) bool {
 }
 
 templ TalentSelection(char *character.Character, allPaths map[string]character.Path, subPaths map[string]character.Talents, selectedPath string) {
-    @Layout("Select Talents") {
+    @CreationLayout(char, "talents", "Select Talents") {
         <div class="flex justify-between items-center mb-6">
             <div>
                 <h1 class="text-3xl font-bold">Select Talents</h1>

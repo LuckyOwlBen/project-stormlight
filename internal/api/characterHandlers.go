@@ -1,4 +1,4 @@
-package api
+﻿package api
 
 import (
 	"net/http"
@@ -104,6 +104,8 @@ func (s *Server) handleCharacterBasicsPost(w http.ResponseWriter, r *http.Reques
 		char.Ancestry = character.Human
 	}
 
+	char.CreationStep = "attributes"
+
 	err = s.store.UpdateCharacter(r.Context(), char)
 	if err != nil {
 		http.Error(w, "Failed to update character", http.StatusInternalServerError)
@@ -163,4 +165,33 @@ func (s *Server) handleCharacterReviewGet(w http.ResponseWriter, r *http.Request
 	}
 
 	views.CharacterReview(char).Render(r.Context(), w)
+}
+
+func (s *Server) handleCharacterFinalizePost(w http.ResponseWriter, r *http.Request) {
+charIDStr := chi.URLParam(r, "id")
+charID, err := strconv.Atoi(charIDStr)
+if err != nil {
+http.Error(w, "Invalid character ID", http.StatusBadRequest)
+return
+}
+
+userID, ok := r.Context().Value("userID").(int)
+if !ok {
+http.Redirect(w, r, "/login", http.StatusSeeOther)
+return
+}
+
+char, err := s.store.GetCharacterByID(r.Context(), charID)
+if err != nil || char.UserID != userID {
+http.Error(w, "Character not found", http.StatusNotFound)
+return
+}
+
+char.IsFinalized = true
+if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
+http.Error(w, "Failed to finalize character", http.StatusInternalServerError)
+return
+}
+
+http.Redirect(w, r, "/playspace/" + charIDStr, http.StatusSeeOther)
 }

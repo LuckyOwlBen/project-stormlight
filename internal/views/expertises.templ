@@ -2,12 +2,44 @@ package views
 
 import (
     "fmt"
-	"strconv"
-	"project-stormlight/internal/character"
+    "strconv"
+    "sort"
+    "project-stormlight/internal/character"
 )
 
+func getCategories(expertises []character.Expertise) []string {
+    var categories []string
+    seen := make(map[string]bool)
+    for _, exp := range expertises {
+        cat := exp.Category
+        if cat == "" {
+            cat = "General"
+        }
+        if !seen[cat] {
+            seen[cat] = true
+            categories = append(categories, cat)
+        }
+    }
+    sort.Strings(categories)
+    return categories
+}
+
+func getExpertisesByCategory(expertises []character.Expertise, category string) []character.Expertise {
+    var result []character.Expertise
+    for _, exp := range expertises {
+        cat := exp.Category
+        if cat == "" {
+            cat = "General"
+        }
+        if cat == category {
+            result = append(result, exp)
+        }
+    }
+    return result
+}
+
 templ ExpertiseSelection(char *character.Character, expertiseGroups map[string][]character.Expertise) {
-    @Layout("Select Expertise") {
+    @CreationLayout(char, "expertises", "Select Expertise") {
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold">Select Your Expertise</h1>
             <div class="text-xl font-semibold flex items-center gap-2">
@@ -34,21 +66,27 @@ templ ExpertiseSelection(char *character.Character, expertiseGroups map[string][
                     </div>
                 } else {
                     for groupName, expertises := range expertiseGroups {
-                        <div class="mb-8">
-                            <h2 class="text-2xl font-semibold mb-4 capitalize">{ groupName }</h2>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                for _, exp := range expertises {
-                                    <div class="card w-full bg-base-200 shadow-xl">
-                                        <div class="card-body">
-                                            <label class="label cursor-pointer flex justify-start gap-4">
-                                                <input type="checkbox" name="expertises" value={ exp.Name } class="checkbox checkbox-primary" />
-                                                <h2 class="card-title m-0">{ exp.Name }</h2>
-                                            </label>
-                                            <p class="text-sm opacity-70 mt-2">{ exp.Description }</p>
-                                        </div>
+                        <div class="mb-10">
+                            <h2 class="text-3xl font-bold mb-6 capitalize border-b border-base-300 pb-2">{ groupName }</h2>
+                            
+                            for _, category := range getCategories(expertises) {
+                                <div class="mb-6">
+                                    <h3 class="text-xl font-semibold mb-3 capitalize text-primary">{ category }</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        for _, exp := range getExpertisesByCategory(expertises, category) {
+                                            <div class="card w-full bg-base-200 shadow-xl">
+                                                <div class="card-body">
+                                                    <label class="label cursor-pointer flex justify-start gap-4">
+                                                        <input type="checkbox" name="expertises" value={ exp.Name } class="checkbox checkbox-primary" />
+                                                        <h2 class="card-title m-0 text-xl">{ exp.Name }</h2>
+                                                    </label>
+                                                    <p class="text-sm opacity-70 mt-2">{ exp.Description }</p>
+                                                </div>
+                                            </div>
+                                        }
                                     </div>
-                                }
-                            </div>
+                                </div>
+                            }
                         </div>
                     }
                     <button type="submit" class="btn btn-primary w-full md:w-auto mt-4">Save Expertises</button>

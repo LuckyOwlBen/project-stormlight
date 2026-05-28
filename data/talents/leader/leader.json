@@ -2,9 +2,9 @@
     "id": "leader",
     "name": "Leader",
     "paths": [
-        "Champion",
-        "Officer",
-        "Politico"
+        "champion",
+        "officer",
+        "politico"
     ],
     "talentNodes": [
         {

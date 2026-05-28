@@ -2,9 +2,9 @@
     "id": "warrior",
     "name": "Warrior",
     "paths": [
-        "Soldier",
-        "Duelist",
-        "Shardbearer"
+        "soldier",
+        "duelist",
+        "shardbearer"
     ],
     "talentNodes": [
         {

@@ -144,6 +144,8 @@ func (s *Server) handleCharacterExpertisesPost(w http.ResponseWriter, r *http.Re
 	char.Expertises.TotalPoints = maxExpertises
 	char.Expertises.PointsRemaining = maxExpertises - len(char.Expertises.List)
 
+	char.CreationStep = "skills"
+
 	err = s.store.UpdateCharacter(r.Context(), char)
 	if err != nil {
 		http.Error(w, "Failed to update expertises", http.StatusInternalServerError)

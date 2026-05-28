@@ -46,7 +46,7 @@ func AttributesForm(char *character.Character) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex items-center justify-center py-10 min-h-[calc(100vh-4rem)]\"><div class=\"card w-full max-w-2xl bg-base-200 shadow-xl\"><div class=\"card-body\"><div class=\"flex justify-between items-center mb-6\"><h2 class=\"card-title m-0 text-3xl\">Attributes</h2><div class=\"text-xl font-semibold flex items-center gap-2\"><span class=\"badge badge-info badge-lg text-lg py-4 px-4 sm:inline-flex\">Points Remaining:</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"py-6\"><div class=\"card w-full max-w-4xl mx-auto bg-base-200 shadow-xl\"><div class=\"card-body\"><div class=\"flex justify-between items-center mb-6\"><h2 class=\"card-title m-0 text-3xl\">Attributes</h2><div class=\"text-xl font-semibold flex items-center gap-2\"><span class=\"badge badge-info badge-lg text-lg py-4 px-4 sm:inline-flex\">Points Remaining:</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -114,7 +114,7 @@ func AttributesForm(char *character.Character) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = Layout("Allocate Attributes").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = CreationLayout(char, "attributes", "Allocate Attributes").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

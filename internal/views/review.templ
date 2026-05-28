@@ -6,7 +6,7 @@ import (
 )
 
 templ CharacterReview(char *character.Character) {
-	@Layout("Review Character") {
+	@CreationLayout(char, "review", "Review Character") {
 		<div class="flex justify-between items-center mb-6">
 			<div>
 				<h1 class="text-3xl font-bold">{ char.Name }</h1>

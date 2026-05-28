@@ -147,6 +147,8 @@ func (s *Server) handleCharacterAttributesPost(w http.ResponseWriter, r *http.Re
 	char.Attributes.PointsRemaining -= totalSpent
 	char.Attributes.PendingPoints += totalSpent
 
+	char.CreationStep = "expertises"
+
 	err = s.store.UpdateCharacter(r.Context(), char)
 	if err != nil {
 		http.Error(w, "Failed to update attributes", http.StatusInternalServerError)
