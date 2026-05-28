@@ -1,6 +1,7 @@
 package views
 
 import (
+    "fmt"
 	"strconv"
 	"project-stormlight/internal/character"
 )
@@ -8,10 +9,21 @@ import (
 templ ExpertiseSelection(char *character.Character, expertiseGroups map[string][]character.Expertise) {
     @Layout("Select Expertise") {
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold">Select Your Expertise ({ strconv.Itoa(char.Attributes.Intelligence) } Available)</h1>
+            <h1 class="text-3xl font-bold">Select Your Expertise</h1>
+            <div class="text-xl font-semibold flex items-center gap-2">
+                <span class="badge badge-info badge-lg text-lg py-4 px-4 hidden sm:inline-flex">Points Remaining:</span>
+                @PointsRemaining(char.Expertises.PointsRemaining)
+            </div>
         </div>
         
-        <form action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/expertises") } method="POST">
+        <form 
+            action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/expertises") } 
+            method="POST"
+            hx-get={ string(templ.SafeURL(fmt.Sprintf("/characters/%d/expertises/points", char.ID))) }
+            hx-trigger="change"
+            hx-target="#pointsRemaining"
+            hx-swap="outerHTML"
+        >
             <section class="expertise-list">
                 if len(expertiseGroups) == 0 {
                     <div class="alert alert-info shadow-lg">

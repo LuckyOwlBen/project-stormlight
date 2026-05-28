@@ -69,15 +69,19 @@ func (s *Server) Mount() http.Handler {
 		r.Post("/characters/{id}/delete", s.handleCharacterDelete)
 
 		r.Get("/characters/{id}/attributes", s.handleCharacterAttributesGet)
+		r.Get("/characters/{id}/attributes/points", s.handleCharacterAttributesPointsGet)
 		r.Post("/characters/{id}/attributes", s.handleCharacterAttributesPost)
 
 		r.Get("/characters/{id}/expertises", s.handleCharacterExpertisesGet)
+		r.Get("/characters/{id}/expertises/points", s.handleCharacterExpertisesPointsGet)
 		r.Post("/characters/{id}/expertises", s.handleCharacterExpertisesPost)
 
 		r.Get("/characters/{id}/skills", s.handleCharacterSkillsGet)
+		r.Get("/characters/{id}/skills/points", s.handleCharacterSkillsPointsGet)
 		r.Post("/characters/{id}/skills", s.handleCharacterSkillsPost)
 
 		r.Get("/characters/{id}/talents", s.handleCharacterTalentsGet)
+		r.Get("/characters/{id}/talents/points", s.handleCharacterTalentsPointsGet)
 		r.Post("/characters/{id}/talents", s.handleCharacterTalentsPost)
 
 		r.Get("/characters/{id}/inventory", s.handleCharacterInventoryGet)

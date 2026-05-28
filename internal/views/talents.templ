@@ -20,11 +20,24 @@ func hasTalent(char *character.Character, talentID string) bool {
 templ TalentSelection(char *character.Character, allPaths map[string]character.Path, subPaths map[string]character.Talents, selectedPath string) {
     @Layout("Select Talents") {
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold">Select Talents ({ strconv.Itoa(char.Talents.PointsRemaining) } Points Remaining)</h1>
-            <p class="text-lg">Select a path and purchase talents. (1 point each)</p>
+            <div>
+                <h1 class="text-3xl font-bold">Select Talents</h1>
+                <p class="text-lg opacity-70 mt-1">Select a path and purchase talents. (1 point each)</p>
+            </div>
+            <div class="text-xl font-semibold flex items-center gap-2">
+                <span class="badge badge-info badge-lg text-lg py-4 px-4 sm:inline-flex">Points Remaining:</span>
+                @PointsRemaining(char.Talents.PointsRemaining)
+            </div>
         </div>
         
-        <form action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents") } method="POST">
+        <form 
+            action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents") } 
+            method="POST"
+            hx-get={ string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/points")) }
+            hx-trigger="change"
+            hx-target="#pointsRemaining"
+            hx-swap="outerHTML"
+        >
             if selectedPath != "" {
                 <input type="hidden" name="selectedPath" value={ selectedPath } />
                 

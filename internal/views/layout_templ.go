@@ -42,7 +42,7 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><!-- Tailwind & DaisyUI CSS --><link href=\"/assets/css/output.css\" rel=\"stylesheet\"><!-- HTMX --><script src=\"https://unpkg.com/htmx.org@2.1.2\"></script></head><body class=\"bg-base-100 text-base-content min-h-screen\"><!-- Navbar --><div class=\"navbar bg-base-200\"><div class=\"flex-1\"><a href=\"/dashboard\" class=\"btn btn-ghost normal-case text-xl\">Stormlight</a></div><div class=\"flex-none\"><ul class=\"menu menu-horizontal px-1\"><li><!-- Example of an HTMX logout or action --><a>Logout</a></li></ul></div></div><!-- Page Content --><main class=\"container mx-auto p-4\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><!-- Tailwind & DaisyUI CSS --><link href=\"/assets/css/output.css\" rel=\"stylesheet\"><!-- HTMX --><script src=\"https://unpkg.com/htmx.org@2.0.0\"></script></head><body class=\"bg-base-100 text-base-content min-h-screen\"><!-- Navbar --><div class=\"navbar bg-base-200\"><div class=\"flex-1\"><a href=\"/dashboard\" class=\"btn btn-ghost normal-case text-xl\">Stormlight</a></div><div class=\"flex-none\"><ul class=\"menu menu-horizontal px-1\"><li><!-- Example of an HTMX logout or action --><a>Logout</a></li></ul></div></div><!-- Page Content --><main class=\"container mx-auto p-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

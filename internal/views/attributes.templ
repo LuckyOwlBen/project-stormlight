@@ -7,19 +7,26 @@ import (
 
 templ AttributesForm(char *character.Character) {
 	@Layout("Allocate Attributes") {
-		<div class="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+		<div class="flex items-center justify-center py-10 min-h-[calc(100vh-4rem)]">
 			<div class="card w-full max-w-2xl bg-base-200 shadow-xl">
 				<div class="card-body">
-					<h2 class="card-title justify-center text-3xl mb-2">Attributes for { char.Name }</h2>
-					
-					<div class="alert alert-info shadow-lg mb-6">
-						<div>
-							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current flex-shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-							<span>Points Remaining: <strong id="pointsRemaining" class="text-xl" data-initial={ fmt.Sprintf("%d", char.Attributes.PointsRemaining) }>{ fmt.Sprintf("%d", char.Attributes.PointsRemaining) }</strong></span>
+					<div class="flex justify-between items-center mb-6">
+						<h2 class="card-title m-0 text-3xl">Attributes</h2>
+						<div class="text-xl font-semibold flex items-center gap-2">
+							<span class="badge badge-info badge-lg text-lg py-4 px-4 sm:inline-flex">Points Remaining:</span>
+							@PointsRemaining(char.Attributes.PointsRemaining)
 						</div>
 					</div>
 
-					<form action={ templ.SafeURL(fmt.Sprintf("/characters/%d/attributes", char.ID)) } method="POST" id="attributesForm">
+					<form 
+						action={ templ.SafeURL(fmt.Sprintf("/characters/%d/attributes", char.ID)) } 
+						method="POST" 
+						id="attributesForm"
+						hx-get={ string(templ.SafeURL(fmt.Sprintf("/characters/%d/attributes/points", char.ID))) }
+						hx-trigger="change"
+						hx-target="#pointsRemaining"
+						hx-swap="outerHTML"
+					>
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 							@attributeInput("Strength", "strength", char.Attributes.Strength)
 							@attributeInput("Speed", "speed", char.Attributes.Speed)
@@ -36,31 +43,11 @@ templ AttributesForm(char *character.Character) {
 				</div>
 			</div>
 		</div>
-
-		<script>
-			document.addEventListener("DOMContentLoaded", () => {
-				const form = document.getElementById("attributesForm");
-				const pointsDisplay = document.getElementById("pointsRemaining");
-				const initialPoints = parseInt(pointsDisplay.getAttribute("data-initial"), 10);
-				
-				const inputs = Array.from(form.querySelectorAll("input[type='number']"));
-				const initialVals = inputs.map(input => parseInt(input.value, 10) || 0);
-
-				const updateTotal = () => {
-					let spent = 0;
-					inputs.forEach((input, index) => {
-						const val = parseInt(input.value, 10) || 0;
-						spent += (val - initialVals[index]);
-					});
-					pointsDisplay.innerText = initialPoints - spent;
-				};
-
-				inputs.forEach(input => {
-					input.addEventListener("input", updateTotal);
-				});
-			});
-		</script>
 	}
+}
+
+templ PointsRemaining(points int) {
+	<strong id="pointsRemaining" class="inline-block text-center">{ fmt.Sprintf("%d", points) }</strong>
 }
 
 templ attributeInput(label string, name string, value int) {
