@@ -21,6 +21,7 @@ type Character struct {
 	// We use a pointer (*Attributes) so it can be 'nil' if we fetch a character WITHOUT fetching their attributes
 	Cultures           *[]Culture      `json:"cultures,omitempty" gorm:"-"`
 	UnlockedCultureIDs []string        `json:"-" gorm:"serializer:json;type:jsonb"`
+	CulturesFinalized  bool            `json:"culturesFinalized" gorm:"not null;default:false"`
 	Attributes         *Attributes     `json:"attributes,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
 	PathsTracker       *PathsTracker   `json:"pathsTracker,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
 	Skills             *Skills         `json:"skills,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`

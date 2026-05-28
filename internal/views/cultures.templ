@@ -1,0 +1,73 @@
+package views
+
+import (
+"fmt"
+"strconv"
+"project-stormlight/internal/character"
+)
+
+func hasCulture(char *character.Character, name string) bool {
+    for _, c := range char.UnlockedCultureIDs {
+        if c == name {
+            return true
+        }
+    }
+    return false
+}
+
+templ CultureSelection(char *character.Character, cultures map[string]character.Culture) {
+    @Layout("Select Cultures") {
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-3xl font-bold">Select Cultures</h1>
+                <p class="text-lg opacity-70 mt-1">Select up to 2 cultures to represent your background.</p>
+            </div>
+            <div class="text-xl font-semibold flex items-center gap-2">
+                <span class="badge badge-info badge-lg text-lg py-4 px-4 sm:inline-flex">Points Remaining:</span>
+                @PointsRemaining(2 - len(char.UnlockedCultureIDs))
+            </div>
+        </div>
+        
+        <form 
+            action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/cultures") } 
+            method="POST"
+            hx-get={ string(templ.SafeURL(fmt.Sprintf("/characters/%d/cultures/points", char.ID))) }
+            hx-trigger="change"
+            hx-target="#pointsRemaining"
+            hx-swap="outerHTML"
+        >
+            <section class="culture-list">
+                if len(cultures) == 0 {
+                    <div class="alert alert-info shadow-lg">
+                        <div>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current flex-shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span>No cultures found.</span>
+                        </div>
+                    </div>
+                } else {
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                        for name, culture := range cultures {
+                            <div class="card w-full bg-base-200 shadow-xl">
+                                <div class="card-body">
+                                    <label class="label cursor-pointer flex justify-start gap-4 items-start">
+                                        <input type="checkbox" name="cultures" value={ name } class="checkbox checkbox-primary mt-1" checked?={ hasCulture(char, name) } />
+                                        <div>
+                                            <h2 class="card-title m-0 text-2xl">{ name }</h2>
+                                        </div>
+                                    </label>
+                                    <p class="text-sm opacity-80 mt-2">{ culture.Description }</p>
+                                    if culture.Expertises != "" {
+                                    <div class="mt-4 border-t border-base-300 pt-2 text-xs">
+                                <span class="font-bold">Expertises:</span> { culture.Expertises }
+                                </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full md:w-auto mt-4">Save Cultures & Continue</button>
+                }
+            </section>
+        </form>
+    }
+}

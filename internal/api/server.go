@@ -64,9 +64,14 @@ func (s *Server) Mount() http.Handler {
 		r.Use(s.AuthMiddleware)
 		r.Get("/dashboard", s.handleDashboardGet)
 
-		r.Get("/characters/new", s.handleCharacterNew)
+		r.Get("/characters/{id}/basics", s.handleCharacterBasicsGet)
+		r.Post("/characters/{id}/basics", s.handleCharacterBasicsPost)
 		r.Post("/characters", s.handleCharacterCreate)
 		r.Post("/characters/{id}/delete", s.handleCharacterDelete)
+
+		r.Get("/characters/{id}/cultures", s.handleCharacterCulturesGet)
+		r.Get("/characters/{id}/cultures/points", s.handleCharacterCulturesPointsGet)
+		r.Post("/characters/{id}/cultures", s.handleCharacterCulturesPost)
 
 		r.Get("/characters/{id}/attributes", s.handleCharacterAttributesGet)
 		r.Get("/characters/{id}/attributes/points", s.handleCharacterAttributesPointsGet)

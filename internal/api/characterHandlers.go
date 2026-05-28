@@ -10,21 +10,74 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func (s *Server) handleCharacterNew(w http.ResponseWriter, r *http.Request) {
-	_, ok := r.Context().Value("userID").(int)
+func (s *Server) handleCharacterCreate(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(int)
 	if !ok {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
-	component := views.CreateCharacterForm()
-	component.Render(r.Context(), w)
+	// Create a draft character immediately
+	char := character.NewCharacter(userID, "", 1)
+	char.Ancestry = character.Human
+
+	err := s.store.CreateCharacter(r.Context(), char)
+	if err != nil {
+		http.Error(w, "Failed to create character", http.StatusInternalServerError)
+		return
+	}
+
+	// Redirect to cultures to start the real flow
+	http.Redirect(w, r, "/characters/"+strconv.Itoa(char.ID)+"/cultures", http.StatusSeeOther)
 }
 
-func (s *Server) handleCharacterCreate(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleCharacterBasicsGet(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(int)
 	if !ok {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	charIDStr := chi.URLParam(r, "id")
+	charID, err := strconv.Atoi(charIDStr)
+	if err != nil {
+		http.Error(w, "Invalid character ID", http.StatusBadRequest)
+		return
+	}
+
+	char, err := s.store.GetCharacterByID(r.Context(), charID)
+	if err != nil || char.UserID != userID {
+		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+
+	var cultures []character.Culture
+	for _, cid := range char.UnlockedCultureIDs {
+		if cult, exists := character.Cultures[cid]; exists {
+			cultures = append(cultures, cult)
+		}
+	}
+
+	views.BasicsForm(char, cultures).Render(r.Context(), w)
+}
+
+func (s *Server) handleCharacterBasicsPost(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(int)
+	if !ok {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	charIDStr := chi.URLParam(r, "id")
+	charID, err := strconv.Atoi(charIDStr)
+	if err != nil {
+		http.Error(w, "Invalid character ID", http.StatusBadRequest)
+		return
+	}
+
+	char, err := s.store.GetCharacterByID(r.Context(), charID)
+	if err != nil || char.UserID != userID {
+		http.Error(w, "Character not found", http.StatusNotFound)
 		return
 	}
 
@@ -33,40 +86,30 @@ func (s *Server) handleCharacterCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name := r.FormValue("name")
+	char.Name = r.FormValue("name")
+	if char.Name == "" {
+		char.Name = "Unnamed"
+	}
+
 	levelStr := r.FormValue("level")
-	ancestryStr := r.FormValue("ancestry")
-	cultureStr := r.FormValue("culture")
-
 	level, err := strconv.Atoi(levelStr)
-	if err != nil {
-		level = 1
-	}
-	if name == "" {
-		name = "Unnamed"
+	if err == nil {
+		char.Level = level
 	}
 
-	// Create a new fresh character
-	char := character.NewCharacter(userID, name, level)
-
-	// Apply form bindings
+	ancestryStr := r.FormValue("ancestry")
 	if ancestryStr == "Singer" {
 		char.Ancestry = character.Singer
 	} else {
 		char.Ancestry = character.Human
 	}
 
-	if cultureStr != "" {
-		char.UnlockedCultureIDs = []string{cultureStr}
-	}
-
-	err = s.store.CreateCharacter(r.Context(), char)
+	err = s.store.UpdateCharacter(r.Context(), char)
 	if err != nil {
-		http.Error(w, "Failed to create character", http.StatusInternalServerError)
+		http.Error(w, "Failed to update character", http.StatusInternalServerError)
 		return
 	}
 
-	// Redirect to attributes
 	http.Redirect(w, r, "/characters/"+strconv.Itoa(char.ID)+"/attributes", http.StatusSeeOther)
 }
 

@@ -7,7 +7,9 @@ templ Dashboard(errors map[string]string, characters []*character.Character) {
     @Layout("Dashboard") {
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold">Welcome to the Dashboard</h1>
-            <a href="/characters/new" class="btn btn-primary">Create Fresh Character</a>
+            <form action="/characters" method="POST">
+                <button type="submit" class="btn btn-primary">Create Fresh Character</button>
+            </form>
         </div>
         
         <section class="characters-list">

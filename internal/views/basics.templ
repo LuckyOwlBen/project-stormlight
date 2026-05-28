@@ -1,0 +1,60 @@
+package views
+
+import (
+    "fmt"
+    "project-stormlight/internal/character"
+)
+
+templ BasicsForm(char *character.Character, cultures []character.Culture) {
+    @Layout("Character Basics") {
+        <div class="flex items-center justify-center min-h-[calc(100vh-4rem)] relative">
+            <div class="card w-full max-w-lg bg-base-200 shadow-xl">
+                <div class="card-body">
+                    <h2 class="card-title justify-center text-3xl mb-6">Character Basics</h2>
+                    <form action={ templ.SafeURL(fmt.Sprintf("/characters/%d/basics", char.ID)) } method="POST">
+                        <div class="form-control w-full mb-4">
+                            <label class="label">
+                                <span class="label-text text-lg font-semibold">Character Name</span>
+                            </label>
+                            if len(cultures) > 0 {
+                                <div class="mb-3">
+                                    <span class="text-sm opacity-70 block mb-2 italic">Suggested Names (click to select):</span>
+                                    <div class="flex flex-wrap gap-2">
+                                        for _, c := range cultures {
+                                            for _, n := range c.SuggestedNames {
+                                                <button type="button" class="btn btn-xs btn-outline" onclick={ templ.ComponentScript{ Call: "document.querySelector('input[name=\\'name\\']').value = this.innerText" } }>{ n }</button>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            <input type="text" name="name" placeholder="e.g. Kaladin" value={ char.Name } class="input input-bordered w-full" required />
+                        </div>
+                        
+                        <div class="form-control w-full mb-4">
+                            <label class="label">
+                                <span class="label-text text-lg font-semibold">Starting Level</span>
+                            </label>
+                            <input type="number" name="level" value={ fmt.Sprintf("%d", char.Level) } min="1" max="20" class="input input-bordered w-full" required />
+                        </div>
+
+                        <div class="form-control w-full mb-4">
+                            <label class="label">
+                                <span class="label-text text-lg font-semibold">Ancestry</span>
+                            </label>
+                            <select name="ancestry" class="select select-bordered w-full" required>
+                                <option disabled selected value="">Select Ancestry</option>
+                                <option value="Human" selected?={ char.Ancestry == "Human" }>Human</option>
+                                <option value="Singer" selected?={ char.Ancestry == "Singer" }>Singer</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-control mt-6">
+                            <button type="submit" class="btn btn-primary w-full text-lg">Save Config & Continue</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+}
