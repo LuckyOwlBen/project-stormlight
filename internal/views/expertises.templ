@@ -48,8 +48,7 @@ templ ExpertiseSelection(char *character.Character, expertiseGroups map[string][
             </div>
         </div>
         
-        <form 
-            action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/expertises") } 
+        <form id="creation-form" action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/expertises") } 
             method="POST"
             hx-get={ string(templ.SafeURL(fmt.Sprintf("/characters/%d/expertises/points", char.ID))) }
             hx-trigger="change"
@@ -89,7 +88,7 @@ templ ExpertiseSelection(char *character.Character, expertiseGroups map[string][
                             }
                         </div>
                     }
-                    <button type="submit" class="btn btn-primary w-full md:w-auto mt-4">Save Expertises</button>
+                    
                 }
             </section>
         </form>

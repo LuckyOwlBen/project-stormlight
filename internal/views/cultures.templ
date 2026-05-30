@@ -29,6 +29,7 @@ templ CultureSelection(char *character.Character, cultures map[string]character.
         </div>
         
         <form 
+            id="creation-form"
             action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/cultures") } 
             method="POST"
             hx-get={ string(templ.SafeURL(fmt.Sprintf("/characters/%d/cultures/points", char.ID))) }
@@ -65,7 +66,6 @@ templ CultureSelection(char *character.Character, cultures map[string]character.
                             </div>
                         }
                     </div>
-                    <button type="submit" class="btn btn-primary w-full md:w-auto mt-4">Save Cultures & Continue</button>
                 }
             </section>
         </form>

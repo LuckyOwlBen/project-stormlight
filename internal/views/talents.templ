@@ -30,8 +30,7 @@ templ TalentSelection(char *character.Character, allPaths map[string]character.P
             </div>
         </div>
         
-        <form 
-            action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents") } 
+        <form id="creation-form" action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents") } 
             method="POST"
             hx-get={ string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/points")) }
             hx-trigger="change"
@@ -101,7 +100,8 @@ templ TalentSelection(char *character.Character, allPaths map[string]character.P
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary w-full md:w-auto">Save Talents</button>
+            
         </form>
     }
 }
+

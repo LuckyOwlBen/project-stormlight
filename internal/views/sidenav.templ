@@ -1,0 +1,22 @@
+package views
+
+import (
+    "project-stormlight/internal/character"
+    "strconv"
+)
+
+templ Sidenav(char *character.Character, steps []string, isStepPending bool) {
+    <ul class="menu bg-base-100 w-full rounded-box">
+        <li class="menu-title">
+            <span>Character Creation</span>
+        </li>
+        for _, step := range steps {
+            <li>
+                <a href={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/" + step) } 
+                   class={ templ.KV("pending", isStepPending) }>
+                   { step }
+                </a>
+            </li>
+        }
+    </ul>
+}

@@ -12,14 +12,7 @@ templ CharacterReview(char *character.Character) {
 				<h1 class="text-3xl font-bold">{ char.Name }</h1>
 				<p class="text-sm opacity-60">Level { strconv.Itoa(char.Level) } · { string(char.Ancestry) }</p>
 			</div>
-			<form action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/finalize") } method="POST">
-				<button type="submit" class="btn btn-success btn-lg">Finalize Character →</button>
-			</form>
-		</div>
-
-		<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-			<!-- Resources -->
+                        <form id="creation-form" action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/finalize") } method="POST" class="hidden"></form>
 			if char.Resources != nil {
 				<div class="card bg-base-200 shadow">
 					<div class="card-body">
@@ -168,10 +161,7 @@ templ CharacterReview(char *character.Character) {
 		</div>
 
 		<!-- Bottom finalize bar -->
-		<div class="flex justify-end mt-8">
-			<form action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/finalize") } method="POST">
-				<button type="submit" class="btn btn-success btn-lg">Finalize Character →</button>
-			</form>
-		</div>
+		
 	}
 }
+

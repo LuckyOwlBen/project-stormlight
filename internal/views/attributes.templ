@@ -21,7 +21,7 @@ templ AttributesForm(char *character.Character) {
 					<form 
 						action={ templ.SafeURL(fmt.Sprintf("/characters/%d/attributes", char.ID)) } 
 						method="POST" 
-						id="attributesForm"
+						id="creation-form"
 						hx-get={ string(templ.SafeURL(fmt.Sprintf("/characters/%d/attributes/points", char.ID))) }
 						hx-trigger="change"
 						hx-target="#pointsRemaining"
@@ -36,9 +36,7 @@ templ AttributesForm(char *character.Character) {
 							@attributeInput("Presence", "presence", char.Attributes.Presence)
 						</div>
 						
-						<div class="form-control mt-8">
-							<button type="submit" class="btn btn-primary w-full text-lg">Save Attributes</button>
-						</div>
+						
 					</form>
 				</div>
 			</div>
@@ -64,3 +62,4 @@ templ attributeInput(label string, name string, value int) {
 		/>
 	</div>
 }
+

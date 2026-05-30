@@ -87,14 +87,14 @@ func ExpertiseSelection(char *character.Character, expertiseGroups map[string][]
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div></div><form action=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div></div><form id=\"creation-form\" action=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 templ.SafeURL
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/expertises"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/expertises.templ`, Line: 52, Col: 90}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/expertises.templ`, Line: 51, Col: 111}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -107,7 +107,7 @@ func ExpertiseSelection(char *character.Character, expertiseGroups map[string][]
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(string(templ.SafeURL(fmt.Sprintf("/characters/%d/expertises/points", char.ID))))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/expertises.templ`, Line: 54, Col: 100}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/expertises.templ`, Line: 53, Col: 100}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 			if templ_7745c5c3_Err != nil {
@@ -131,7 +131,7 @@ func ExpertiseSelection(char *character.Character, expertiseGroups map[string][]
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(groupName)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/expertises.templ`, Line: 70, Col: 116}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/expertises.templ`, Line: 69, Col: 116}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -149,7 +149,7 @@ func ExpertiseSelection(char *character.Character, expertiseGroups map[string][]
 						var templ_7745c5c3_Var6 string
 						templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(category)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/expertises.templ`, Line: 74, Col: 109}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/expertises.templ`, Line: 73, Col: 109}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 						if templ_7745c5c3_Err != nil {
@@ -167,7 +167,7 @@ func ExpertiseSelection(char *character.Character, expertiseGroups map[string][]
 							var templ_7745c5c3_Var7 string
 							templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(exp.Name)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/expertises.templ`, Line: 80, Col: 113}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/expertises.templ`, Line: 79, Col: 113}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 							if templ_7745c5c3_Err != nil {
@@ -180,7 +180,7 @@ func ExpertiseSelection(char *character.Character, expertiseGroups map[string][]
 							var templ_7745c5c3_Var8 string
 							templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(exp.Name)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/expertises.templ`, Line: 81, Col: 101}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/expertises.templ`, Line: 80, Col: 101}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 							if templ_7745c5c3_Err != nil {
@@ -193,7 +193,7 @@ func ExpertiseSelection(char *character.Character, expertiseGroups map[string][]
 							var templ_7745c5c3_Var9 string
 							templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(exp.Description)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/expertises.templ`, Line: 83, Col: 104}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/expertises.templ`, Line: 82, Col: 104}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 							if templ_7745c5c3_Err != nil {
@@ -214,12 +214,8 @@ func ExpertiseSelection(char *character.Character, expertiseGroups map[string][]
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " <button type=\"submit\" class=\"btn btn-primary w-full md:w-auto mt-4\">Save Expertises</button>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</section></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</section></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -11,7 +11,7 @@ templ BasicsForm(char *character.Character, cultures []character.Culture) {
             <div class="card w-full max-w-lg bg-base-200 shadow-xl">
                 <div class="card-body">
                     <h2 class="card-title justify-center text-3xl mb-6">Character Basics</h2>
-                    <form action={ templ.SafeURL(fmt.Sprintf("/characters/%d/basics", char.ID)) } method="POST">
+                    <form id="creation-form" action={ templ.SafeURL(fmt.Sprintf("/characters/%d/basics", char.ID)) } method="POST">
                         <div class="form-control w-full mb-4">
                             <label class="label">
                                 <span class="label-text text-lg font-semibold">Character Name</span>
@@ -47,10 +47,6 @@ templ BasicsForm(char *character.Character, cultures []character.Culture) {
                                 <option value="Human" selected?={ char.Ancestry == "Human" }>Human</option>
                                 <option value="Singer" selected?={ char.Ancestry == "Singer" }>Singer</option>
                             </select>
-                        </div>
-                        
-                        <div class="form-control mt-6">
-                            <button type="submit" class="btn btn-primary w-full text-lg">Save Config & Continue</button>
                         </div>
                     </form>
                 </div>

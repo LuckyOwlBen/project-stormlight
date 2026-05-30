@@ -46,14 +46,14 @@ func BasicsForm(char *character.Character, cultures []character.Culture) templ.C
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"py-6 relative\"><div class=\"card w-full max-w-lg bg-base-200 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title justify-center text-3xl mb-6\">Character Basics</h2><form action=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"py-6 relative\"><div class=\"card w-full max-w-lg bg-base-200 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title justify-center text-3xl mb-6\">Character Basics</h2><form id=\"creation-form\" action=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 templ.SafeURL
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/characters/%d/basics", char.ID)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/basics.templ`, Line: 14, Col: 95}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/basics.templ`, Line: 14, Col: 114}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -153,7 +153,7 @@ func BasicsForm(char *character.Character, cultures []character.Culture) templ.C
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, ">Singer</option></select></div><div class=\"form-control mt-6\"><button type=\"submit\" class=\"btn btn-primary w-full text-lg\">Save Config & Continue</button></div></form></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, ">Singer</option></select></div></form></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

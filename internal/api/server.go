@@ -64,6 +64,7 @@ func (s *Server) Mount() http.Handler {
 		r.Use(s.AuthMiddleware)
 		r.Get("/dashboard", s.handleDashboardGet)
 
+		r.Get("/characters/{id}/sidenav", s.HandleGetSidenav)
 		r.Get("/characters/{id}/basics", s.handleCharacterBasicsGet)
 		r.Post("/characters/{id}/basics", s.handleCharacterBasicsPost)
 		r.Post("/characters", s.handleCharacterCreate)

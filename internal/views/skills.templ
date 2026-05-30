@@ -45,8 +45,7 @@ templ SkillSelection(char *character.Character, skillGroups map[string][]charact
             </div>
         </div>
         
-        <form 
-            action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/skills") } 
+        <form id="creation-form" action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/skills") } 
             method="POST"
             hx-get={ string(templ.SafeURL(fmt.Sprintf("/characters/%d/skills/points", char.ID))) }
             hx-trigger="change"
@@ -90,9 +89,10 @@ templ SkillSelection(char *character.Character, skillGroups map[string][]charact
                         </div>
                         }
                     }
-                    <button type="submit" class="btn btn-primary w-full md:w-auto mt-4">Save Skills</button>
+                    
                 }
             </section>
         </form>
     }
 }
+
