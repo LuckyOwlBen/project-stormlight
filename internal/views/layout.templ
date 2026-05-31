@@ -53,14 +53,19 @@ templ CreationLayout(c *character.Character, currentStep, title string) {
                     
                     <!-- Bottom Navigation -->
                     <div class="mt-12 flex justify-between items-center w-full border-t border-base-300 pt-6">
-                        <!-- TODO: Hook up to API for determining prev/next steps -->
-                        <button type="button" class="btn btn-outline btn-sm sm:btn-md" id="nav-back-btn">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-                            <span class="sm:inline">Back</span>
-                        </button>
+                        if models.GetPrevURL(c, currentStep) != "" {
+                            <a href={ templ.SafeURL(models.GetPrevURL(c, currentStep)) } class="btn btn-outline btn-sm sm:btn-md">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                                <span class="sm:inline">Back</span>
+                            </a>
+                        } else {
+                            <button type="button" class="btn btn-outline btn-sm sm:btn-md" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                                <span class="sm:inline">Back</span>
+                            </button>
+                        }
                         
-                        <!-- If there's a form to submit on the page, type="submit" form="creation-form" is recommended, otherwise generic button -->
-                        <button type="button" class="btn btn-primary btn-sm sm:btn-md" id="nav-next-btn">
+                        <button type="submit" form="creation-form" class="btn btn-primary btn-sm sm:btn-md">
                             <span class="sm:inline">Next</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                         </button>

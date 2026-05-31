@@ -112,7 +112,35 @@ func CreationLayout(c *character.Character, currentStep, title string) templ.Com
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<!-- Bottom Navigation --><div class=\"mt-12 flex justify-between items-center w-full border-t border-base-300 pt-6\"><!-- TODO: Hook up to API for determining prev/next steps --><button type=\"button\" class=\"btn btn-outline btn-sm sm:btn-md\" id=\"nav-back-btn\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-5 w-5 sm:mr-2\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 19l-7-7 7-7\"></path></svg> <span class=\"sm:inline\">Back</span></button><!-- If there's a form to submit on the page, type=\"submit\" form=\"creation-form\" is recommended, otherwise generic button --><button type=\"button\" class=\"btn btn-primary btn-sm sm:btn-md\" id=\"nav-next-btn\"><span class=\"sm:inline\">Next</span> <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-5 w-5 sm:ml-2\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 5l7 7-7 7\"></path></svg></button></div></main></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<!-- Bottom Navigation --><div class=\"mt-12 flex justify-between items-center w-full border-t border-base-300 pt-6\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if models.GetPrevURL(c, currentStep) != "" {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<a href=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var5 templ.SafeURL
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(models.GetPrevURL(c, currentStep)))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/layout.templ`, Line: 57, Col: 86}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" class=\"btn btn-outline btn-sm sm:btn-md\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-5 w-5 sm:mr-2\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 19l-7-7 7-7\"></path></svg> <span class=\"sm:inline\">Back</span></a> ")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<button type=\"button\" class=\"btn btn-outline btn-sm sm:btn-md\" disabled><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-5 w-5 sm:mr-2\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 19l-7-7 7-7\"></path></svg> <span class=\"sm:inline\">Back</span></button> ")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<button type=\"submit\" form=\"creation-form\" class=\"btn btn-primary btn-sm sm:btn-md\"><span class=\"sm:inline\">Next</span> <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-5 w-5 sm:ml-2\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 5l7 7-7 7\"></path></svg></button></div></main></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

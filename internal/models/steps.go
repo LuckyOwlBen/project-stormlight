@@ -37,6 +37,9 @@ var stepDoneFunctions = map[string]func(*character.Character) bool{
 	"Attributes": func(c *character.Character) bool {
 		return c.Attributes.PointsRemaining == 0
 	},
+	"Expertises": func(c *character.Character) bool {
+		return c.Expertises != nil && c.Expertises.PointsRemaining == 0
+	},
 	"Skills": func(c *character.Character) bool {
 		return c.Skills.PointsRemaining == 0
 	},
@@ -49,6 +52,45 @@ var stepDoneFunctions = map[string]func(*character.Character) bool{
 	"Finalize": func(c *character.Character) bool {
 		return c.IsFinalized
 	},
+}
+
+// DetermineNextStepURL finds the first incomplete step after currentStep.
+// If none remain incomplete, it returns the Finalize URL.
+func DetermineNextStepURL(c *character.Character, currentStep string) string {
+	idStr := strconv.Itoa(c.ID)
+	currentIdx := -1
+	for i, step := range Steps {
+		if strings.EqualFold(step.Name, currentStep) {
+			currentIdx = i
+			break
+		}
+	}
+	// Scan from after current step for first incomplete
+	for i := currentIdx + 1; i < len(Steps); i++ {
+		step := Steps[i]
+		if checkFunc, exists := stepDoneFunctions[step.Name]; exists {
+			if !checkFunc(c) {
+				return strings.ReplaceAll(step.URL, "{id}", idStr)
+			}
+		}
+	}
+	// All subsequent steps are done — go to the last step (Finalize)
+	if len(Steps) > 0 {
+		return strings.ReplaceAll(Steps[len(Steps)-1].URL, "{id}", idStr)
+	}
+	return ""
+}
+
+// GetPrevURL returns the URL of the step immediately before currentStep,
+// or an empty string if currentStep is the first step.
+func GetPrevURL(c *character.Character, currentStep string) string {
+	idStr := strconv.Itoa(c.ID)
+	for i, step := range Steps {
+		if strings.EqualFold(step.Name, currentStep) && i > 0 {
+			return strings.ReplaceAll(Steps[i-1].URL, "{id}", idStr)
+		}
+	}
+	return ""
 }
 
 // BuildSidenavSteps resolves URLs for the given character ID, evaluates each

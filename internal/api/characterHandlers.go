@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"project-stormlight/internal/character"
+	"project-stormlight/internal/models"
 	"project-stormlight/internal/views"
 
 	"github.com/go-chi/chi/v5"
@@ -112,7 +113,7 @@ func (s *Server) handleCharacterBasicsPost(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	http.Redirect(w, r, "/characters/"+strconv.Itoa(char.ID)+"/attributes", http.StatusSeeOther)
+	http.Redirect(w, r, models.DetermineNextStepURL(char, "Basics"), http.StatusSeeOther)
 }
 
 func (s *Server) handleCharacterDelete(w http.ResponseWriter, r *http.Request) {
@@ -168,30 +169,30 @@ func (s *Server) handleCharacterReviewGet(w http.ResponseWriter, r *http.Request
 }
 
 func (s *Server) handleCharacterFinalizePost(w http.ResponseWriter, r *http.Request) {
-charIDStr := chi.URLParam(r, "id")
-charID, err := strconv.Atoi(charIDStr)
-if err != nil {
-http.Error(w, "Invalid character ID", http.StatusBadRequest)
-return
-}
+	charIDStr := chi.URLParam(r, "id")
+	charID, err := strconv.Atoi(charIDStr)
+	if err != nil {
+		http.Error(w, "Invalid character ID", http.StatusBadRequest)
+		return
+	}
 
-userID, ok := r.Context().Value("userID").(int)
-if !ok {
-http.Redirect(w, r, "/login", http.StatusSeeOther)
-return
-}
+	userID, ok := r.Context().Value("userID").(int)
+	if !ok {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
 
-char, err := s.store.GetCharacterByID(r.Context(), charID)
-if err != nil || char.UserID != userID {
-http.Error(w, "Character not found", http.StatusNotFound)
-return
-}
+	char, err := s.store.GetCharacterByID(r.Context(), charID)
+	if err != nil || char.UserID != userID {
+		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
 
-char.IsFinalized = true
-if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
-http.Error(w, "Failed to finalize character", http.StatusInternalServerError)
-return
-}
+	char.IsFinalized = true
+	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
+		http.Error(w, "Failed to finalize character", http.StatusInternalServerError)
+		return
+	}
 
-http.Redirect(w, r, "/playspace/" + charIDStr, http.StatusSeeOther)
+	http.Redirect(w, r, "/playspace/"+charIDStr, http.StatusSeeOther)
 }

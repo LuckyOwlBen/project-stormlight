@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"project-stormlight/internal/character"
+	"project-stormlight/internal/models"
 	"project-stormlight/internal/views"
 
 	"github.com/go-chi/chi/v5"
@@ -152,5 +153,5 @@ func (s *Server) handleCharacterExpertisesPost(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	http.Redirect(w, r, "/characters/"+strconv.Itoa(char.ID)+"/skills", http.StatusSeeOther)
+	http.Redirect(w, r, models.DetermineNextStepURL(char, "Expertises"), http.StatusSeeOther)
 }

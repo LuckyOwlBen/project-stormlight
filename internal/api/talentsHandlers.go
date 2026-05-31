@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"project-stormlight/internal/character"
+	"project-stormlight/internal/models"
 	"project-stormlight/internal/views"
 
 	"github.com/go-chi/chi/v5"
@@ -33,15 +34,15 @@ func (s *Server) handleCharacterTalentsGet(w http.ResponseWriter, r *http.Reques
 	selectedPath := r.URL.Query().Get("path")
 
 	// If a primary path is already known but not in URL, we could default it, but URL drives UI purely.
-        filteredPaths := make(map[string]character.Path)
-        for id, path := range character.PathMap {
-                if id == "radiant" || id == "surges" {
-                        continue
-                }
-                filteredPaths[id] = path
-        }
+	filteredPaths := make(map[string]character.Path)
+	for id, path := range character.PathMap {
+		if id == "radiant" || id == "surges" {
+			continue
+		}
+		filteredPaths[id] = path
+	}
 
-        component := views.TalentSelection(char, filteredPaths, character.SubPathMap, selectedPath)
+	component := views.TalentSelection(char, filteredPaths, character.SubPathMap, selectedPath)
 	component.Render(r.Context(), w)
 }
 
@@ -169,8 +170,7 @@ func (s *Server) handleCharacterTalentsPost(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// Where does it redirect after talents in the flow?
-	http.Redirect(w, r, "/characters/"+strconv.Itoa(char.ID)+"/inventory", http.StatusSeeOther)
+	http.Redirect(w, r, models.DetermineNextStepURL(char, "Talents"), http.StatusSeeOther)
 }
 
 // groupItemsByType returns store items grouped by type, filtered to common rarity, sorted by name.

@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"project-stormlight/internal/character"
+	"project-stormlight/internal/models"
 	"project-stormlight/internal/views"
 
 	"github.com/go-chi/chi/v5"
@@ -110,5 +111,5 @@ func (s *Server) handleCharacterCulturesPost(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	http.Redirect(w, r, "/characters/"+strconv.Itoa(char.ID)+"/basics", http.StatusSeeOther)
+	http.Redirect(w, r, models.DetermineNextStepURL(char, "Culture"), http.StatusSeeOther)
 }

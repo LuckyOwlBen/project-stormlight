@@ -16,24 +16,29 @@
             "stepNumber": 3
         },
         {
+            "name": "Expertises",
+            "url": "/characters/{id}/expertises",
+            "stepNumber": 4
+        },
+        {
             "name": "Skills",
             "url": "/characters/{id}/skills",
-            "stepNumber": 4
+            "stepNumber": 5
         },
         {
             "name": "Talents",
             "url": "/characters/{id}/talents",
-            "stepNumber": 5
+            "stepNumber": 6
         },
         {
             "name": "Equipment",
             "url": "/characters/{id}/inventory",
-            "stepNumber": 6
+            "stepNumber": 7
         },
         {
             "name": "Finalize",
             "url": "/characters/{id}/review",
-            "stepNumber": 7
+            "stepNumber": 8
         }
     ]
 }
