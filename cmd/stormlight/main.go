@@ -9,6 +9,7 @@ import (
 	"project-stormlight/internal/api"
 	"project-stormlight/internal/character"
 	"project-stormlight/internal/database"
+	"project-stormlight/internal/models"
 	"project-stormlight/internal/store"
 
 	"github.com/joho/godotenv"
@@ -39,6 +40,9 @@ func main() {
 	}
 	if err := store.LoadStartingKits(); err != nil {
 		log.Fatalf("Could not load starting kits: %v", err)
+	}
+	if err := models.LoadSteps(); err != nil {
+		log.Fatalf("Could not load steps: %v", err)
 	}
 
 	// Read separate env vars and construct the DSN, or read a complete DATABASE_URL

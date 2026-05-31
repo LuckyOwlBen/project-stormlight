@@ -10,6 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"project-stormlight/internal/character"
+	"project-stormlight/internal/models"
 )
 
 func Layout(title string) templ.Component {
@@ -33,7 +34,20 @@ func Layout(title string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\" data-theme=\"dark\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><!-- Tailwind & DaisyUI CSS --><link href=\"/assets/css/output.css\" rel=\"stylesheet\"><!-- HTMX --><script src=\"https://unpkg.com/htmx.org@2.0.0\"></script></head><body class=\"bg-base-100 text-base-content min-h-screen\"><!-- Navbar --><div class=\"navbar bg-base-200 z-50 relative shadow-md\"><div class=\"flex-1\"><a href=\"/dashboard\" class=\"btn btn-ghost normal-case text-xl\">Stormlight</a></div><div class=\"flex-none\"><ul class=\"menu menu-horizontal px-1\"><li><!-- Example of an HTMX logout or action --><a>Logout</a></li></ul></div></div><!-- Page Content -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\" data-theme=\"dark\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><!-- Tailwind & DaisyUI CSS --><link href=\"/assets/css/output.css\" rel=\"stylesheet\"><!-- HTMX --><script src=\"https://unpkg.com/htmx.org@2.0.0\"></script><title>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/layout.templ`, Line: 18, Col: 26}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - Stormlight Character Creator</title></head><body class=\"bg-base-100 text-base-content min-h-screen\"><!-- Navbar --><div class=\"navbar bg-base-200 z-50 relative shadow-md\"><div class=\"flex-1\"><a href=\"/dashboard\" class=\"btn btn-ghost normal-case text-xl\">Stormlight</a></div><div class=\"flex-none\"><ul class=\"menu menu-horizontal px-1\"><li><!-- Example of an HTMX logout or action --><a>Logout</a></li></ul></div></div><!-- Page Content -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -41,7 +55,7 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -49,7 +63,7 @@ func Layout(title string) templ.Component {
 	})
 }
 
-func CreationLayout(c *character.Character, currentStep string, title string) templ.Component {
+func CreationLayout(c *character.Character, currentStep, title string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -65,12 +79,12 @@ func CreationLayout(c *character.Character, currentStep string, title string) te
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var2 == nil {
-			templ_7745c5c3_Var2 = templ.NopComponent
+		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var3 == nil {
+			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var3 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var4 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -82,29 +96,29 @@ func CreationLayout(c *character.Character, currentStep string, title string) te
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"flex flex-row w-full min-h-screen\"><!-- Sidebar (Left 1/3) --><div class=\"w-1/3 bg-base-200 border-r border-base-300 p-4 shrink-0\" id=\"sidebar-container\" hx-trigger=\"load, update-sidenav from:body\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"flex flex-row w-full min-h-screen\"><!-- Sidebar (Left 1/3) -->")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = Sidenav(c, []string{"basics", "cultures", "attributes", "resources", "finalize"}, false).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = Sidenav(models.BuildSidenavSteps(c, currentStep)).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><!-- Main Content Area (Right Full) --><div class=\"w-full p-4 md:p-8 flex flex-col flex-grow\"><main class=\"w-full max-w-4xl mx-auto flex-grow pb-24\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- Main Content Area (Right Full) --><div class=\"w-full p-4 md:p-8 flex flex-col flex-grow\"><main class=\"w-full max-w-4xl mx-auto flex-grow pb-24\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templ_7745c5c3_Var2.Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = templ_7745c5c3_Var3.Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- Bottom Navigation --><div class=\"mt-12 flex justify-between items-center w-full border-t border-base-300 pt-6\"><!-- TODO: Hook up to API for determining prev/next steps --><button type=\"button\" class=\"btn btn-outline btn-sm sm:btn-md\" id=\"nav-back-btn\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-5 w-5 sm:mr-2\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 19l-7-7 7-7\"></path></svg> <span class=\"sm:inline\">Back</span></button><!-- If there's a form to submit on the page, type=\"submit\" form=\"creation-form\" is recommended, otherwise generic button --><button type=\"button\" class=\"btn btn-primary btn-sm sm:btn-md\" id=\"nav-next-btn\"><span class=\"sm:inline\">Next</span> <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-5 w-5 sm:ml-2\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 5l7 7-7 7\"></path></svg></button></div></main></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<!-- Bottom Navigation --><div class=\"mt-12 flex justify-between items-center w-full border-t border-base-300 pt-6\"><!-- TODO: Hook up to API for determining prev/next steps --><button type=\"button\" class=\"btn btn-outline btn-sm sm:btn-md\" id=\"nav-back-btn\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-5 w-5 sm:mr-2\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 19l-7-7 7-7\"></path></svg> <span class=\"sm:inline\">Back</span></button><!-- If there's a form to submit on the page, type=\"submit\" form=\"creation-form\" is recommended, otherwise generic button --><button type=\"button\" class=\"btn btn-primary btn-sm sm:btn-md\" id=\"nav-next-btn\"><span class=\"sm:inline\">Next</span> <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-5 w-5 sm:ml-2\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 5l7 7-7 7\"></path></svg></button></div></main></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = Layout(currentStep).Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Layout(title).Render(templ.WithChildren(ctx, templ_7745c5c3_Var4), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

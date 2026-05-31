@@ -1,0 +1,39 @@
+{
+    "steps": [
+        {
+            "name": "Culture",
+            "url": "/characters/{id}/cultures",
+            "stepNumber": 1
+        },
+        {
+            "name": "Basics",
+            "url": "/characters/{id}/basics",
+            "stepNumber": 2
+        },
+        {
+            "name": "Attributes",
+            "url": "/characters/{id}/attributes",
+            "stepNumber": 3
+        },
+        {
+            "name": "Skills",
+            "url": "/characters/{id}/skills",
+            "stepNumber": 4
+        },
+        {
+            "name": "Talents",
+            "url": "/characters/{id}/talents",
+            "stepNumber": 5
+        },
+        {
+            "name": "Equipment",
+            "url": "/characters/{id}/inventory",
+            "stepNumber": 6
+        },
+        {
+            "name": "Finalize",
+            "url": "/characters/{id}/review",
+            "stepNumber": 7
+        }
+    ]
+}

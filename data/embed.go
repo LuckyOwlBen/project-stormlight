@@ -19,3 +19,6 @@ var TalentFiles embed.FS
 
 //go:embed startingKits.json
 var StartingKitFiles embed.FS
+
+//go:embed steps.json
+var StepFiles embed.FS
