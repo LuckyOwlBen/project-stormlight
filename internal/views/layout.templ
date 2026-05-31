@@ -1,6 +1,7 @@
 package views
 
 import (
+    "fmt"
     "project-stormlight/internal/character"
     "project-stormlight/internal/models"
 )
@@ -83,6 +84,10 @@ templ NextButtonOOB(enabled bool) {
         <span class="sm:inline">Next</span>
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
     </button>
+}
+
+templ PointsRemainingOOB(points int) {
+    <strong id="pointsRemaining" hx-swap-oob="true" class="inline-block text-center">{ fmt.Sprintf("%d", points) }</strong>
 }
 
 templ CreationLayout(c *character.Character, currentStep, title string, nav NavState) {

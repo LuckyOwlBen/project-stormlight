@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strconv"
 
+	"project-stormlight/internal/models"
 	"project-stormlight/internal/store"
 	"project-stormlight/internal/views"
 
@@ -47,8 +48,45 @@ func (s *Server) handleCharacterInventoryGet(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	if s.redirectIfFinalized(w, r, char.IsFinalized) {
+		return
+	}
+
 	component := views.InventoryPage(char, store.Kits, groupItemsByType())
 	component.Render(r.Context(), w)
+}
+
+func (s *Server) handleCharacterInventoryPost(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(int)
+	if !ok {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	charIDStr := chi.URLParam(r, "id")
+	charID, err := strconv.Atoi(charIDStr)
+	if err != nil {
+		http.Error(w, "Invalid character ID", http.StatusBadRequest)
+		return
+	}
+
+	char, err := s.store.GetCharacterByID(r.Context(), charID)
+	if err != nil || char.UserID != userID {
+		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+
+	if s.redirectIfFinalized(w, r, char.IsFinalized) {
+		return
+	}
+
+	char.CreationStep = "review"
+	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
+		http.Error(w, "Failed to advance step", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, models.DetermineNextStepURL(char, "Equipment"), http.StatusSeeOther)
 }
 
 func (s *Server) handleCharacterInventoryKitPost(w http.ResponseWriter, r *http.Request) {
@@ -68,6 +106,10 @@ func (s *Server) handleCharacterInventoryKitPost(w http.ResponseWriter, r *http.
 	char, err := s.store.GetCharacterByID(r.Context(), charID)
 	if err != nil || char.UserID != userID {
 		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+
+	if s.redirectIfFinalized(w, r, char.IsFinalized) {
 		return
 	}
 

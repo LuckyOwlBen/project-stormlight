@@ -30,6 +30,10 @@ func (s *Server) handleCharacterAttributesGet(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	if s.redirectIfFinalized(w, r, char.Attributes.Finalized) {
+		return
+	}
+
 	component := views.AttributesForm(char)
 	component.Render(r.Context(), w)
 }
@@ -51,6 +55,11 @@ func (s *Server) handleCharacterAttributesPointsGet(w http.ResponseWriter, r *ht
 	char, err := s.store.GetCharacterByID(r.Context(), charID)
 	if err != nil || char.UserID != userID {
 		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+
+	if char.Attributes.Finalized {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
 
@@ -104,6 +113,10 @@ func (s *Server) handleCharacterAttributesPost(w http.ResponseWriter, r *http.Re
 	char, err := s.store.GetCharacterByID(r.Context(), charID)
 	if err != nil || char.UserID != userID {
 		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+
+	if s.redirectIfFinalized(w, r, char.Attributes.Finalized) {
 		return
 	}
 

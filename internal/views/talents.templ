@@ -17,7 +17,16 @@ func hasTalent(char *character.Character, talentID string) bool {
     return false
 }
 
-templ TalentSelection(char *character.Character, allPaths map[string]character.Path, subPaths map[string]character.Talents, selectedPath string) {
+func isTalentPending(pendingIDs []string, talentID string) bool {
+    for _, id := range pendingIDs {
+        if id == talentID {
+            return true
+        }
+    }
+    return false
+}
+
+templ TalentSelection(char *character.Character, allPaths map[string]character.Path, subPaths map[string]character.Talents, selectedPath string, evaluations map[string][]character.TalentWithState) {
     @CreationLayout(char, "talents", "Select Talents", NavState{BackEnabled: true, NextEnabled: char.Talents.PointsRemaining == 0}) {
         <div class="flex justify-between items-center mb-6">
             <div>
@@ -32,57 +41,12 @@ templ TalentSelection(char *character.Character, allPaths map[string]character.P
         
         <form id="creation-form" action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents") } 
             method="POST"
-            hx-get={ string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/points")) }
-            hx-trigger="change"
-            hx-target="#pointsRemaining"
-            hx-swap="outerHTML"
         >
             if selectedPath != "" {
                 <input type="hidden" name="selectedPath" value={ selectedPath } />
-                
-                <div class="mb-8">
-                    <h2 class="text-2xl font-semibold mb-4 capitalize">{ allPaths[selectedPath].Name } Path</h2>
-                    <!-- Base Path Talent (Tier 0) -->
-                    if len(allPaths[selectedPath].TalentNodes) > 0 {
-                        <div class="card w-full bg-base-200 shadow-xl mb-6 border-2 border-primary">
-                            <div class="card-body">
-                                <label class="label cursor-pointer flex justify-start gap-4">
-                                    <input type="checkbox" name="talents" value={ allPaths[selectedPath].TalentNodes[0].Id } class="checkbox checkbox-primary" checked?={ hasTalent(char, allPaths[selectedPath].TalentNodes[0].Id) } />
-                                    <div>
-                                        <h2 class="card-title m-0 inline-block">{ allPaths[selectedPath].TalentNodes[0].Name } (Base Path Talent)</h2>
-                                        <span class="badge badge-secondary ml-2">Tier 0</span>
-                                    </div>
-                                </label>
-                                <p class="text-sm mt-2">{ allPaths[selectedPath].TalentNodes[0].Description }</p>
-                            </div>
-                        </div>
-                    }
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        for _, subPathID := range allPaths[selectedPath].SubPaths {
-                            <div class="col-span-1">
-                                <h3 class="text-xl font-bold mb-4 border-b pb-2">{ subPaths[subPathID].PathName }</h3>
-                                <div class="space-y-4">
-                                    for _, talent := range subPaths[subPathID].Nodes {
-                                        <div class="card w-full bg-base-100 shadow-md border border-base-300">
-                                            <div class="card-body p-4">
-                                                <label class="label cursor-pointer flex justify-start gap-4">
-                                                    <input type="checkbox" name="talents" value={ talent.Id } class="checkbox checkbox-primary checkbox-sm" checked?={ hasTalent(char, talent.Id) } />
-                                                    <div>
-                                                        <h4 class="font-bold m-0">{ talent.Name }</h4>
-                                                        <span class="badge badge-sm badge-secondary">Tier { strconv.Itoa(talent.Tier) }</span>
-                                                    </div>
-                                                </label>
-                                                <p class="text-xs mt-2 opacity-80">{ talent.Description }</p>
-                                            </div>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                        }
-                    </div>
-                </div>
             }
+
+            @TalentSectionsFragment(char, allPaths[selectedPath], subPaths, evaluations, selectedPath, nil)
 
             <div class="mb-8">
                 <h2 class="text-2xl font-semibold mb-4 capitalize">Primary Paths</h2>
@@ -99,9 +63,78 @@ templ TalentSelection(char *character.Character, allPaths map[string]character.P
                     }
                 </div>
             </div>
-
-            
         </form>
     }
+}
+
+templ TalentSectionsFragment(char *character.Character, path character.Path, subPaths map[string]character.Talents, evaluations map[string][]character.TalentWithState, selectedPath string, pendingIDs []string) {
+    <div id="talent-sections"
+        hx-get={ string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/sections")) }
+        hx-trigger="change"
+        hx-swap="outerHTML"
+        hx-include="closest form"
+    >
+        if selectedPath != "" {
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4 capitalize">{ path.Name } Path</h2>
+
+                <!-- Base Path Talent (Tier 0) -->
+                if len(path.TalentNodes) > 0 {
+                    <div class="card w-full bg-base-200 shadow-xl mb-6 border-2 border-primary">
+                        <div class="card-body">
+                            <label class="label cursor-pointer flex justify-start gap-4">
+                                <input type="checkbox" name="talents" value={ path.TalentNodes[0].Id } class="checkbox checkbox-primary" checked?={ hasTalent(char, path.TalentNodes[0].Id) || isTalentPending(pendingIDs, path.TalentNodes[0].Id) } />
+                                <div>
+                                    <h2 class="card-title m-0 inline-block">{ path.TalentNodes[0].Name } (Base Path Talent)</h2>
+                                    <span class="badge badge-secondary ml-2">Tier 0</span>
+                                </div>
+                            </label>
+                            <p class="text-sm mt-2">{ path.TalentNodes[0].Description }</p>
+                        </div>
+                    </div>
+                }
+
+                <!-- Sub-path columns -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    for _, subPathID := range path.SubPaths {
+                        <div class="col-span-1">
+                            <h3 class="text-xl font-bold mb-4 border-b pb-2">{ subPaths[subPathID].PathName }</h3>
+                            <div class="space-y-4">
+                                for _, tw := range evaluations[subPathID] {
+                                    if tw.State != character.StateHidden {
+                                        <div class={ "card w-full shadow-md border border-base-300", templ.KV("bg-base-100", tw.State == character.StateEligible), templ.KV("bg-base-100 opacity-50", tw.State == character.StateIneligible) }>
+                                            <div class="card-body p-4">
+                                                <label class={ "label flex justify-start gap-4", templ.KV("cursor-pointer", tw.State == character.StateEligible), templ.KV("cursor-not-allowed", tw.State == character.StateIneligible) }>
+                                                    <input
+                                                        type="checkbox"
+                                                        name="talents"
+                                                        value={ tw.Talent.Id }
+                                                        class="checkbox checkbox-primary checkbox-sm"
+                                                        checked?={ hasTalent(char, tw.Talent.Id) || isTalentPending(pendingIDs, tw.Talent.Id) }
+                                                        disabled?={ tw.State == character.StateIneligible }
+                                                    />
+                                                    <div>
+                                                        <h4 class="font-bold m-0">{ tw.Talent.Name }</h4>
+                                                        <span class="badge badge-sm badge-secondary">Tier { strconv.Itoa(tw.Talent.Tier) }</span>
+                                                        if tw.Talent.ActionType != "" {
+                                                            <span class="badge badge-sm badge-ghost ml-1">{ tw.Talent.ActionType }</span>
+                                                        }
+                                                    </div>
+                                                </label>
+                                                <p class="text-xs mt-2 opacity-80">{ tw.Talent.Description }</p>
+                                                if tw.State == character.StateIneligible {
+                                                    <p class="text-xs text-warning mt-1 font-semibold">Prerequisites not met</p>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
 }
 

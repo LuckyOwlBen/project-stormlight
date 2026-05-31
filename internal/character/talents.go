@@ -2,6 +2,8 @@ package character
 
 import (
 	"encoding/json"
+	"strings"
+
 	"project-stormlight/data"
 )
 
@@ -338,4 +340,129 @@ func NewTalents(characterID int, level int) *TalentsTracker {
 			Finalized:       false,
 		},
 	}
+}
+
+// TalentState represents the display eligibility of a talent in the selection UI.
+type TalentState int
+
+const (
+	StateEligible   TalentState = iota // Tier visible, prerequisites met
+	StateIneligible                    // Tier visible, but prerequisites not met
+	StateHidden                        // Tier not yet unlocked
+)
+
+// TalentWithState pairs a talent with its computed display state.
+type TalentWithState struct {
+	Talent Talent
+	State  TalentState
+}
+
+// MaxVisibleTierForPath returns the highest tier that should be visible in sub-path
+// columns for the given path. It equals the highest tier of any selected talent + 1,
+// so the next tier is always revealed. Returns 0 when nothing in this path is selected.
+func MaxVisibleTierForPath(ownedIDs, pendingIDs []string, path Path, subPathMap map[string]Talents) int {
+	selected := make(map[string]bool, len(ownedIDs)+len(pendingIDs))
+	for _, id := range ownedIDs {
+		selected[id] = true
+	}
+	for _, id := range pendingIDs {
+		selected[id] = true
+	}
+
+	maxTier := -1
+	for _, t := range path.TalentNodes {
+		if selected[t.Id] && t.Tier > maxTier {
+			maxTier = t.Tier
+		}
+	}
+	for _, subPathID := range path.SubPaths {
+		if sp, ok := subPathMap[subPathID]; ok {
+			for _, t := range sp.Nodes {
+				if selected[t.Id] && t.Tier > maxTier {
+					maxTier = t.Tier
+				}
+			}
+		}
+	}
+
+	if maxTier < 0 {
+		return 0
+	}
+	return maxTier + 1
+}
+
+// EvaluateSubPathNodes assigns a TalentState to each talent in a sub-path's node list.
+// pendingIDs are talent IDs currently checked in the form (not yet saved to DB).
+// maxVisibleTier is the highest tier index that should be visible.
+func EvaluateSubPathNodes(char *Character, pendingIDs []string, maxVisibleTier int, nodes []Talent) []TalentWithState {
+	result := make([]TalentWithState, 0, len(nodes))
+	for _, t := range nodes {
+		result = append(result, TalentWithState{
+			Talent: t,
+			State:  talentStateFor(char, pendingIDs, maxVisibleTier, t),
+		})
+	}
+	return result
+}
+
+func talentStateFor(char *Character, pendingIDs []string, maxVisibleTier int, t Talent) TalentState {
+	// Already owned → always eligible regardless of tier or prerequisites
+	if char != nil && char.Talents != nil {
+		for _, h := range char.Talents.List {
+			if h.TalentID == t.Id {
+				return StateEligible
+			}
+		}
+	}
+	if t.Tier > maxVisibleTier {
+		return StateHidden
+	}
+	if !meetsPrerequisites(char, pendingIDs, t.Prerequisites) {
+		return StateIneligible
+	}
+	return StateEligible
+}
+
+func meetsPrerequisites(char *Character, pendingIDs []string, prereqs []Prerequisite) bool {
+	pendingSet := make(map[string]bool, len(pendingIDs))
+	for _, id := range pendingIDs {
+		pendingSet[id] = true
+	}
+	for _, req := range prereqs {
+		switch req.Type {
+		case "talent":
+			owned := pendingSet[req.Target]
+			if !owned && char != nil && char.Talents != nil {
+				for _, h := range char.Talents.List {
+					if h.TalentID == req.Target {
+						owned = true
+						break
+					}
+				}
+			}
+			if !owned {
+				return false
+			}
+		case "skill":
+			hasSkill := false
+			if char != nil && char.Skills != nil {
+				for _, s := range char.Skills.PlayerSkills {
+					if strings.EqualFold(s.SkillName, req.Target) && s.Value >= req.Value {
+						hasSkill = true
+						break
+					}
+				}
+			}
+			if !hasSkill {
+				return false
+			}
+		case "level":
+			if char == nil || char.Level < req.Value {
+				return false
+			}
+		case "ideal":
+			// Radiant paths are excluded from character creation; ideal checks skipped
+		}
+	}
+	return true
 }

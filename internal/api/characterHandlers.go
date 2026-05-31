@@ -58,6 +58,10 @@ func (s *Server) handleCharacterBasicsGet(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	if s.redirectIfFinalized(w, r, char.IsFinalized) {
+		return
+	}
+
 	var cultures []character.Culture
 	for _, cid := range char.UnlockedCultureIDs {
 		if cult, exists := character.Cultures[cid]; exists {
@@ -85,6 +89,10 @@ func (s *Server) handleCharacterBasicsPost(w http.ResponseWriter, r *http.Reques
 	char, err := s.store.GetCharacterByID(r.Context(), charID)
 	if err != nil || char.UserID != userID {
 		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+
+	if s.redirectIfFinalized(w, r, char.IsFinalized) {
 		return
 	}
 
@@ -194,7 +202,25 @@ func (s *Server) handleCharacterFinalizePost(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	if char.IsFinalized {
+		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+		return
+	}
+
 	char.IsFinalized = true
+	char.CulturesFinalized = true
+	if char.Attributes != nil {
+		char.Attributes.Finalized = true
+	}
+	if char.Skills != nil {
+		char.Skills.Finalized = true
+	}
+	if char.Expertises != nil {
+		char.Expertises.Finalized = true
+	}
+	if char.Talents != nil {
+		char.Talents.Finalized = true
+	}
 	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
 		http.Error(w, "Failed to finalize character", http.StatusInternalServerError)
 		return

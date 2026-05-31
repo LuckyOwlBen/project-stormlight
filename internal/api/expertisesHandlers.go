@@ -74,6 +74,10 @@ func (s *Server) handleCharacterExpertisesGet(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	if s.redirectIfFinalized(w, r, char.Expertises != nil && char.Expertises.Finalized) {
+		return
+	}
+
 	// Update expected max expertises based on Intelligence capability
 	maxExpertises := char.Attributes.Intelligence
 	if maxExpertises < 0 {
@@ -105,6 +109,10 @@ func (s *Server) handleCharacterExpertisesPost(w http.ResponseWriter, r *http.Re
 	char, err := s.store.GetCharacterByID(r.Context(), charID)
 	if err != nil || char.UserID != userID {
 		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+
+	if s.redirectIfFinalized(w, r, char.Expertises != nil && char.Expertises.Finalized) {
 		return
 	}
 

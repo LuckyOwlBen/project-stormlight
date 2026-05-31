@@ -45,7 +45,9 @@ func humanizeItemType(t string) string {
 // InventoryPage is the top-level layout for the inventory wizard step.
 // It shows KitSelect if no kit has been chosen, otherwise the full InventoryView.
 templ InventoryPage(char *character.Character, kits []store.Kit, storeItems map[string][]store.Item) {
-	@CreationLayout(char, "inventory", "Inventory", NavState{BackEnabled: true, NextEnabled: true}) {
+	@CreationLayout(char, "inventory", "Inventory", NavState{BackEnabled: true, NextEnabled: char.StartingKitID != ""}) {
+		<!-- Hidden form so the Next button can advance the step -->
+		<form id="creation-form" action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/inventory") } method="POST"></form>
 		if char.StartingKitID == "" {
 			@KitSelect(char, kits)
 		} else {
@@ -88,7 +90,6 @@ templ InventoryView(char *character.Character, storeItems map[string][]store.Ite
 		<div class="flex flex-wrap justify-between items-center gap-4 mb-6">
 			<h1 class="text-3xl font-bold">Inventory</h1>
 			@CurrencyDisplay(char.CurrencyInChips)
-			<a href={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/review") } class="btn btn-success">Review &amp; Finalize →</a>
 		</div>
 		<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 			<div>

@@ -24,6 +24,16 @@ func NewServer(store *database.Store) *Server {
 	}
 }
 
+// redirectIfFinalized redirects to /dashboard if the given flag is true and returns true.
+// Use this to guard creation-step handlers that should be locked once finalized.
+func (s *Server) redirectIfFinalized(w http.ResponseWriter, r *http.Request, isFinalized bool) bool {
+	if isFinalized {
+		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+		return true
+	}
+	return false
+}
+
 // AuthMiddleware protects routes by enforcing a valid session
 func (s *Server) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -90,9 +100,11 @@ func (s *Server) Mount() http.Handler {
 
 		r.Get("/characters/{id}/talents", s.handleCharacterTalentsGet)
 		r.Get("/characters/{id}/talents/points", s.handleCharacterTalentsPointsGet)
+		r.Get("/characters/{id}/talents/sections", s.handleCharacterTalentsSectionsGet)
 		r.Post("/characters/{id}/talents", s.handleCharacterTalentsPost)
 
 		r.Get("/characters/{id}/inventory", s.handleCharacterInventoryGet)
+		r.Post("/characters/{id}/inventory", s.handleCharacterInventoryPost)
 		r.Post("/characters/{id}/inventory/kit", s.handleCharacterInventoryKitPost)
 		r.Post("/characters/{id}/inventory/buy", s.handleCharacterInventoryBuyPost)
 		r.Post("/characters/{id}/inventory/sell", s.handleCharacterInventorySellPost)

@@ -32,6 +32,10 @@ func (s *Server) handleCharacterCulturesGet(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	if s.redirectIfFinalized(w, r, char.CulturesFinalized) {
+		return
+	}
+
 	component := views.CultureSelection(char, character.Cultures)
 	component.Render(r.Context(), w)
 }
@@ -54,6 +58,11 @@ func (s *Server) handleCharacterCulturesPointsGet(w http.ResponseWriter, r *http
 	char, err := s.store.GetCharacterByID(r.Context(), charID)
 	if err != nil || char.UserID != userID {
 		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+
+	if char.CulturesFinalized {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
 
@@ -87,6 +96,10 @@ func (s *Server) handleCharacterCulturesPost(w http.ResponseWriter, r *http.Requ
 	char, err := s.store.GetCharacterByID(r.Context(), charID)
 	if err != nil || char.UserID != userID {
 		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+
+	if s.redirectIfFinalized(w, r, char.CulturesFinalized) {
 		return
 	}
 

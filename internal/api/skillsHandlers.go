@@ -31,6 +31,10 @@ func (s *Server) handleCharacterSkillsGet(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	if s.redirectIfFinalized(w, r, char.Skills.Finalized) {
+		return
+	}
+
 	filteredGroups := make(map[string][]character.Skill)
 	for groupName, skills := range character.SkillGroups {
 		if groupName == "surgeSkills" {
@@ -60,6 +64,11 @@ func (s *Server) handleCharacterSkillsPointsGet(w http.ResponseWriter, r *http.R
 	char, err := s.store.GetCharacterByID(r.Context(), charID)
 	if err != nil || char.UserID != userID {
 		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+
+	if char.Skills != nil && char.Skills.Finalized {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
 
@@ -106,6 +115,10 @@ func (s *Server) handleCharacterSkillsPost(w http.ResponseWriter, r *http.Reques
 	char, err := s.store.GetCharacterByID(r.Context(), charID)
 	if err != nil || char.UserID != userID {
 		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+
+	if s.redirectIfFinalized(w, r, char.Skills.Finalized) {
 		return
 	}
 
