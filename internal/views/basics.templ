@@ -6,7 +6,7 @@ import (
 )
 
 templ BasicsForm(char *character.Character, cultures []character.Culture) {
-    @CreationLayout(char, "basics", "Character Basics") {
+    @CreationLayout(char, "basics", "Character Basics", NavState{BackEnabled: true, NextEnabled: char.Name != ""}) {
         <div class="py-6 relative">
             <div class="card w-full max-w-lg bg-base-200 shadow-xl">
                 <div class="card-body">
@@ -28,7 +28,13 @@ templ BasicsForm(char *character.Character, cultures []character.Culture) {
                                     </div>
                                 </div>
                             }
-                            <input type="text" name="name" placeholder="e.g. Kaladin" value={ char.Name } class="input input-bordered w-full" required />
+                            <input type="text" name="name" placeholder="e.g. Kaladin" value={ char.Name } class="input input-bordered w-full" required
+                                hx-get={ string(templ.SafeURL(fmt.Sprintf("/characters/%d/basics/validate", char.ID))) }
+                                hx-trigger="input delay:200ms"
+                                hx-include="[name='name']"
+                                hx-target="#next-btn"
+                                hx-swap="outerHTML"
+                            />
                         </div>
                         
                         <div class="form-control w-full mb-4">

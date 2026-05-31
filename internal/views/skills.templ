@@ -33,7 +33,7 @@ func getSkillValue(char *character.Character, skillName string) int {
 }
 
 templ SkillSelection(char *character.Character, skillGroups map[string][]character.Skill) {
-    @CreationLayout(char, "skills", "Allocate Skills") {
+    @CreationLayout(char, "skills", "Allocate Skills", NavState{BackEnabled: true, NextEnabled: char.Skills.PointsRemaining == 0}) {
         <div class="flex justify-between items-center mb-6">
             <div>
                 <h1 class="text-3xl font-bold">Allocate Skills</h1>

@@ -45,7 +45,7 @@ func humanizeItemType(t string) string {
 // InventoryPage is the top-level layout for the inventory wizard step.
 // It shows KitSelect if no kit has been chosen, otherwise the full InventoryView.
 templ InventoryPage(char *character.Character, kits []store.Kit, storeItems map[string][]store.Item) {
-	@CreationLayout(char, "inventory", "Inventory") {
+	@CreationLayout(char, "inventory", "Inventory", NavState{BackEnabled: true, NextEnabled: true}) {
 		if char.StartingKitID == "" {
 			@KitSelect(char, kits)
 		} else {

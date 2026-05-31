@@ -3,6 +3,7 @@
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"project-stormlight/internal/character"
 	"project-stormlight/internal/models"
@@ -30,6 +31,11 @@ func (s *Server) handleCharacterCreate(w http.ResponseWriter, r *http.Request) {
 
 	// Redirect to cultures to start the real flow
 	http.Redirect(w, r, "/characters/"+strconv.Itoa(char.ID)+"/cultures", http.StatusSeeOther)
+}
+
+// GET /characters/{id}/basics/validate
+func (s *Server) handleCharacterBasicsValidate(w http.ResponseWriter, r *http.Request) {
+	views.NextButton(strings.TrimSpace(r.URL.Query().Get("name")) != "").Render(r.Context(), w)
 }
 
 func (s *Server) handleCharacterBasicsGet(w http.ResponseWriter, r *http.Request) {

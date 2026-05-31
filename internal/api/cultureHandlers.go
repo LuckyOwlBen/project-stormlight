@@ -66,6 +66,7 @@ func (s *Server) handleCharacterCulturesPointsGet(w http.ResponseWriter, r *http
 	remaining := 2 - len(selectedNames)
 
 	views.PointsRemaining(remaining).Render(r.Context(), w)
+	views.NextButtonOOB(len(selectedNames) > 0).Render(r.Context(), w)
 }
 
 // POST /characters/{id}/cultures

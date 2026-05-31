@@ -6,7 +6,7 @@ import (
 )
 
 templ AttributesForm(char *character.Character) {
-	@CreationLayout(char, "attributes", "Allocate Attributes") {
+	@CreationLayout(char, "attributes", "Allocate Attributes", NavState{BackEnabled: true, NextEnabled: char.Attributes.PointsRemaining == 0}) {
 		<div class="py-6">
 			<div class="card w-full max-w-4xl mx-auto bg-base-200 shadow-xl">
 				<div class="card-body">
@@ -57,7 +57,7 @@ templ attributeInput(label string, name string, value int) {
 			type="number" 
 			name={ name } 
 			value={ fmt.Sprintf("%d", value) } 
-			min={ fmt.Sprintf("%d", value) } 
+			min="0" 
 			class="input input-bordered w-full" 
 		/>
 	</div>

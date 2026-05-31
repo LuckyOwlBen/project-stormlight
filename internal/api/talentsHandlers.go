@@ -95,6 +95,7 @@ func (s *Server) handleCharacterTalentsPointsGet(w http.ResponseWriter, r *http.
 
 	remaining := char.Talents.PointsRemaining - totalSpent
 	views.PointsRemaining(remaining).Render(r.Context(), w)
+	views.NextButtonOOB(remaining == 0).Render(r.Context(), w)
 }
 
 func (s *Server) handleCharacterTalentsPost(w http.ResponseWriter, r *http.Request) {

@@ -39,7 +39,7 @@ func getExpertisesByCategory(expertises []character.Expertise, category string) 
 }
 
 templ ExpertiseSelection(char *character.Character, expertiseGroups map[string][]character.Expertise) {
-    @CreationLayout(char, "expertises", "Select Expertise") {
+    @CreationLayout(char, "expertises", "Select Expertise", NavState{BackEnabled: true, NextEnabled: char.Expertises.PointsRemaining == 0}) {
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold">Select Your Expertise</h1>
             <div class="text-xl font-semibold flex items-center gap-2">

@@ -61,7 +61,7 @@ func (s *Server) handleCharacterAttributesPointsGet(w http.ResponseWriter, r *ht
 
 	getInt := func(field string, current int) int {
 		val, err := strconv.Atoi(r.FormValue(field))
-		if err != nil || val < current {
+		if err != nil || val < 0 {
 			return current
 		}
 		return val
@@ -84,6 +84,7 @@ func (s *Server) handleCharacterAttributesPointsGet(w http.ResponseWriter, r *ht
 	remaining := char.Attributes.PointsRemaining - totalSpent
 
 	views.PointsRemaining(remaining).Render(r.Context(), w)
+	views.NextButtonOOB(remaining == 0).Render(r.Context(), w)
 }
 
 func (s *Server) handleCharacterAttributesPost(w http.ResponseWriter, r *http.Request) {
@@ -113,7 +114,7 @@ func (s *Server) handleCharacterAttributesPost(w http.ResponseWriter, r *http.Re
 
 	getInt := func(field string, current int) int {
 		val, err := strconv.Atoi(r.FormValue(field))
-		if err != nil || val < current {
+		if err != nil || val < 0 {
 			return current
 		}
 		return val

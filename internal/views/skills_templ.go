@@ -211,7 +211,7 @@ func SkillSelection(char *character.Character, skillGroups map[string][]characte
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = CreationLayout(char, "skills", "Allocate Skills").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = CreationLayout(char, "skills", "Allocate Skills", NavState{BackEnabled: true, NextEnabled: char.Skills.PointsRemaining == 0}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

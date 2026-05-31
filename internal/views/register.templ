@@ -2,7 +2,7 @@ package views
 
 // RegisterForm is a compiled Go function that renders HTML
 templ RegisterForm(errors map[string]string) {
-    @Layout("Register") {
+    @Layout("Register", false) {
         <div class="flex items-center justify-center min-h-[calc(100vh-4rem)]">
             <div class="card w-96 bg-base-200 shadow-xl">
                 <div class="card-body">

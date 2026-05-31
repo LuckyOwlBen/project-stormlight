@@ -62,10 +62,12 @@ func (s *Server) Mount() http.Handler {
 	// Protected routes
 	r.Group(func(r chi.Router) {
 		r.Use(s.AuthMiddleware)
+		r.Post("/logout", s.handleLogout)
 		r.Get("/dashboard", s.handleDashboardGet)
 
 		r.Get("/characters/{id}/sidenav", s.HandleGetSidenav)
 		r.Get("/characters/{id}/basics", s.handleCharacterBasicsGet)
+		r.Get("/characters/{id}/basics/validate", s.handleCharacterBasicsValidate)
 		r.Post("/characters/{id}/basics", s.handleCharacterBasicsPost)
 		r.Post("/characters", s.handleCharacterCreate)
 		r.Post("/characters/{id}/delete", s.handleCharacterDelete)

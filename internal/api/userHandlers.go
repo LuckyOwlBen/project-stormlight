@@ -88,6 +88,20 @@ func (s *Server) handleLoginPost(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 }
 
+// POST /logout
+func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {
+	session, _ := s.sessionStore.Get(r, "session-name")
+	session.Options.MaxAge = -1
+	session.Save(r, w)
+
+	if r.Header.Get("HX-Request") == "true" {
+		w.Header().Set("HX-Redirect", "/login")
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
+}
+
 // GET /dashboard
 func (s *Server) handleDashboardGet(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(int)

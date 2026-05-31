@@ -221,7 +221,7 @@ func ExpertiseSelection(char *character.Character, expertiseGroups map[string][]
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = CreationLayout(char, "expertises", "Select Expertise").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = CreationLayout(char, "expertises", "Select Expertise", NavState{BackEnabled: true, NextEnabled: char.Expertises.PointsRemaining == 0}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

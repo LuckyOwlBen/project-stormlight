@@ -16,7 +16,7 @@ func hasCulture(char *character.Character, name string) bool {
 }
 
 templ CultureSelection(char *character.Character, cultures map[string]character.Culture) {
-    @CreationLayout(char, "cultures", "Select Cultures") {
+    @CreationLayout(char, "cultures", "Select Cultures", NavState{BackEnabled: true, NextEnabled: len(char.UnlockedCultureIDs) > 0}) {
         <div class="flex justify-between items-center mb-6">
             <div>
                 <h1 class="text-3xl font-bold">Select Cultures</h1>

@@ -98,7 +98,7 @@ func InventoryPage(char *character.Character, kits []store.Kit, storeItems map[s
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = CreationLayout(char, "inventory", "Inventory").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = CreationLayout(char, "inventory", "Inventory", NavState{BackEnabled: true, NextEnabled: true}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

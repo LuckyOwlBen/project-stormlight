@@ -51,6 +51,7 @@ func (s *Server) handleCharacterExpertisesPointsGet(w http.ResponseWriter, r *ht
 	remaining := maxExpertises - len(selectedNames)
 
 	views.PointsRemaining(remaining).Render(r.Context(), w)
+	views.NextButtonOOB(remaining == 0).Render(r.Context(), w)
 }
 
 func (s *Server) handleCharacterExpertisesGet(w http.ResponseWriter, r *http.Request) {
