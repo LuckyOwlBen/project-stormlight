@@ -70,7 +70,7 @@ func BasicsForm(char *character.Character, cultures []character.Culture) templ.C
 				}
 				for _, c := range cultures {
 					for _, n := range c.SuggestedNames {
-						templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: "document.querySelector('input[name=\\'name\\']').value = this.innerText"})
+						templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: "var el=document.querySelector('input[name=\\'name\\']');el.value=this.innerText;el.dispatchEvent(new Event('input'))"})
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -78,7 +78,7 @@ func BasicsForm(char *character.Character, cultures []character.Culture) templ.C
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						var templ_7745c5c3_Var4 templ.ComponentScript = templ.ComponentScript{Call: "document.querySelector('input[name=\\'name\\']').value = this.innerText"}
+						var templ_7745c5c3_Var4 templ.ComponentScript = templ.ComponentScript{Call: "var el=document.querySelector('input[name=\\'name\\']');el.value=this.innerText;el.dispatchEvent(new Event('input'))"}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4.Call)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
@@ -90,7 +90,7 @@ func BasicsForm(char *character.Character, cultures []character.Culture) templ.C
 						var templ_7745c5c3_Var5 string
 						templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(n)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/basics.templ`, Line: 25, Col: 221}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/basics.templ`, Line: 25, Col: 266}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 						if templ_7745c5c3_Err != nil {

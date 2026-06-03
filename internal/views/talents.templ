@@ -123,7 +123,14 @@ templ TalentSectionsFragment(char *character.Character, path character.Path, sub
                                                 </label>
                                                 <p class="text-xs mt-2 opacity-80">{ tw.Talent.Description }</p>
                                                 if tw.State == character.StateIneligible {
-                                                    <p class="text-xs text-warning mt-1 font-semibold">Prerequisites not met</p>
+                                                    <div class="mt-1">
+                                                        <p class="text-xs text-warning font-semibold">Prerequisites not met:</p>
+                                                        <ul class="text-xs text-warning opacity-80 list-disc list-inside">
+                                                            for _, req := range tw.UnmetPrereqs {
+                                                                <li>{ req }</li>
+                                                            }
+                                                        </ul>
+                                                    </div>
                                                 }
                                             </div>
                                         </div>

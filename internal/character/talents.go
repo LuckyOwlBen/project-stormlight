@@ -2,6 +2,7 @@ package character
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"project-stormlight/data"
@@ -353,8 +354,9 @@ const (
 
 // TalentWithState pairs a talent with its computed display state.
 type TalentWithState struct {
-	Talent Talent
-	State  TalentState
+	Talent       Talent
+	State        TalentState
+	UnmetPrereqs []string // human-readable descriptions of unmet prerequisites
 }
 
 // MaxVisibleTierForPath returns the highest tier that should be visible in sub-path
@@ -397,12 +399,66 @@ func MaxVisibleTierForPath(ownedIDs, pendingIDs []string, path Path, subPathMap 
 func EvaluateSubPathNodes(char *Character, pendingIDs []string, maxVisibleTier int, nodes []Talent) []TalentWithState {
 	result := make([]TalentWithState, 0, len(nodes))
 	for _, t := range nodes {
+		state := talentStateFor(char, pendingIDs, maxVisibleTier, t)
+		var unmet []string
+		if state == StateIneligible {
+			unmet = collectUnmetPrereqs(char, pendingIDs, t.Prerequisites)
+		}
 		result = append(result, TalentWithState{
-			Talent: t,
-			State:  talentStateFor(char, pendingIDs, maxVisibleTier, t),
+			Talent:       t,
+			State:        state,
+			UnmetPrereqs: unmet,
 		})
 	}
 	return result
+}
+
+// collectUnmetPrereqs returns human-readable descriptions of prerequisites that are not currently met.
+func collectUnmetPrereqs(char *Character, pendingIDs []string, prereqs []Prerequisite) []string {
+	pendingSet := make(map[string]bool, len(pendingIDs))
+	for _, id := range pendingIDs {
+		pendingSet[id] = true
+	}
+	var missing []string
+	for _, req := range prereqs {
+		switch req.Type {
+		case "talent":
+			owned := pendingSet[req.Target]
+			if !owned && char != nil && char.Talents != nil {
+				for _, h := range char.Talents.List {
+					if h.TalentID == req.Target {
+						owned = true
+						break
+					}
+				}
+			}
+			if !owned {
+				name := req.Target
+				if t, ok := AllTalents[req.Target]; ok {
+					name = t.Name
+				}
+				missing = append(missing, "Talent: "+name)
+			}
+		case "skill":
+			hasSkill := false
+			if char != nil && char.Skills != nil {
+				for _, s := range char.Skills.PlayerSkills {
+					if strings.EqualFold(s.SkillName, req.Target) && s.Value >= req.Value {
+						hasSkill = true
+						break
+					}
+				}
+			}
+			if !hasSkill {
+				missing = append(missing, fmt.Sprintf("Skill: %s (rank %d+)", req.Target, req.Value))
+			}
+		case "level":
+			if char == nil || char.Level < req.Value {
+				missing = append(missing, fmt.Sprintf("Level %d", req.Value))
+			}
+		}
+	}
+	return missing
 }
 
 func talentStateFor(char *Character, pendingIDs []string, maxVisibleTier int, t Talent) TalentState {

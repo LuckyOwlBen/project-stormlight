@@ -22,7 +22,7 @@ templ BasicsForm(char *character.Character, cultures []character.Culture) {
                                     <div class="flex flex-wrap gap-2">
                                         for _, c := range cultures {
                                             for _, n := range c.SuggestedNames {
-                                                <button type="button" class="btn btn-xs btn-outline" onclick={ templ.ComponentScript{ Call: "document.querySelector('input[name=\\'name\\']').value = this.innerText" } }>{ n }</button>
+                                                <button type="button" class="btn btn-xs btn-outline" onclick={ templ.ComponentScript{ Call: "var el=document.querySelector('input[name=\\'name\\']');el.value=this.innerText;el.dispatchEvent(new Event('input'))" } }>{ n }</button>
                                             }
                                         }
                                     </div>
