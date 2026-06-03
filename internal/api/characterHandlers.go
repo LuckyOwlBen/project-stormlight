@@ -211,15 +211,19 @@ func (s *Server) handleCharacterFinalizePost(w http.ResponseWriter, r *http.Requ
 	char.CulturesFinalized = true
 	if char.Attributes != nil {
 		char.Attributes.Finalized = true
+		char.Attributes.PendingPoints = 0
 	}
 	if char.Skills != nil {
 		char.Skills.Finalized = true
+		char.Skills.PendingPoints = 0
 	}
 	if char.Expertises != nil {
 		char.Expertises.Finalized = true
+		char.Expertises.PendingPoints = 0
 	}
 	if char.Talents != nil {
 		char.Talents.Finalized = true
+		char.Talents.PendingPoints = 0
 	}
 	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
 		http.Error(w, "Failed to finalize character", http.StatusInternalServerError)
