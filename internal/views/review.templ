@@ -7,161 +7,165 @@ import (
 
 templ CharacterReview(char *character.Character) {
 	@CreationLayout(char, "review", "Review Character", NavState{BackEnabled: true, NextEnabled: true}) {
+		<!-- Header -->
 		<div class="flex justify-between items-center mb-6">
 			<div>
 				<h1 class="text-3xl font-bold">{ char.Name }</h1>
 				<p class="text-sm opacity-60">Level { strconv.Itoa(char.Level) } · { string(char.Ancestry) }</p>
 			</div>
-                        <form id="creation-form" action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/finalize") } method="POST" class="hidden"></form>
-			if char.Resources != nil {
-				<div class="card bg-base-200 shadow">
-					<div class="card-body">
-						<h2 class="card-title">Resources</h2>
-						<div class="stats stats-vertical sm:stats-horizontal w-full">
-							<div class="stat">
-								<div class="stat-title">Health</div>
-								<div class="stat-value text-error">{ strconv.Itoa(char.Resources.HealthMax) }</div>
-							</div>
-							<div class="stat">
-								<div class="stat-title">Focus</div>
-								<div class="stat-value text-info">{ strconv.Itoa(char.Resources.FocusMax) }</div>
-							</div>
-							if char.Resources.InvestitureActive {
+			<form id="creation-form" action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/finalize") } method="POST" class="hidden"></form>
+		</div>
+
+		<!-- 3-column review grid -->
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+
+			<!-- Column 1: Core Stats -->
+			<div class="flex flex-col gap-4">
+				if char.Resources != nil {
+					<div class="card bg-base-200 shadow">
+						<div class="card-body">
+							<h2 class="card-title">Resources</h2>
+							<div class="stats stats-vertical w-full">
 								<div class="stat">
-									<div class="stat-title">Investiture</div>
-									<div class="stat-value text-secondary">{ strconv.Itoa(char.Resources.InvestitureMax) }</div>
+									<div class="stat-title">Health</div>
+									<div class="stat-value text-error">{ strconv.Itoa(char.Resources.HealthMax) }</div>
 								</div>
-							}
-						</div>
-					</div>
-				</div>
-			}
-
-			<!-- Attributes -->
-			if char.Attributes != nil {
-				<div class="card bg-base-200 shadow">
-					<div class="card-body">
-						<h2 class="card-title">Attributes</h2>
-						<div class="grid grid-cols-3 gap-3">
-							<div class="flex flex-col items-center p-2 bg-base-300 rounded-lg">
-								<span class="text-xs opacity-60 uppercase tracking-wide">Strength</span>
-								<span class="text-2xl font-bold">{ strconv.Itoa(char.Attributes.Strength) }</span>
-							</div>
-							<div class="flex flex-col items-center p-2 bg-base-300 rounded-lg">
-								<span class="text-xs opacity-60 uppercase tracking-wide">Speed</span>
-								<span class="text-2xl font-bold">{ strconv.Itoa(char.Attributes.Speed) }</span>
-							</div>
-							<div class="flex flex-col items-center p-2 bg-base-300 rounded-lg">
-								<span class="text-xs opacity-60 uppercase tracking-wide">Willpower</span>
-								<span class="text-2xl font-bold">{ strconv.Itoa(char.Attributes.Willpower) }</span>
-							</div>
-							<div class="flex flex-col items-center p-2 bg-base-300 rounded-lg">
-								<span class="text-xs opacity-60 uppercase tracking-wide">Intelligence</span>
-								<span class="text-2xl font-bold">{ strconv.Itoa(char.Attributes.Intelligence) }</span>
-							</div>
-							<div class="flex flex-col items-center p-2 bg-base-300 rounded-lg">
-								<span class="text-xs opacity-60 uppercase tracking-wide">Awareness</span>
-								<span class="text-2xl font-bold">{ strconv.Itoa(char.Attributes.Awareness) }</span>
-							</div>
-							<div class="flex flex-col items-center p-2 bg-base-300 rounded-lg">
-								<span class="text-xs opacity-60 uppercase tracking-wide">Presence</span>
-								<span class="text-2xl font-bold">{ strconv.Itoa(char.Attributes.Presence) }</span>
-							</div>
-						</div>
-					</div>
-				</div>
-			}
-
-			<!-- Skills -->
-			if char.Skills != nil && len(char.Skills.PlayerSkills) > 0 {
-				<div class="card bg-base-200 shadow">
-					<div class="card-body">
-						<h2 class="card-title">Skills</h2>
-						<div class="grid grid-cols-2 gap-1">
-							for _, skill := range char.Skills.PlayerSkills {
-								<div class="flex justify-between items-center py-1 px-2 bg-base-300 rounded">
-									<span class="text-sm">{ skill.SkillName }</span>
-									<span class="badge badge-primary badge-sm">{ strconv.Itoa(skill.Value) }</span>
+								<div class="stat">
+									<div class="stat-title">Focus</div>
+									<div class="stat-value text-info">{ strconv.Itoa(char.Resources.FocusMax) }</div>
 								</div>
-							}
-						</div>
-					</div>
-				</div>
-			}
-
-			<!-- Talents -->
-			if char.Talents != nil && len(char.Talents.List) > 0 {
-				<div class="card bg-base-200 shadow">
-					<div class="card-body">
-						<h2 class="card-title">Talents</h2>
-						<div class="flex flex-col gap-2">
-							for _, history := range char.Talents.List {
-								<div class="flex items-start gap-2 p-2 bg-base-300 rounded">
-									<div>
-										<p class="font-medium text-sm">{ history.Talent.Name }</p>
-										if history.Talent.Description != "" {
-											<p class="text-xs opacity-60">{ history.Talent.Description }</p>
-										}
+								if char.Resources.InvestitureActive {
+									<div class="stat">
+										<div class="stat-title">Investiture</div>
+										<div class="stat-value text-secondary">{ strconv.Itoa(char.Resources.InvestitureMax) }</div>
 									</div>
-								</div>
-							}
+								}
+							</div>
 						</div>
 					</div>
-				</div>
-			}
+				}
+				if char.Attributes != nil {
+					<div class="card bg-base-200 shadow">
+						<div class="card-body">
+							<h2 class="card-title">Attributes</h2>
+							<div class="grid grid-cols-3 gap-3">
+								<div class="flex flex-col items-center p-2 bg-base-300 rounded-lg">
+									<span class="text-xs opacity-60 uppercase tracking-wide">Strength</span>
+									<span class="text-2xl font-bold">{ strconv.Itoa(char.Attributes.Strength) }</span>
+								</div>
+								<div class="flex flex-col items-center p-2 bg-base-300 rounded-lg">
+									<span class="text-xs opacity-60 uppercase tracking-wide">Speed</span>
+									<span class="text-2xl font-bold">{ strconv.Itoa(char.Attributes.Speed) }</span>
+								</div>
+								<div class="flex flex-col items-center p-2 bg-base-300 rounded-lg">
+									<span class="text-xs opacity-60 uppercase tracking-wide">Willpower</span>
+									<span class="text-2xl font-bold">{ strconv.Itoa(char.Attributes.Willpower) }</span>
+								</div>
+								<div class="flex flex-col items-center p-2 bg-base-300 rounded-lg">
+									<span class="text-xs opacity-60 uppercase tracking-wide">Intelligence</span>
+									<span class="text-2xl font-bold">{ strconv.Itoa(char.Attributes.Intelligence) }</span>
+								</div>
+								<div class="flex flex-col items-center p-2 bg-base-300 rounded-lg">
+									<span class="text-xs opacity-60 uppercase tracking-wide">Awareness</span>
+									<span class="text-2xl font-bold">{ strconv.Itoa(char.Attributes.Awareness) }</span>
+								</div>
+								<div class="flex flex-col items-center p-2 bg-base-300 rounded-lg">
+									<span class="text-xs opacity-60 uppercase tracking-wide">Presence</span>
+									<span class="text-2xl font-bold">{ strconv.Itoa(char.Attributes.Presence) }</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				}
+			</div>
 
-			<!-- Expertises -->
-			if char.Expertises != nil && len(char.Expertises.List) > 0 {
+			<!-- Column 2: Abilities -->
+			<div class="flex flex-col gap-4">
+				if char.Skills != nil && len(char.Skills.PlayerSkills) > 0 {
+					<div class="card bg-base-200 shadow">
+						<div class="card-body">
+							<h2 class="card-title">Skills</h2>
+							<div class="grid grid-cols-2 gap-1">
+								for _, skill := range char.Skills.PlayerSkills {
+									<div class="flex justify-between items-center py-1 px-2 bg-base-300 rounded">
+										<span class="text-sm">{ skill.SkillName }</span>
+										<span class="badge badge-primary badge-sm">{ strconv.Itoa(skill.Value) }</span>
+									</div>
+								}
+							</div>
+						</div>
+					</div>
+				}
+				if char.Expertises != nil && len(char.Expertises.List) > 0 {
+					<div class="card bg-base-200 shadow">
+						<div class="card-body">
+							<h2 class="card-title">Expertises</h2>
+							<div class="flex flex-wrap gap-2">
+								for _, exp := range char.Expertises.List {
+									<div class="badge badge-outline badge-lg">{ exp.Name }</div>
+								}
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+
+			<!-- Column 3: Talents & Inventory -->
+			<div class="flex flex-col gap-4">
+				if char.Talents != nil && len(char.Talents.List) > 0 {
+					<div class="card bg-base-200 shadow">
+						<div class="card-body">
+							<h2 class="card-title">Talents</h2>
+							<div class="flex flex-col gap-2">
+								for _, history := range char.Talents.List {
+									<div class="flex items-start gap-2 p-2 bg-base-300 rounded">
+										<div>
+											<p class="font-medium text-sm">{ history.Talent.Name }</p>
+											if history.Talent.Description != "" {
+												<p class="text-xs opacity-60">{ history.Talent.Description }</p>
+											}
+										</div>
+									</div>
+								}
+							</div>
+						</div>
+					</div>
+				}
 				<div class="card bg-base-200 shadow">
 					<div class="card-body">
-						<h2 class="card-title">Expertises</h2>
-						<div class="flex flex-wrap gap-2">
-							for _, exp := range char.Expertises.List {
-								<div class="badge badge-outline badge-lg">{ exp.Name }</div>
-							}
+						<h2 class="card-title">Inventory</h2>
+						<div class="flex flex-wrap gap-2 mb-3">
+							<span class="badge badge-warning h-auto py-1 px-2 text-sm whitespace-normal">{ strconv.Itoa(char.CurrencyInChips / 20) } Broams</span>
+							<span class="badge badge-secondary h-auto py-1 px-2 text-sm whitespace-normal">{ strconv.Itoa((char.CurrencyInChips % 20) / 5) } Marks</span>
+							<span class="badge badge-accent h-auto py-1 px-2 text-sm whitespace-normal">{ strconv.Itoa(char.CurrencyInChips % 5) } Chips</span>
 						</div>
-					</div>
-				</div>
-			}
-
-			<!-- Inventory & Currency -->
-			<div class="card bg-base-200 shadow">
-				<div class="card-body">
-					<h2 class="card-title">Inventory</h2>
-					<div class="flex gap-2 mb-3">
-						<span class="badge badge-warning badge-lg">{ strconv.Itoa(char.CurrencyInChips / 20) } Broams</span>
-						<span class="badge badge-secondary badge-lg">{ strconv.Itoa((char.CurrencyInChips % 20) / 5) } Marks</span>
-						<span class="badge badge-accent badge-lg">{ strconv.Itoa(char.CurrencyInChips % 5) } Chips</span>
-					</div>
-					if char.Inventory == nil || len(*char.Inventory) == 0 {
-						<p class="text-sm opacity-60 italic">No items.</p>
-					} else {
-						<div class="overflow-x-auto">
-							<table class="table table-sm">
-								<thead>
-									<tr>
-										<th>Item</th>
-										<th class="text-right">Qty</th>
-									</tr>
-								</thead>
-								<tbody>
-									for _, item := range *char.Inventory {
+						if char.Inventory == nil || len(*char.Inventory) == 0 {
+							<p class="text-sm opacity-60 italic">No items.</p>
+						} else {
+							<div class="overflow-x-auto">
+								<table class="table table-sm">
+									<thead>
 										<tr>
-											<td>{ item.Name }</td>
-											<td class="text-right">{ strconv.Itoa(item.Quantity) }</td>
+											<th>Item</th>
+											<th class="text-right">Qty</th>
 										</tr>
-									}
-								</tbody>
-							</table>
-						</div>
-					}
+									</thead>
+									<tbody>
+										for _, item := range *char.Inventory {
+											<tr>
+												<td>{ item.Name }</td>
+												<td class="text-right">{ strconv.Itoa(item.Quantity) }</td>
+											</tr>
+										}
+									</tbody>
+								</table>
+							</div>
+						}
+					</div>
 				</div>
 			</div>
 
 		</div>
-
-		<!-- Bottom finalize bar -->
-		
 	}
 }
 
