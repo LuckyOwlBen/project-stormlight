@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"project-stormlight/internal/database"
+	"project-stormlight/internal/playspace"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -14,6 +15,7 @@ import (
 type Server struct {
 	store        *database.Store
 	sessionStore *sessions.CookieStore
+	hub          *playspace.Hub
 }
 
 // NewServer creates a new API server with the required dependencies
@@ -21,7 +23,13 @@ func NewServer(store *database.Store) *Server {
 	return &Server{
 		store:        store,
 		sessionStore: sessions.NewCookieStore([]byte("super-secret-key-keep-safe")),
+		hub:          playspace.NewHub(),
 	}
+}
+
+// Hub returns the playspace hub so callers can start it.
+func (s *Server) Hub() *playspace.Hub {
+	return s.hub
 }
 
 // redirectIfFinalized redirects to /dashboard if the given flag is true and returns true.
@@ -60,6 +68,8 @@ func (s *Server) Mount() http.Handler {
 	// User Registration
 	r.Get("/register", s.handleRegisterGet)
 	r.Post("/register", s.handleRegisterPost)
+	r.Get("/register/gm", s.handleGMRegisterGet)
+	r.Post("/register/gm", s.handleGMRegisterPost)
 
 	// User Login
 	r.Get("/login", s.handleLoginGet)
@@ -119,6 +129,11 @@ func (s *Server) Mount() http.Handler {
 
 		// Playspace integration
 		r.Get("/playspace/{id}", s.handlePlayspaceGet)
+		r.Get("/playspace/{id}/ws", s.handlePlayspaceWebSocket)
+
+		// GM views
+		r.Get("/gm", s.handleGMGet)
+		r.Get("/gm/ws", s.handleGMWebSocket)
 	})
 
 	return r

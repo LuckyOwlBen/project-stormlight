@@ -46,183 +46,196 @@ func Playspace(char *character.Character) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mx-auto p-4 max-w-6xl\"><div class=\"flex justify-between items-center mb-6\"><h1 class=\"text-4xl font-bold text-primary\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mx-auto p-4 max-w-6xl\" id=\"playspace-root\" data-char-id=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(char.Name)
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(char.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 12, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 10, Col: 103}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "'s Playspace</h1><div class=\"badge badge-lg badge-accent\">Level ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><div class=\"flex justify-between items-center mb-6\"><h1 class=\"text-4xl font-bold text-primary\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(char.Level))
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(char.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 13, Col: 73}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 12, Col: 59}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</h1><div class=\"badge badge-lg badge-accent\">Level ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(string(char.Ancestry))
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(char.Level))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 13, Col: 99}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 13, Col: 77}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></div><div role=\"tablist\" class=\"tabs tabs-lifted tabs-lg mb-8\"><input type=\"radio\" name=\"playspace_tabs\" role=\"tab\" class=\"tab\" aria-label=\"Player View\" checked=\"checked\"><div role=\"tabpanel\" class=\"tab-content bg-base-100 border-base-300 rounded-box p-6 shadow-xl\"><div class=\"space-y-4\"><div class=\"collapse collapse-arrow bg-base-200 border border-base-300\"><input type=\"radio\" name=\"player_accordion\" checked=\"checked\"><div class=\"collapse-title text-xl font-medium\">Resources &amp; Currency</div><div class=\"collapse-content\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(string(char.Ancestry))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 13, Col: 103}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div><div class=\"grid grid-cols-1 lg:grid-cols-3 gap-6\"><!-- Character Stats: 2 cols on large screens --><div class=\"lg:col-span-2 space-y-4\"><!-- Resources -->")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if char.Resources != nil {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"stats shadow w-full mb-4\"><div class=\"stat\"><div class=\"stat-title\">Health</div><div class=\"stat-value text-error\">")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var6 string
-				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(char.Resources.HealthMax))
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 28, Col: 75}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div></div><div class=\"stat\"><div class=\"stat-title\">Focus</div><div class=\"stat-value text-info\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"card bg-base-200 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title\">Resources</h2><div class=\"stats shadow w-full\"><div class=\"stat\"><div class=\"stat-title\">Health</div><div class=\"stat-value text-error\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var7 string
-				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(char.Resources.FocusMax))
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(char.Resources.HealthMax))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 32, Col: 73}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 27, Col: 85}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div></div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div></div><div class=\"stat\"><div class=\"stat-title\">Focus</div><div class=\"stat-value text-info\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"alert alert-info shadow-lg\"><div><span class=\"font-bold\">Chips:</span> <span>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(char.CurrencyInChips))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 39, Col: 42}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</span></div></div></div></div><div class=\"collapse collapse-arrow bg-base-200 border border-base-300\"><input type=\"radio\" name=\"player_accordion\"><div class=\"collapse-title text-xl font-medium\">Attributes</div><div class=\"collapse-content\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if char.Attributes != nil {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"grid grid-cols-2 md:grid-cols-4 gap-4\"><div class=\"card bg-base-100 shadow\"><div class=\"card-body p-4 text-center\"><h3 class=\"font-bold\">Strength</h3><span class=\"text-2xl\">")
+				var templ_7745c5c3_Var8 string
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(char.Resources.FocusMax))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 31, Col: 83}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></div><div class=\"stat\"><div class=\"stat-title\">Chips</div><div class=\"stat-value text-success\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var9 string
-				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(char.Attributes.Strength))
+				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(char.CurrencyInChips))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 51, Col: 174}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 35, Col: 83}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</span></div></div><div class=\"card bg-base-100 shadow\"><div class=\"card-body p-4 text-center\"><h3 class=\"font-bold\">Speed</h3><span class=\"text-2xl\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div></div></div></div></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<!-- Attributes -->")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if char.Attributes != nil {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"card bg-base-200 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title\">Attributes</h2><div class=\"grid grid-cols-2 md:grid-cols-3 gap-4\"><div class=\"card bg-base-100 shadow\"><div class=\"card-body p-4 text-center\"><h3 class=\"font-bold\">Strength</h3><span class=\"text-2xl\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var10 string
-				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(char.Attributes.Speed))
+				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(char.Attributes.Strength))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 52, Col: 168}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 51, Col: 74}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</span></div></div><div class=\"card bg-base-100 shadow\"><div class=\"card-body p-4 text-center\"><h3 class=\"font-bold\">Intellect</h3><span class=\"text-2xl\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</span></div></div><div class=\"card bg-base-100 shadow\"><div class=\"card-body p-4 text-center\"><h3 class=\"font-bold\">Speed</h3><span class=\"text-2xl\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var11 string
-				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(char.Attributes.Intelligence))
+				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(char.Attributes.Speed))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 53, Col: 179}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 57, Col: 71}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</span></div></div><div class=\"card bg-base-100 shadow\"><div class=\"card-body p-4 text-center\"><h3 class=\"font-bold\">Willpower</h3><span class=\"text-2xl\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</span></div></div><div class=\"card bg-base-100 shadow\"><div class=\"card-body p-4 text-center\"><h3 class=\"font-bold\">Intellect</h3><span class=\"text-2xl\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var12 string
-				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(char.Attributes.Willpower))
+				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(char.Attributes.Intelligence))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 54, Col: 176}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 63, Col: 78}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</span></div></div><div class=\"card bg-base-100 shadow\"><div class=\"card-body p-4 text-center\"><h3 class=\"font-bold\">Awareness</h3><span class=\"text-2xl\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</span></div></div><div class=\"card bg-base-100 shadow\"><div class=\"card-body p-4 text-center\"><h3 class=\"font-bold\">Willpower</h3><span class=\"text-2xl\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var13 string
-				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(char.Attributes.Awareness))
+				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(char.Attributes.Willpower))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 55, Col: 176}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 69, Col: 75}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</span></div></div><div class=\"card bg-base-100 shadow\"><div class=\"card-body p-4 text-center\"><h3 class=\"font-bold\">Presence</h3><span class=\"text-2xl\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</span></div></div><div class=\"card bg-base-100 shadow\"><div class=\"card-body p-4 text-center\"><h3 class=\"font-bold\">Awareness</h3><span class=\"text-2xl\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var14 string
-				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(char.Attributes.Presence))
+				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(char.Attributes.Awareness))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 56, Col: 174}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 75, Col: 75}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</span></div></div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</span></div></div><div class=\"card bg-base-100 shadow\"><div class=\"card-body p-4 text-center\"><h3 class=\"font-bold\">Presence</h3><span class=\"text-2xl\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var15 string
+				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(char.Attributes.Presence))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/playspace.templ`, Line: 81, Col: 74}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</span></div></div></div></div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div></div></div></div><input type=\"radio\" name=\"playspace_tabs\" role=\"tab\" class=\"tab\" aria-label=\"GM View\"><div role=\"tabpanel\" class=\"tab-content bg-base-100 border-base-300 rounded-box p-6\"><p class=\"text-center font-bold\">GM View - Coming Soon</p></div></div><div class=\"mt-8 text-center text-sm text-base-content/50\"><a href=\"/dashboard\" class=\"link\">Return to Dashboard</a></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div><!-- Who's Online --><div class=\"card bg-base-200 shadow-xl h-fit\"><div class=\"card-body\"><h2 class=\"card-title\">Who's Online<div class=\"badge badge-success badge-sm\" id=\"ps-gm-badge\" style=\"display:none\">GM</div></h2><div id=\"ps-player-list\" class=\"space-y-2\"><p class=\"text-base-content/50 text-sm italic\">Connecting...</p></div></div></div></div><div class=\"mt-8 text-center text-sm text-base-content/50\"><a href=\"/dashboard\" class=\"link\">Return to Dashboard</a></div></div><script>\n\t\t\t(function () {\n\t\t\t\tconst charID = document.getElementById(\"playspace-root\").dataset.charId;\n\t\t\t\tconst protocol = location.protocol === \"https:\" ? \"wss:\" : \"ws:\";\n\t\t\t\tconst ws = new WebSocket(protocol + \"//\" + location.host + \"/playspace/\" + charID + \"/ws\");\n\n\t\t\t\tws.addEventListener(\"message\", function (evt) {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst data = JSON.parse(evt.data);\n\t\t\t\t\t\tif (data.type === \"presence_update\") {\n\t\t\t\t\t\t\tupdatePresence(data.players || [], data.gmOnline);\n\t\t\t\t\t\t}\n\t\t\t\t\t} catch (e) {\n\t\t\t\t\t\tconsole.error(\"Playspace WS parse error:\", e);\n\t\t\t\t\t}\n\t\t\t\t});\n\n\t\t\t\tws.addEventListener(\"close\", function () {\n\t\t\t\t\tdocument.getElementById(\"ps-player-list\").innerHTML =\n\t\t\t\t\t\t'<p class=\"text-warning text-sm\">Disconnected from server.</p>';\n\t\t\t\t});\n\n\t\t\t\tfunction updatePresence(players, gmOnline) {\n\t\t\t\t\tconst gmBadge = document.getElementById(\"ps-gm-badge\");\n\t\t\t\t\tgmBadge.style.display = gmOnline ? \"\" : \"none\";\n\n\t\t\t\t\tconst list = document.getElementById(\"ps-player-list\");\n\t\t\t\t\tif (players.length === 0) {\n\t\t\t\t\t\tlist.innerHTML = '<p class=\"text-base-content/50 text-sm italic\">No other players online.</p>';\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tlist.innerHTML = players.map(function (p) {\n\t\t\t\t\t\treturn '<div class=\"flex items-center gap-2 p-2 rounded bg-base-100\">' +\n\t\t\t\t\t\t\t'<div class=\"badge badge-success badge-xs\"></div>' +\n\t\t\t\t\t\t\t'<span class=\"font-medium\">' + escapeHtml(p.charName) + '</span>' +\n\t\t\t\t\t\t\t'</div>';\n\t\t\t\t\t}).join(\"\");\n\t\t\t\t}\n\n\t\t\t\tfunction escapeHtml(str) {\n\t\t\t\t\tconst d = document.createElement(\"div\");\n\t\t\t\t\td.appendChild(document.createTextNode(str));\n\t\t\t\t\treturn d.innerHTML;\n\t\t\t\t}\n\t\t\t})();\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

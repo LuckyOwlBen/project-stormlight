@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"os"
 	"project-stormlight/internal/models"
 	"project-stormlight/internal/views"
 
@@ -85,7 +86,50 @@ func (s *Server) handleLoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if user.IsGM {
+		http.Redirect(w, r, "/gm", http.StatusSeeOther)
+		return
+	}
 	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+}
+
+// GET /register/gm
+func (s *Server) handleGMRegisterGet(w http.ResponseWriter, r *http.Request) {
+	views.GMRegisterForm(nil).Render(r.Context(), w)
+}
+
+// POST /register/gm
+func (s *Server) handleGMRegisterPost(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Unable to parse form", http.StatusBadRequest)
+		return
+	}
+
+	gmSecret := os.Getenv("GM_SECRET")
+	if gmSecret == "" || r.FormValue("gm_secret") != gmSecret {
+		errors := map[string]string{"gm_secret": "Invalid GM secret."}
+		views.GMRegisterForm(errors).Render(r.Context(), w)
+		return
+	}
+
+	username := r.FormValue("username")
+	password, err := bcrypt.GenerateFromPassword([]byte(r.FormValue("password")), bcrypt.DefaultCost)
+	if err != nil {
+		http.Error(w, "Unable to hash password", http.StatusInternalServerError)
+		return
+	}
+
+	if err := s.store.CreateUser(r.Context(), &models.User{
+		Username: username,
+		Password: password,
+		IsGM:     true,
+	}); err != nil {
+		errors := map[string]string{"username": "Username already taken!"}
+		views.GMRegisterForm(errors).Render(r.Context(), w)
+		return
+	}
+
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
 // POST /logout

@@ -1,0 +1,50 @@
+package views
+
+templ GMRegisterForm(errors map[string]string) {
+	@Layout("GM Registration", false) {
+		<div class="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+			<div class="card w-96 bg-base-200 shadow-xl">
+				<div class="card-body">
+					<h2 class="card-title justify-center text-2xl mb-4">GM Registration</h2>
+					<p class="text-sm text-base-content/60 text-center mb-4">This page is for Game Masters only. You must have the GM secret to register.</p>
+					<form action="/register/gm" method="POST">
+						<div class="form-control w-full">
+							<label class="label">
+								<span class="label-text">Username</span>
+							</label>
+							<input type="text" name="username" class="input input-bordered w-full"/>
+							if err, ok := errors["username"]; ok {
+								<label class="label">
+									<span class="label-text-alt text-error">{ err }</span>
+								</label>
+							}
+						</div>
+						<div class="form-control w-full mt-4">
+							<label class="label">
+								<span class="label-text">Password</span>
+							</label>
+							<input type="password" name="password" class="input input-bordered w-full"/>
+						</div>
+						<div class="form-control w-full mt-4">
+							<label class="label">
+								<span class="label-text">GM Secret</span>
+							</label>
+							<input type="password" name="gm_secret" class="input input-bordered w-full"/>
+							if err, ok := errors["gm_secret"]; ok {
+								<label class="label">
+									<span class="label-text-alt text-error">{ err }</span>
+								</label>
+							}
+						</div>
+						<div class="form-control mt-6">
+							<button type="submit" class="btn btn-primary w-full">Register as GM</button>
+						</div>
+					</form>
+					<div class="text-center mt-4 text-sm">
+						<a href="/login" class="link link-hover">Already have an account? Login here.</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}

@@ -21,3 +21,12 @@ func (s *Store) GetUserByUsername(ctx context.Context, username string) (*models
 	}
 	return &user, nil
 }
+
+func (s *Store) GetUserByID(ctx context.Context, id int) (*models.User, error) {
+	var user models.User
+	err := s.db.WithContext(ctx).First(&user, id).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}

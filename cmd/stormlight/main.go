@@ -78,6 +78,9 @@ func main() {
 	// Initialize our API server, injecting the store
 	server := api.NewServer(store)
 
+	// Start the WebSocket presence hub
+	go server.Hub().Run()
+
 	log.Println("Starting server on :3000")
 	if err := http.ListenAndServe(":3000", server.Mount()); err != nil {
 		log.Fatal(err)
