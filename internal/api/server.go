@@ -112,6 +112,11 @@ func (s *Server) Mount() http.Handler {
 		r.Get("/characters/{id}/review", s.handleCharacterReviewGet)
 		r.Post("/characters/{id}/finalize", s.handleCharacterFinalizePost)
 
+		// Bonus ledger
+		r.Get("/characters/{id}/bonuses", s.handleCharacterBonusesGet)
+		r.Post("/characters/{id}/bonuses/recalculate", s.handleCharacterBonusesRecalculate)
+		r.Patch("/characters/{id}/bonuses/{bonusId}/toggle", s.handleCharacterBonusToggle)
+
 		// Playspace integration
 		r.Get("/playspace/{id}", s.handlePlayspaceGet)
 	})

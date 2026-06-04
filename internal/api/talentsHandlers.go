@@ -202,6 +202,13 @@ func (s *Server) handleCharacterTalentsPost(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	// Keep the bonus ledger in sync with the updated talent list.
+	bonuses := character.RecalculateBonuses(char)
+	if err := s.store.UpsertBonuses(r.Context(), char.ID, bonuses); err != nil {
+		// Non-fatal: log and continue — the talent save already succeeded.
+		_ = err
+	}
+
 	http.Redirect(w, r, models.DetermineNextStepURL(char, "Talents"), http.StatusSeeOther)
 }
 

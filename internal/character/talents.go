@@ -108,6 +108,7 @@ type Bonus struct {
 	Scaling      bool   `json:"scaling,omitempty"`
 	Value        int    `json:"value,omitempty"`
 	ValueFormula string `json:"valueFormula,omitempty"`
+	Condition    string `json:"condition,omitempty"` // non-empty means the bonus is conditional
 }
 
 type ExpertiseGrant struct {

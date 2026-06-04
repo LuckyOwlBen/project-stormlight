@@ -84,9 +84,18 @@ func (s *Server) handleCharacterExpertisesGet(w http.ResponseWriter, r *http.Req
 		maxExpertises = 0
 	}
 
+	// Count only non-culture expertises against the Intelligence budget.
+	// The 2 cultural expertises granted during culture selection are free.
+	chosen := 0
+	for _, e := range char.Expertises.List {
+		if e.Source != "culture_selection" {
+			chosen++
+		}
+	}
+
 	// Sync the point tracker to show total max and remaining available
 	char.Expertises.TotalPoints = maxExpertises
-	char.Expertises.PointsRemaining = maxExpertises - len(char.Expertises.List)
+	char.Expertises.PointsRemaining = maxExpertises - chosen
 
 	component := views.ExpertiseSelection(char, character.ExpertiseGroups)
 	component.Render(r.Context(), w)
@@ -133,11 +142,18 @@ func (s *Server) handleCharacterExpertisesPost(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	var newExpertises []character.Expertise
+	// Preserve cultural expertises seeded during culture selection.
+	var preserved []character.Expertise
+	for _, e := range char.Expertises.List {
+		if e.Source == "culture_selection" {
+			preserved = append(preserved, e)
+		}
+	}
+
+	var chosen []character.Expertise
 	for _, name := range selectedNames {
 		if exp, exists := character.ExpertiseList[name]; exists {
-			// Create a copy for the character list
-			newExpertises = append(newExpertises, character.Expertise{
+			chosen = append(chosen, character.Expertise{
 				ExpertisesID: char.Expertises.ID,
 				CharacterID:  char.ID,
 				Name:         exp.Name,
@@ -148,11 +164,11 @@ func (s *Server) handleCharacterExpertisesPost(w http.ResponseWriter, r *http.Re
 		}
 	}
 
-	char.Expertises.List = newExpertises
+	char.Expertises.List = append(preserved, chosen...)
 
-	// Sync the point tracker before saving
+	// Sync the point tracker before saving (only Intelligence-budget slots count).
 	char.Expertises.TotalPoints = maxExpertises
-	char.Expertises.PointsRemaining = maxExpertises - len(char.Expertises.List)
+	char.Expertises.PointsRemaining = maxExpertises - len(chosen)
 
 	char.CreationStep = "skills"
 

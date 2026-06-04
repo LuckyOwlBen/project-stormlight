@@ -28,6 +28,8 @@ func (s *Store) GetCharacterByID(ctx context.Context, id int) (*character.Charac
 		Preload("Talents.List").
 		Preload("Expertises.List").
 		Preload("Resources").
+		Preload("Defenses").
+		Preload("Bonuses").
 		First(&char, id).Error
 
 	if err != nil {

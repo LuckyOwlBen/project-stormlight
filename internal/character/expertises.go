@@ -70,17 +70,17 @@ func LoadExpertises() error {
 	return nil
 }
 
-// NewExpertises creates a new Expertises module tracker for a character
-func NewExpertises(level int) *Expertises {
-	// Let's assume you get 1 expertise point per level as an example.
-	// You can adjust the math to match whatever your actual point distribution per level logic is!
-	availablePoints := level
+// NewExpertises creates a new Expertises module tracker for a character.
+// TotalPoints is intentionally 0 here — it is set to the character's Intelligence
+// score at display time, since attributes are not yet assigned at creation.
+// Two cultural expertises are seeded separately by the culture selection step.
+func NewExpertises() *Expertises {
 	return &Expertises{
 		List: []Expertise{},
 		PointTracker: PointTracker{
-			TotalPoints:     availablePoints,
+			TotalPoints:     0,
 			PendingPoints:   0,
-			PointsRemaining: availablePoints,
+			PointsRemaining: 0,
 			Finalized:       false,
 		},
 	}

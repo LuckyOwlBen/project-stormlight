@@ -20,17 +20,19 @@ type Character struct {
 
 	// Relationships
 	// We use a pointer (*Attributes) so it can be 'nil' if we fetch a character WITHOUT fetching their attributes
-	Cultures           *[]Culture      `json:"cultures,omitempty" gorm:"-"`
-	UnlockedCultureIDs []string        `json:"-" gorm:"serializer:json;type:jsonb"`
-	CulturesFinalized  bool            `json:"culturesFinalized" gorm:"not null;default:false"`
-	IsFinalized        bool            `json:"isFinalized" gorm:"not null;default:false"`
-	Attributes         *Attributes     `json:"attributes,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
-	PathsTracker       *PathsTracker   `json:"pathsTracker,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
-	Skills             *Skills         `json:"skills,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
-	Inventory          *[]Inventory    `json:"inventory,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
-	Talents            *TalentsTracker `json:"talents,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
-	Expertises         *Expertises     `json:"expertises,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
-	Resources          *Resources      `json:"resources,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
+	Cultures           *[]Culture        `json:"cultures,omitempty" gorm:"-"`
+	UnlockedCultureIDs []string          `json:"-" gorm:"serializer:json;type:jsonb"`
+	CulturesFinalized  bool              `json:"culturesFinalized" gorm:"not null;default:false"`
+	IsFinalized        bool              `json:"isFinalized" gorm:"not null;default:false"`
+	Attributes         *Attributes       `json:"attributes,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
+	PathsTracker       *PathsTracker     `json:"pathsTracker,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
+	Skills             *Skills           `json:"skills,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
+	Inventory          *[]Inventory      `json:"inventory,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
+	Talents            *TalentsTracker   `json:"talents,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
+	Expertises         *Expertises       `json:"expertises,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
+	Resources          *Resources        `json:"resources,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
+	Defenses           *Defenses         `json:"defenses,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
+	Bonuses            *[]CharacterBonus `json:"bonuses,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
 
 	CreatedAt time.Time `json:"createdAt" gorm:"autoCreateTime"`
 }
@@ -45,9 +47,10 @@ func NewCharacter(userID int, name string, level int) *Character {
 		CreationStep: "cultures",
 		Attributes:   NewAttributes(0, level),
 		Talents:      NewTalents(0, level),
-		Expertises:   NewExpertises(level),
+		Expertises:   NewExpertises(),
 		PathsTracker: NewPathsTracker(0),
 		Resources:    NewResources(0, level),
+		Defenses:     NewDefenses(0),
 		Inventory:    &[]Inventory{},
 	}
 

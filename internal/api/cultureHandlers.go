@@ -116,8 +116,32 @@ func (s *Server) handleCharacterCulturesPost(w http.ResponseWriter, r *http.Requ
 	}
 
 	char.UnlockedCultureIDs = selectedNames
-	char.CulturesFinalized = true
 	char.CreationStep = "basics"
+
+	// Seed the 2 cultural expertises that are automatically granted by culture selection.
+	// These are distinct from the Intelligence-based expertises chosen later and are
+	// tracked with Source = "culture_selection" so they are never counted against the
+	// Intelligence budget.
+	if char.Expertises != nil {
+		// Preserve any non-culture expertises already on the list (edge case safety).
+		var kept []character.Expertise
+		for _, e := range char.Expertises.List {
+			if e.Source != "culture_selection" {
+				kept = append(kept, e)
+			}
+		}
+		for _, name := range selectedNames {
+			if exp, exists := character.ExpertiseList[name]; exists {
+				kept = append(kept, character.Expertise{
+					ExpertisesID: char.Expertises.ID,
+					CharacterID:  char.ID,
+					Name:         exp.Name,
+					Source:       "culture_selection",
+				})
+			}
+		}
+		char.Expertises.List = kept
+	}
 
 	err = s.store.UpdateCharacter(r.Context(), char)
 	if err != nil {

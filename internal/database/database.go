@@ -37,6 +37,8 @@ func (s *Store) InitSchema(ctx context.Context) error {
 		&character.Expertises{},
 		&character.Expertise{},
 		&character.Resources{},
+		&character.Defenses{},
+		&character.CharacterBonus{},
 	)
 
 	return err
