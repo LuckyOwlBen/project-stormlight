@@ -3,6 +3,7 @@ package store
 import (
 	"encoding/json"
 	"project-stormlight/data"
+	"strings"
 )
 
 type Item struct {
@@ -17,6 +18,7 @@ type Item struct {
 	Equipable   bool    `json:"equippable"`
 	Stackable   bool    `json:"stackable"`
 	Slot        string  `json:"slot"`
+	Category    string  `json:"category,omitempty"`
 
 	Armor      *ArmorItem         `json:"armorProperties,omitempty"`
 	Weapon     *WeaponItem        `json:"weaponProperties,omitempty"`
@@ -76,7 +78,9 @@ func LoadItems() error {
 		if err := json.Unmarshal(fileData, &itemList); err != nil {
 			return err
 		}
+		category := strings.TrimSuffix(entry.Name(), ".json")
 		for _, item := range itemList {
+			item.Category = category
 			Items[item.Id] = item
 		}
 	}

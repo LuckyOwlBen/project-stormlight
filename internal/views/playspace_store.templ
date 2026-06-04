@@ -1,0 +1,244 @@
+package views
+
+import (
+	"project-stormlight/internal/character"
+	"project-stormlight/internal/models"
+	"project-stormlight/internal/store"
+	"strconv"
+	"fmt"
+)
+
+func isSectionOpen(code string, sections []models.StoreSection) bool {
+	for _, sec := range sections {
+		if sec.Code == code {
+			return sec.IsOpen
+		}
+	}
+	return false
+}
+
+templ PlayspaceStorePage(char *character.Character, storeState *models.StoreState, groupedItems map[string][]store.Item) {
+	@Layout("Store: "+char.Name, true) {
+		<div class="container mx-auto p-4 max-w-6xl" id="playspace-store-root" data-char-id={ strconv.Itoa(char.ID) }>
+			<div class="flex justify-between items-center mb-6">
+				<h1 class="text-4xl font-bold text-primary">{ char.Name } - Store</h1>
+				<div class="badge badge-lg badge-accent">Level { strconv.Itoa(char.Level) } { string(char.Ancestry) }</div>
+			</div>
+
+			<!-- Playspace Navigation Tabs -->
+			<div class="tabs tabs-boxed mb-6 justify-center">
+				<a href={ templ.SafeURL("/playspace/" + strconv.Itoa(char.ID)) } class="tab">Character Sheet</a>
+				<a href={ templ.SafeURL("/playspace/" + strconv.Itoa(char.ID) + "/store") } class="tab tab-active">Store</a>
+			</div>
+
+			<div id="store-container" hx-get={ "/playspace/" + strconv.Itoa(char.ID) + "/store/content" } hx-trigger="store-updated" hx-swap="innerHTML">
+				@PlayspaceStoreContent(char, storeState, groupedItems)
+			</div>
+
+			<div class="mt-8 text-center text-sm text-base-content/50">
+				<a href="/dashboard" class="link">Return to Dashboard</a>
+			</div>
+		</div>
+
+		<script>
+			(function () {
+				const charID = document.getElementById("playspace-store-root").dataset.charId;
+				const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+				const ws = new WebSocket(protocol + "//" + location.host + "/playspace/" + charID + "/ws");
+
+				ws.addEventListener("message", function (evt) {
+					try {
+						const data = JSON.parse(evt.data);
+						if (data.type === "store_update") {
+							htmx.trigger("#store-container", "store-updated");
+						}
+					} catch (e) {
+						console.error("Store WS parse error:", e);
+					}
+				});
+
+				ws.addEventListener("close", function () {
+					console.warn("Store WebSocket disconnected");
+				});
+			})();
+		</script>
+	}
+}
+
+templ PlayspaceStoreContent(char *character.Character, storeState *models.StoreState, groupedItems map[string][]store.Item) {
+	<!-- Display alerts for error conditions during buys/sells -->
+	<div id="store-alert-box"></div>
+
+	<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+		<!-- Shopping Sections: 2 cols on large screens -->
+		<div class="lg:col-span-2 space-y-4">
+			<h2 class="text-2xl font-bold text-base-content mb-4">Catalog Sections</h2>
+			
+			for _, cat := range []struct{ Code, Name string }{{"armorItems", "Armor"}, {"craftingMaterials", "Crafting Materials"}, {"equipmentItems", "Equipment"}, {"fabrialItems", "Fabrials"}, {"heavyWeapons", "Heavy Weapons"}, {"lightWeapons", "Light Weapons"}, {"mountItems", "Mounts"}, {"petItems", "Pets"}, {"specialWeapons", "Special Weapons"}, {"vehicleItems", "Vehicles"}} {
+				<div class="collapse collapse-arrow bg-base-200 border border-base-300">
+					<input type="checkbox" /> 
+					<div class="collapse-title text-lg font-medium flex justify-between items-center pr-12">
+						<span>{ cat.Name }</span>
+						if isSectionOpen(cat.Code, storeState.Sections) {
+							<div class="badge badge-success gap-1">
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg>
+								Open
+							</div>
+						} else {
+							<div class="badge badge-ghost gap-1 opacity-60">
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg>
+								Closed
+							</div>
+						}
+					</div>
+					<div class="collapse-content bg-base-100/50 p-4">
+						if !isSectionOpen(cat.Code, storeState.Sections) {
+							<div class="text-center p-6 text-base-content/50 italic">
+								This section is currently closed by the GM.
+							</div>
+						} else {
+							if len(groupedItems[cat.Code]) == 0 {
+								<div class="text-center p-6 text-base-content/50 italic">
+									No items listed in this category.
+								</div>
+							} else {
+								<div class="overflow-x-auto">
+									<table class="table w-full">
+										<thead>
+											<tr>
+												<th>Name</th>
+												<th>Rarity</th>
+												<th>Weight</th>
+												<th>Price</th>
+												<th class="text-right">Action</th>
+											</tr>
+										</thead>
+										<tbody>
+											for _, item := range groupedItems[cat.Code] {
+												<tr>
+													<td>
+														<div class="font-bold">{ item.Name }</div>
+														if item.Description != "" {
+															<div class="text-xs opacity-60">{ item.Description }</div>
+														}
+													</td>
+													<td>
+														<span class={ "badge badge-sm badge-outline " + getRarityClass(item.Rarity) }>{ item.Rarity }</span>
+													</td>
+													<td>{ fmt.Sprintf("%.2f lb", item.Weight) }</td>
+													<td><span class="text-success font-semibold">{ fmt.Sprintf("%.0f", item.Price) } chips</span></td>
+													<td class="text-right">
+														<form 
+															hx-post={ "/playspace/" + strconv.Itoa(char.ID) + "/store/buy" }
+															hx-target="#store-container"
+															hx-swap="innerHTML"
+															class="inline-block"
+														>
+															<input type="hidden" name="itemId" value={ item.Id } />
+															<button type="submit" class="btn btn-primary btn-sm">Buy</button>
+														</form>
+													</td>
+												</tr>
+											}
+										</tbody>
+									</table>
+								</div>
+							}
+						}
+					</div>
+				</div>
+			}
+		</div>
+
+		<!-- Character Funds & Selling Sidecard -->
+		<div class="space-y-6">
+			<!-- Wallet -->
+			<div class="card bg-base-200 shadow-xl overflow-hidden border border-success/20">
+				<div class="card-body">
+					<h3 class="card-title text-success flex items-center justify-between">
+						<span>Your Funds</span>
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+						</svg>
+					</h3>
+					<div class="text-4xl font-extrabold text-success mt-2">
+						{ strconv.Itoa(char.CurrencyInChips) } <span class="text-sm font-normal text-base-content/60">chips</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- Inventory Sell Back -->
+			<div class="card bg-base-200 shadow-xl">
+				<div class="card-body">
+					<h3 class="card-title mb-4 flex justify-between items-center">
+						<span>Sell Back Items</span>
+						if storeState.CanSell {
+							<div class="badge badge-success font-normal">{ strconv.Itoa(storeState.SellPercentage) }% rate</div>
+						} else {
+							<div class="badge badge-ghost font-normal opacity-60">Locked</div>
+						}
+					</h3>
+
+					if !storeState.CanSell {
+						<div class="alert alert-warning py-4 text-sm text-center">
+							<span>GM has disabled sell back options at this time.</span>
+						</div>
+					} else {
+						if char.Inventory == nil || len(*char.Inventory) == 0 {
+							<p class="text-sm text-base-content/50 italic text-center py-6">Your inventory is currently empty.</p>
+						} else {
+							<div class="space-y-3">
+								for _, inv := range *char.Inventory {
+									<div class="flex items-center justify-between p-3 bg-base-100 rounded-lg shadow-sm border border-base-300">
+										<div class="max-w-[70%]">
+											<div class="font-bold text-sm truncate">{ inv.Name }</div>
+											<div class="text-xs text-base-content/50">
+												Qty: { strconv.Itoa(inv.Quantity) } | Buy Price: { strconv.Itoa(inv.Price) }c
+											</div>
+										</div>
+										<div>
+											<form 
+												hx-post={ "/playspace/" + strconv.Itoa(char.ID) + "/store/sell" }
+												hx-target="#store-container"
+												hx-swap="innerHTML"
+											>
+												<input type="hidden" name="inventoryItemId" value={ strconv.Itoa(inv.ID) } />
+												<button type="submit" class="btn btn-error btn-outline btn-xs sm:btn-sm flex items-center gap-1">
+													Sell ({ strconv.Itoa((getSellValue(inv) * storeState.SellPercentage) / 100) }c)
+												</button>
+											</form>
+										</div>
+									</div>
+								}
+							</div>
+						}
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+func getSellValue(inv character.Inventory) int {
+	if baseItem, ok := store.Items[inv.ItemID]; ok {
+		return int(baseItem.Price)
+	}
+	return inv.Price
+}
+
+func getRarityClass(rarity string) string {
+	switch rarity {
+	case "common":
+		return "badge-ghost"
+	case "uncommon":
+		return "badge-info text-info-content"
+	case "rare":
+		return "badge-primary"
+	case "epic":
+		return "badge-secondary"
+	case "legendary":
+		return "badge-accent"
+	default:
+		return "badge-ghost"
+	}
+}

@@ -7,6 +7,7 @@ import (
 
 	"project-stormlight/internal/character"
 	"project-stormlight/internal/models"
+	"project-stormlight/internal/playspace"
 	"project-stormlight/internal/views"
 
 	"github.com/go-chi/chi/v5"
@@ -231,4 +232,55 @@ func (s *Server) handleCharacterFinalizePost(w http.ResponseWriter, r *http.Requ
 	}
 
 	http.Redirect(w, r, "/playspace/"+charIDStr, http.StatusSeeOther)
+}
+
+func (s *Server) handleCharacterLevelUpPost(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(int)
+	if !ok {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	// 1. Verify GM credentials
+	user, err := s.store.GetUserByID(r.Context(), userID)
+	if err != nil || !user.IsGM {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	charIDStr := chi.URLParam(r, "id")
+	charID, err := strconv.Atoi(charIDStr)
+	if err != nil {
+		http.Error(w, "Invalid character ID", http.StatusBadRequest)
+		return
+	}
+
+	// 2. Fetch Character
+	char, err := s.store.GetCharacterByID(r.Context(), charID)
+	if err != nil {
+		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+
+	// 3. Level Up character
+	char.LevelUp()
+
+	// 4. Save to Database
+	err = s.store.UpdateCharacter(r.Context(), char)
+	if err != nil {
+		http.Error(w, "Failed to level up character", http.StatusInternalServerError)
+		return
+	}
+
+	// 5. Update cached WS level
+	s.hub.UpdateClientLevel(char.ID, char.Level)
+
+	// 6. Determine dynamic target edit URL
+	redirectURL := models.DetermineNextStepURL(char, "Cultures")
+
+	// 7. Push real-time notification
+	msg := playspace.MarshalLevelUp(char.ID, char.Level, redirectURL)
+	s.hub.SendToCharacter(char.ID, msg)
+
+	w.WriteHeader(http.StatusOK)
 }

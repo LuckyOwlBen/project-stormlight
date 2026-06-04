@@ -27,6 +27,31 @@ type stepsFile struct {
 
 var Steps []Step
 
+func isStepVisible(c *character.Character, stepName string, currentStep string) bool {
+	if !c.CulturesFinalized {
+		// During initial character creation, all steps are visible!
+		return true
+	}
+	// Once initially finalized, only show unfinalized spend categories, plus Finalize
+	if strings.EqualFold(stepName, currentStep) {
+		return true
+	}
+	switch stepName {
+	case "Attributes":
+		return c.Attributes != nil && !c.Attributes.Finalized
+	case "Expertises":
+		return c.Expertises != nil && !c.Expertises.Finalized
+	case "Skills":
+		return c.Skills != nil && !c.Skills.Finalized
+	case "Talents":
+		return c.Talents != nil && !c.Talents.Finalized
+	case "Finalize":
+		return true
+	default:
+		return false
+	}
+}
+
 var stepDoneFunctions = map[string]func(*character.Character) bool{
 	"Culture": func(c *character.Character) bool {
 		return len(c.UnlockedCultureIDs) > 0
@@ -38,7 +63,20 @@ var stepDoneFunctions = map[string]func(*character.Character) bool{
 		return c.Attributes.PointsRemaining == 0
 	},
 	"Expertises": func(c *character.Character) bool {
-		return c.Expertises != nil && c.Expertises.PointsRemaining == 0
+		if c.Expertises == nil {
+			return true
+		}
+		spent := 0
+		for _, exp := range c.Expertises.List {
+			if exp.Source != "culture_selection" {
+				spent++
+			}
+		}
+		maxExpertises := c.Attributes.Intelligence
+		if maxExpertises < 0 {
+			maxExpertises = 0
+		}
+		return spent == maxExpertises
 	},
 	"Skills": func(c *character.Character) bool {
 		return c.Skills.PointsRemaining == 0
@@ -65,9 +103,12 @@ func DetermineNextStepURL(c *character.Character, currentStep string) string {
 			break
 		}
 	}
-	// Scan from after current step for first incomplete
+	// Scan from after current step for first incomplete which is also visible
 	for i := currentIdx + 1; i < len(Steps); i++ {
 		step := Steps[i]
+		if !isStepVisible(c, step.Name, currentStep) {
+			continue
+		}
 		if checkFunc, exists := stepDoneFunctions[step.Name]; exists {
 			if !checkFunc(c) {
 				return strings.ReplaceAll(step.URL, "{id}", idStr)
@@ -85,9 +126,15 @@ func DetermineNextStepURL(c *character.Character, currentStep string) string {
 // or an empty string if currentStep is the first step.
 func GetPrevURL(c *character.Character, currentStep string) string {
 	idStr := strconv.Itoa(c.ID)
-	for i, step := range Steps {
+	var visibleSteps []Step
+	for _, step := range Steps {
+		if isStepVisible(c, step.Name, currentStep) {
+			visibleSteps = append(visibleSteps, step)
+		}
+	}
+	for i, step := range visibleSteps {
 		if strings.EqualFold(step.Name, currentStep) && i > 0 {
-			return strings.ReplaceAll(Steps[i-1].URL, "{id}", idStr)
+			return strings.ReplaceAll(visibleSteps[i-1].URL, "{id}", idStr)
 		}
 	}
 	return ""
@@ -97,18 +144,21 @@ func GetPrevURL(c *character.Character, currentStep string) string {
 // step's completion state, and marks the active step.
 func BuildSidenavSteps(c *character.Character, currentStep string) []SidenavStep {
 	idStr := strconv.Itoa(c.ID)
-	result := make([]SidenavStep, len(Steps))
-	for i, step := range Steps {
+	var result []SidenavStep
+	for _, step := range Steps {
+		if !isStepVisible(c, step.Name, currentStep) {
+			continue
+		}
 		isDone := false
 		if checkFunc, exists := stepDoneFunctions[step.Name]; exists {
 			isDone = checkFunc(c)
 		}
-		result[i] = SidenavStep{
+		result = append(result, SidenavStep{
 			Name:     step.Name,
 			URL:      strings.ReplaceAll(step.URL, "{id}", idStr),
 			IsDone:   isDone,
-			IsActive: step.Name == currentStep,
-		}
+			IsActive: strings.EqualFold(step.Name, currentStep),
+		})
 	}
 	return result
 }

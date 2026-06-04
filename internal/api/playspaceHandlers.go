@@ -4,10 +4,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/gorilla/websocket"
 	"project-stormlight/internal/playspace"
 	"project-stormlight/internal/views"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/gorilla/websocket"
 )
 
 var wsUpgrader = websocket.Upgrader{
@@ -81,6 +82,7 @@ func (s *Server) handlePlayspaceWebSocket(w http.ResponseWriter, r *http.Request
 		Username: user.Username,
 		CharID:   charID,
 		CharName: char.Name,
+		Level:    char.Level,
 		IsGM:     false,
 	}
 

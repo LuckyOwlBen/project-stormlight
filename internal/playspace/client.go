@@ -23,6 +23,7 @@ type Client struct {
 	Username string
 	CharID   int
 	CharName string
+	Level    int
 	IsGM     bool
 }
 

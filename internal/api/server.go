@@ -91,6 +91,7 @@ func (s *Server) Mount() http.Handler {
 		r.Post("/characters/{id}/basics", s.handleCharacterBasicsPost)
 		r.Post("/characters", s.handleCharacterCreate)
 		r.Post("/characters/{id}/delete", s.handleCharacterDelete)
+		r.Post("/characters/{id}/level-up", s.handleCharacterLevelUpPost)
 
 		r.Get("/characters/{id}/cultures", s.handleCharacterCulturesGet)
 		r.Get("/characters/{id}/cultures/points", s.handleCharacterCulturesPointsGet)
@@ -130,10 +131,18 @@ func (s *Server) Mount() http.Handler {
 		// Playspace integration
 		r.Get("/playspace/{id}", s.handlePlayspaceGet)
 		r.Get("/playspace/{id}/ws", s.handlePlayspaceWebSocket)
+		r.Get("/playspace/{id}/store", s.handlePlayspaceStoreGet)
+		r.Get("/playspace/{id}/store/content", s.handlePlayspaceStoreContentGet)
+		r.Post("/playspace/{id}/store/buy", s.handlePlayspaceStoreBuyPost)
+		r.Post("/playspace/{id}/store/sell", s.handlePlayspaceStoreSellPost)
 
 		// GM views
 		r.Get("/gm", s.handleGMGet)
 		r.Get("/gm/ws", s.handleGMWebSocket)
+		r.Get("/gm/store/controls", s.handleGMStoreControlsGet)
+		r.Post("/gm/store/toggle-section", s.handleGMStoreToggleSectionPost)
+		r.Post("/gm/store/toggle-sell", s.handleGMStoreToggleSellPost)
+		r.Post("/gm/store/update-sell-percentage", s.handleGMStoreUpdateSellPercentagePost)
 	})
 
 	return r

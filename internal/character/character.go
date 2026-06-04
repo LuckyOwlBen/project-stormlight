@@ -108,3 +108,44 @@ func (c *Character) Hydrate() {
 		}
 	}
 }
+
+// LevelUp increments the character's level, adds points to category trackers, and marks them unfinalized.
+func (c *Character) LevelUp() {
+	c.Level++
+
+	// 1. Attributes
+	if c.Attributes != nil {
+		pts := calculateAttributePoints(c.Level)
+		c.Attributes.TotalPoints += pts
+		c.Attributes.PointsRemaining += pts
+		if pts > 0 {
+			c.Attributes.Finalized = false
+			// If attribute points are gained, also unfinalize expertises as Intellect might be increased
+			if c.Expertises != nil {
+				c.Expertises.Finalized = false
+			}
+		}
+	}
+
+	// 2. Skills
+	if c.Skills != nil {
+		pts := calculateSkillPoints(c.Level)
+		c.Skills.TotalPoints += pts
+		c.Skills.PointsRemaining += pts
+		if pts > 0 {
+			c.Skills.Finalized = false
+		}
+	}
+
+	// 3. Talents
+	if c.Talents != nil {
+		pts := calculateTalentPoints(c.Level)
+		c.Talents.TotalPoints += pts
+		c.Talents.PointsRemaining += pts
+		if pts > 0 {
+			c.Talents.Finalized = false
+		}
+	}
+
+	c.IsFinalized = false
+}

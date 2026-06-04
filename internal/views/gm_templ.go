@@ -8,6 +8,11 @@ package views
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+import (
+	"project-stormlight/internal/models"
+	"strconv"
+)
+
 func GMDashboard() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -41,13 +46,155 @@ func GMDashboard() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mx-auto p-4 max-w-6xl\"><div class=\"flex justify-between items-center mb-6\"><h1 class=\"text-4xl font-bold text-primary\">GM Dashboard</h1><div class=\"badge badge-lg badge-secondary\">Game Master</div></div><div class=\"grid grid-cols-1 lg:grid-cols-2 gap-6\"><!-- Connected Players --><div class=\"card bg-base-200 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title\">Connected Players<div class=\"badge badge-accent\" id=\"gm-player-count\">0</div></h2><div id=\"gm-player-list\" class=\"space-y-2\"><p class=\"text-base-content/50 text-sm italic\">No players connected yet.</p></div></div></div><!-- Store Management (placeholder) --><div class=\"card bg-base-200 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title\">Store Management</h2><div class=\"alert alert-info\"><span>Store controls coming soon.</span></div></div></div></div></div><script>\r\n\t\t\t(function () {\r\n\t\t\t\tconst protocol = location.protocol === \"https:\" ? \"wss:\" : \"ws:\";\r\n\t\t\t\tconst ws = new WebSocket(protocol + \"//\" + location.host + \"/gm/ws\");\r\n\r\n\t\t\t\tws.addEventListener(\"message\", function (evt) {\r\n\t\t\t\t\ttry {\r\n\t\t\t\t\t\tconst data = JSON.parse(evt.data);\r\n\t\t\t\t\t\tif (data.type === \"presence_update\") {\r\n\t\t\t\t\t\t\tupdatePlayerList(data.players || []);\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t} catch (e) {\r\n\t\t\t\t\t\tconsole.error(\"GM WS parse error:\", e);\r\n\t\t\t\t\t}\r\n\t\t\t\t});\r\n\r\n\t\t\t\tws.addEventListener(\"close\", function () {\r\n\t\t\t\t\tconsole.warn(\"GM WebSocket closed\");\r\n\t\t\t\t});\r\n\r\n\t\t\t\tfunction updatePlayerList(players) {\r\n\t\t\t\t\tconst list = document.getElementById(\"gm-player-list\");\r\n\t\t\t\t\tconst count = document.getElementById(\"gm-player-count\");\r\n\t\t\t\t\tcount.textContent = players.length;\r\n\r\n\t\t\t\t\tif (players.length === 0) {\r\n\t\t\t\t\t\tlist.innerHTML = '<p class=\"text-base-content/50 text-sm italic\">No players connected yet.</p>';\r\n\t\t\t\t\t\treturn;\r\n\t\t\t\t\t}\r\n\r\n\t\t\t\t\tlist.innerHTML = players.map(function (p) {\r\n\t\t\t\t\t\treturn '<div class=\"flex items-center gap-3 p-2 rounded bg-base-100\">' +\r\n\t\t\t\t\t\t\t'<div class=\"badge badge-success badge-xs\"></div>' +\r\n\t\t\t\t\t\t\t'<span class=\"font-medium\">' + escapeHtml(p.charName) + '</span>' +\r\n\t\t\t\t\t\t\t'<span class=\"text-xs text-base-content/50\">(' + escapeHtml(p.username) + ')</span>' +\r\n\t\t\t\t\t\t\t'</div>';\r\n\t\t\t\t\t}).join(\"\");\r\n\t\t\t\t}\r\n\r\n\t\t\t\tfunction escapeHtml(str) {\r\n\t\t\t\t\tconst d = document.createElement(\"div\");\r\n\t\t\t\t\td.appendChild(document.createTextNode(str));\r\n\t\t\t\t\treturn d.innerHTML;\r\n\t\t\t\t}\r\n\t\t\t})();\r\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mx-auto p-4 max-w-6xl\"><div class=\"flex justify-between items-center mb-6\"><h1 class=\"text-4xl font-bold text-primary\">GM Dashboard</h1><div class=\"badge badge-lg badge-secondary\">Game Master</div></div><div class=\"grid grid-cols-1 lg:grid-cols-2 gap-6\"><!-- Connected Players --><div class=\"card bg-base-200 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title flex justify-between items-center\"><span>Connected Players</span><div class=\"badge badge-accent\" id=\"gm-player-count\">0</div></h2><div id=\"gm-player-list\" class=\"space-y-2 mt-2\"><p class=\"text-base-content/50 text-sm italic\">No players connected yet.</p></div></div></div><!-- Store Management --><div class=\"card bg-base-200 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title mb-4 flex justify-between items-center\"><span>Store Management</span></h2><div id=\"store-controls-container\" hx-get=\"/gm/store/controls\" hx-trigger=\"load, store-updated\" hx-swap=\"innerHTML\"><p class=\"text-base-content/50 text-sm italic\">Loading store controls...</p></div></div></div></div></div><script>\r\n\t\t\t(function () {\r\n\t\t\t\tconst protocol = location.protocol === \"https:\" ? \"wss:\" : \"ws:\";\r\n\t\t\t\tconst ws = new WebSocket(protocol + \"//\" + location.host + \"/gm/ws\");\r\n\r\n\t\t\t\tws.addEventListener(\"message\", function (evt) {\r\n\t\t\t\t\ttry {\r\n\t\t\t\t\t\tconst data = JSON.parse(evt.data);\r\n\t\t\t\t\t\tif (data.type === \"presence_update\") {\r\n\t\t\t\t\t\t\tupdatePlayerList(data.players || []);\r\n\t\t\t\t\t\t} else if (data.type === \"store_update\") {\r\n\t\t\t\t\t\t\thtmx.trigger(\"#store-controls-container\", \"store-updated\");\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t} catch (e) {\r\n\t\t\t\t\t\tconsole.error(\"GM WS parse error:\", e);\r\n\t\t\t\t\t}\r\n\t\t\t\t});\r\n\r\n\t\t\t\tws.addEventListener(\"close\", function () {\r\n\t\t\t\t\tconsole.warn(\"GM WebSocket closed\");\r\n\t\t\t\t});\r\n\r\n\t\t\t\tfunction updatePlayerList(players) {\r\n\t\t\t\t\tconst list = document.getElementById(\"gm-player-list\");\r\n\t\t\t\t\tconst count = document.getElementById(\"gm-player-count\");\r\n\t\t\t\t\tcount.textContent = players.length;\r\n\r\n\t\t\t\t\tif (players.length === 0) {\r\n\t\t\t\t\t\tlist.innerHTML = '<p class=\"text-base-content/50 text-sm italic\">No players connected yet.</p>';\r\n\t\t\t\t\t\treturn;\r\n\t\t\t\t\t}\r\n\r\n\t\t\t\t\tlist.innerHTML = players.map(function (p) {\r\n\t\t\t\t\t\treturn '<div class=\"flex items-center justify-between gap-3 p-2 rounded bg-base-100 w-full\">' +\r\n\t\t\t\t\t\t\t'<div class=\"flex items-center gap-2\">' +\r\n\t\t\t\t\t\t\t\t'<div class=\"badge badge-success badge-xs\"></div>' +\r\n\t\t\t\t\t\t\t\t'<span class=\"font-medium\">' + escapeHtml(p.charName) + '</span>' +\r\n\t\t\t\t\t\t\t\t'<span class=\"text-xs font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded\">Lvl ' + p.level + '</span>' +\r\n\t\t\t\t\t\t\t\t'<span class=\"text-xs text-base-content/50\">(' + escapeHtml(p.username) + ')</span>' +\r\n\t\t\t\t\t\t\t'</div>' +\r\n\t\t\t\t\t\t\t'<button class=\"btn btn-xs btn-primary font-bold ml-auto\" hx-post=\"/characters/' + p.charID + '/level-up\" hx-swap=\"none\">Level Up</button>' +\r\n\t\t\t\t\t\t\t'</div>';\r\n\t\t\t\t\t}).join(\"\");\r\n\r\n\t\t\t\t\thtmx.process(list);\r\n\t\t\t\t}\r\n\r\n\t\t\t\tfunction escapeHtml(str) {\r\n\t\t\t\t\tconst d = document.createElement(\"div\");\r\n\t\t\t\t\td.appendChild(document.createTextNode(str));\r\n\t\t\t\t\treturn d.innerHTML;\r\n\t\t\t\t}\r\n\t\t\t})();\r\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
 		templ_7745c5c3_Err = Layout("GM Dashboard", true).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func GMStoreControls(storeState *models.StoreState) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var3 == nil {
+			templ_7745c5c3_Var3 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"space-y-6\"><!-- Global Switches --><div class=\"p-4 bg-base-100 rounded-xl space-y-4 border border-base-300\"><!-- Toggle Selling --><div class=\"flex items-center justify-between\"><div><div class=\"font-bold text-sm\">Allow Player Selling</div><div class=\"text-xs opacity-60\">Let players sell items back to the store</div></div><form hx-post=\"/gm/store/toggle-sell\" hx-target=\"#store-controls-container\" hx-swap=\"innerHTML\" class=\"inline\"><input type=\"checkbox\" class=\"toggle toggle-success\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if storeState.CanSell {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " checked")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " onChange=\"this.form.dispatchEvent(new Event('submit'))\"></form></div><!-- Sell Percentage Adjuster --><div class=\"pt-2\"><div class=\"flex justify-between items-center mb-1\"><span class=\"font-bold text-sm\">Sell Back Percentage</span> <span class=\"text-xs font-semibold px-2 py-1 bg-success/10 text-success rounded-md\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(storeState.SellPercentage))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm.templ`, Line: 125, Col: 130}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "% of original</span></div><form hx-post=\"/gm/store/update-sell-percentage\" hx-target=\"#store-controls-container\" hx-swap=\"innerHTML\" class=\"flex items-center gap-3\"><input type=\"range\" name=\"sellPercentage\" min=\"0\" max=\"100\" value=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(storeState.SellPercentage))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm.templ`, Line: 133, Col: 53}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" class=\"range range-success range-sm flex-1\" onchange=\"this.form.dispatchEvent(new Event('submit'))\"></form></div></div><!-- Category Lockers Section --><div><h3 class=\"font-bold text-sm mb-3\">Segment Control</h3><div class=\"space-y-2 max-h-[350px] overflow-y-auto pr-1\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		for _, sec := range storeState.Sections {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"flex items-center justify-between p-3 bg-base-100 rounded-lg shadow-sm border border-base-300\"><div><div class=\"font-bold text-sm\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(sec.Name)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm.templ`, Line: 148, Col: 48}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div><div class=\"text-xs opacity-60 truncate max-w-[200px]\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(sec.Code)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm.templ`, Line: 149, Col: 72}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div></div><div class=\"flex items-center gap-3\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if sec.IsOpen {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<span class=\"badge badge-success badge-sm\">Open</span><form hx-post=\"/gm/store/toggle-section\" hx-target=\"#store-controls-container\" hx-swap=\"innerHTML\"><input type=\"hidden\" name=\"code\" value=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var8 string
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue(sec.Code)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm.templ`, Line: 155, Col: 58}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\"> <button type=\"submit\" class=\"btn btn-warning btn-xs flex items-center gap-1\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" class=\"w-3.5 h-3.5 stroke-current\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z\"></path></svg> Lock</button></form>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<span class=\"badge badge-neutral badge-sm opacity-60\">Locked</span><form hx-post=\"/gm/store/toggle-section\" hx-target=\"#store-controls-container\" hx-swap=\"innerHTML\"><input type=\"hidden\" name=\"code\" value=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var9 string
+				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue(sec.Code)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm.templ`, Line: 164, Col: 58}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"> <button type=\"submit\" class=\"btn btn-success btn-xs btn-outline flex items-center gap-1\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" class=\"w-3.5 h-3.5 stroke-current\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z\"></path></svg> Unlock</button></form>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

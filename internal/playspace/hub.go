@@ -75,6 +75,7 @@ func (h *Hub) broadcastPresence() {
 				Username: c.Username,
 				CharName: c.CharName,
 				CharID:   c.CharID,
+				Level:    c.Level,
 			})
 		}
 	}
@@ -89,4 +90,30 @@ func (h *Hub) broadcastPresence() {
 		}
 	}
 	h.mu.RUnlock()
+}
+
+// SendToCharacter sends a raw message back to all active client connections representing the given character ID.
+func (h *Hub) SendToCharacter(charID int, msg []byte) {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	for c := range h.clients {
+		if c.CharID == charID {
+			select {
+			case c.Send <- msg:
+			default:
+			}
+		}
+	}
+}
+
+// UpdateClientLevel locks client registry, updates the level inside all matching connections, and broadcasts.
+func (h *Hub) UpdateClientLevel(charID int, newLevel int) {
+	h.mu.Lock()
+	for c := range h.clients {
+		if c.CharID == charID {
+			c.Level = newLevel
+		}
+	}
+	h.mu.Unlock()
+	h.broadcastPresence()
 }

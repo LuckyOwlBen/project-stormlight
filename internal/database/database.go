@@ -39,9 +39,14 @@ func (s *Store) InitSchema(ctx context.Context) error {
 		&character.Resources{},
 		&character.Defenses{},
 		&character.CharacterBonus{},
+		&models.StoreState{},
+		&models.StoreSection{},
 	)
+	if err != nil {
+		return err
+	}
 
-	return err
+	return s.SeedStoreState(ctx)
 }
 
 // Connect opens a database connection and verifies it with a ping
