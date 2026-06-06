@@ -48,16 +48,16 @@ templ CharacterSheet(characterSheet models.CharacterSheetData) {
 
 templ BasicsComponent(characterSheet models.CharacterSheetData) {
 	<div class="grid grid-cols-3 md:grid-cols-3 gap-4">
-		@ResourcesComponent(*characterSheet.Char.Resources)
+		@ResourcesComponent(characterSheet.Char.ID, *characterSheet.Char.Resources)
 		@DefensesComponent(characterSheet.DefensesMap)
 		@AttributesComponent(characterSheet.AttributesMap)
 	</div>
 }
 
 
-templ ResourcesComponent(resources character.Resources ) {
+templ ResourcesComponent(characterId int, resources character.Resources ) {
 	<div class="card bg-base-200 shadow border-t-4 border-primary">
-		@ValueJoinCard(resources.HealthCurrent, "Health", "/api/resources/health")
+		@ValueJoinCard(resources.HealthCurrent, "Health", "/characters/" + strconv.Itoa(characterId) + "/resources/health")
 	</div>
 }
 

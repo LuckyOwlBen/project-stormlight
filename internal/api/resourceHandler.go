@@ -2,17 +2,13 @@ package api
 
 import (
 	"net/http"
+	"project-stormlight/internal/views"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
 )
 
-func (s *Server) PointValueHandler(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value("userID").(int)
-	if !ok {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
+func (s *Server) IncrementHealthResource(w http.ResponseWriter, r *http.Request) {
 
 	charIDStr := chi.URLParam(r, "id")
 	charID, err := strconv.Atoi(charIDStr)
@@ -21,15 +17,14 @@ func (s *Server) PointValueHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	char, err := s.store.GetCharacterByID(r.Context(), charID)
-	if err != nil || char.UserID != userID {
-		http.Error(w, "Character not found", http.StatusNotFound)
-		return
-	}
-
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Unable to parse form", http.StatusBadRequest)
 		return
 	}
-	//I'll increment and decrement later
+	updatedValue, err := s.store.IncrementCurrentHealth(r.Context(), charID)
+	if err != nil {
+		http.Error(w, "Unable to update point value", http.StatusInternalServerError)
+		return
+	}
+	views.ValueJoinCard(updatedValue, "health", "/characters/"+charIDStr+"/resources/health").Render(r.Context(), w)
 }

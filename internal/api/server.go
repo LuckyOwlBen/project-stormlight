@@ -128,6 +128,7 @@ func (s *Server) Mount() http.Handler {
 		r.Post("/characters/{id}/bonuses/recalculate", s.handleCharacterBonusesRecalculate)
 		r.Patch("/characters/{id}/bonuses/{bonusId}/toggle", s.handleCharacterBonusToggle)
 
+		r.Post("/characters/{id}/resources/health/increment", s.IncrementHealthResource)
 		// Playspace integration
 		r.Get("/playspace/{id}", s.handlePlayspaceGet)
 		r.Get("/playspace/{id}/ws", s.handlePlayspaceWebSocket)
