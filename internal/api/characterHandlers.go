@@ -284,3 +284,11 @@ func (s *Server) handleCharacterLevelUpPost(w http.ResponseWriter, r *http.Reque
 
 	w.WriteHeader(http.StatusOK)
 }
+
+func allDefenses(c character.Character) map[string]int {
+	return map[string]int{
+		"Physical Defense":  c.Defenses.Physical,
+		"Spiritual Defense": c.Defenses.Spiritual,
+		"Cognitive Defense": c.Defenses.Cognitive,
+	}
+}

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"project-stormlight/internal/character"
 	"project-stormlight/internal/models"
 	"project-stormlight/internal/views"
 
@@ -178,4 +179,15 @@ func (s *Server) handleCharacterAttributesPost(w http.ResponseWriter, r *http.Re
 		s.store.UpdateCharacter(r.Context(), char)
 	}
 	http.Redirect(w, r, models.DetermineNextStepURL(char, "Attributes"), http.StatusSeeOther)
+}
+
+func allAttributes(c character.Character) map[string]int {
+	return map[string]int{
+		"Strength":     c.Attributes.Strength,
+		"Speed":        c.Attributes.Speed,
+		"Willpower":    c.Attributes.Willpower,
+		"Intelligence": c.Attributes.Intelligence,
+		"Awareness":    c.Attributes.Awareness,
+		"Presence":     c.Attributes.Presence,
+	}
 }

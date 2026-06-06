@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"project-stormlight/internal/models"
 	"project-stormlight/internal/playspace"
 	"project-stormlight/internal/views"
 
@@ -39,7 +40,13 @@ func (s *Server) handlePlayspaceGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	views.Playspace(char).Render(r.Context(), w)
+	characterSheet := models.CharacterSheetData{
+		Char:          char,
+		AttributesMap: allAttributes(*char),
+		DefensesMap:   allDefenses(*char),
+	}
+
+	views.CharacterSheet(characterSheet).Render(r.Context(), w)
 }
 
 // GET /playspace/{id}/ws

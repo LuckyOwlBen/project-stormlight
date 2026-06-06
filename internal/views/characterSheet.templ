@@ -1,0 +1,113 @@
+package views
+
+
+import (
+	"project-stormlight/internal/models"
+    "strconv"
+	"project-stormlight/internal/character"
+)
+
+templ CharacterSheet(characterSheet models.CharacterSheetData) {
+	
+    @Layout("Character Sheet: " + characterSheet.Char.Name, true) {
+        <div class="container mx-auto p-4 max-w-6xl" id="playspace-root" data-char-id={ strconv.Itoa(characterSheet.Char.ID) }>
+			<div class="flex justify-between items-center mb-6">
+				<h1 class="text-4xl font-bold text-primary">{ characterSheet.Char.Name }</h1>
+				<div class="badge badge-lg badge-accent">Level { strconv.Itoa(characterSheet.Char.Level) } { string(characterSheet.Char.Ancestry) }</div>
+			</div>
+
+			<!-- Playspace Navigation Tabs -->
+			<div class="tabs tabs-boxed mb-6 justify-center">
+				<a href={ templ.SafeURL("/playspace/" + strconv.Itoa(characterSheet.Char.ID)) } class="tab tab-active">Character Sheet</a>
+				<a href={ templ.SafeURL("/playspace/" + strconv.Itoa(characterSheet.Char.ID) + "/store") } class="tab">Store</a>
+			</div>
+            <!-- Character Sheet Content -->
+           <div class="tabs tabs-lift tabs-bottom mb-6 justify-center">
+  				<input type="radio" name="my_tabs_5" class="tab" aria-label="Overview" checked="checked"/>
+  				<div class="tab-content bg-base-100 border-base-300 p-6">@BasicsComponent(characterSheet)</div>
+
+  				<input type="radio" name="my_tabs_5" class="tab" aria-label="Skills" />
+  				<div class="tab-content bg-base-100 border-base-300 p-6">Tab content 2</div>
+
+  				<input type="radio" name="my_tabs_5" class="tab" aria-label="Talents & Expertises" />
+  				<div class="tab-content bg-base-100 border-base-300 p-6"></div>
+
+			  	<input type="radio" name="my_tabs_5" class="tab" aria-label="Equipment" />
+  				<div class="tab-content bg-base-100 border-base-300 p-6">Tab content 2</div>
+
+  				<input type="radio" name="my_tabs_5" class="tab" aria-label="Derived Stats" />
+  				<div class="tab-content bg-base-100 border-base-300 p-6">Tab content 2</div>
+
+	  			<input type="radio" name="my_tabs_5" class="tab" aria-label="Notes" />
+				<div class="tab-content bg-base-100 border-base-300 p-6">Tab content 2</div>				
+			</div>
+        </div>
+    }
+}
+
+
+templ BasicsComponent(characterSheet models.CharacterSheetData) {
+	<div class="grid grid-cols-3 md:grid-cols-3 gap-4">
+		@ResourcesComponent(*characterSheet.Char.Resources)
+		@DefensesComponent(characterSheet.DefensesMap)
+		@AttributesComponent(characterSheet.AttributesMap)
+	</div>
+}
+
+
+templ ResourcesComponent(resources character.Resources ) {
+	<div class="card bg-base-200 shadow border-t-4 border-primary">
+		@ValueJoinCard(resources.HealthCurrent, "Health", "/api/resources/health")
+	</div>
+}
+
+	
+templ DefensesComponent(defensesMap map[string]int) {
+	<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+		for defense, value := range defensesMap {
+			<div class="card bg-base-200 shadow border-t-4 border-primary">
+				<div class="card-body p-4 text-center">
+					<span class="text-xs uppercase font-extrabold text-primary">{ defense }</span>
+					<span class="text-3xl font-extrabold text-base-content">{ strconv.Itoa(value) }</span>
+				</div>
+			</div>
+		}
+	</div>
+}
+
+templ AttributesComponent(attributesMap map[string]int) {
+	<div class="grid grid-cols-6 gap-4 md:grid-cols-3">
+		for attr, value := range attributesMap {
+		<div class="card-body">
+			<h3 class="font-bold text-md mb-3 opacity-80 uppercase tracking-wider">Attributes</h3>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div class="stat">
+					<div class="stat-title">{ attr }</div>
+					<div class="stat-value">{ strconv.Itoa(value) }</div>
+				</div>
+			</div>
+		</div>
+	}
+	</div>
+}
+
+templ ValueJoinCard(value int, label string, endpoint string) {
+    <div id={ "card-" + label } class="card card-border bg-base-100 w-96">
+        <div class="card-body">
+            <h2 class="card-title">{ label }</h2>
+            <div class="join">
+                <button class="btn join-item"
+                        hx-post={ endpoint + "/decrement" }
+                        hx-target={ "#card-" + label }
+                        hx-swap="outerHTML">-</button>
+                <input type="number"
+                       class="input input-bordered join-item w-20 text-center"
+                       value={ strconv.Itoa(value) }/>
+                <button class="btn join-item"
+                        hx-post={ endpoint + "/increment" }
+                        hx-target={ "#card-" + label }
+                        hx-swap="outerHTML">+</button>
+            </div>
+        </div>
+    </div>
+}
