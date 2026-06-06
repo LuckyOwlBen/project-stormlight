@@ -23,11 +23,18 @@ templ CharacterSheet(characterSheet models.CharacterSheetData) {
 			</div>
             <!-- Character Sheet Content -->
            <div class="tabs tabs-lift tabs-bottom mb-6 justify-center">
-  				<input type="radio" name="my_tabs_5" class="tab" aria-label="Overview" checked="checked"/>
-  				<div class="tab-content bg-base-100 border-base-300 p-6">@BasicsComponent(characterSheet)</div>
+  				
+				//Overview Tab
+				<input type="radio" name="my_tabs_5" class="tab" aria-label="Overview" checked="checked"/>
+  				<div class="tab-content bg-base-100 border-base-300 p-6">
+					@BasicsComponent(characterSheet)
+				</div>
 
+				//Skills Tab
   				<input type="radio" name="my_tabs_5" class="tab" aria-label="Skills" />
-  				<div class="tab-content bg-base-100 border-base-300 p-6">Tab content 2</div>
+  				<div class="tab-content bg-base-100 border-base-300 p-6">
+					@SkillsComponent(characterSheet)
+				</div>
 
   				<input type="radio" name="my_tabs_5" class="tab" aria-label="Talents & Expertises" />
   				<div class="tab-content bg-base-100 border-base-300 p-6"></div>
@@ -58,6 +65,12 @@ templ BasicsComponent(characterSheet models.CharacterSheetData) {
 templ ResourcesComponent(characterId int, resources character.Resources ) {
 	<div class="card bg-base-200 shadow border-t-4 border-primary">
 		@ValueJoinCard(resources.HealthCurrent, "Health", "/characters/" + strconv.Itoa(characterId) + "/resources/health")
+		@ValueJoinCard(resources.FocusCurrent, "Focus", "/characters/" + strconv.Itoa(characterId) + "/resources/focus")
+		if resources.InvestitureActive {
+			@ValueJoinCard(resources.InvestitureCurrent, "Investiture", "/characters/" + strconv.Itoa(characterId) + "/resources/investiture")
+		} else {
+			@UninvestedPlaceholder()
+		}
 	</div>
 }
 
@@ -91,6 +104,15 @@ templ AttributesComponent(attributesMap map[string]int) {
 	</div>
 }
 
+templ UninvestedPlaceholder() {
+	<div class="card w-full bg-base-200 shadow-xl mb-6 border-2 border-primary">
+		<div class="card-body p-4 text-center">
+			<h2 class="card-title m-0 inline-block">Uninvested</h2>
+			<p class="text-sm mt-2">Seek out friendship with the spren.</p>
+		</div>
+	</div>
+}
+
 templ ValueJoinCard(value int, label string, endpoint string) {
     <div id={ "card-" + label } class="card card-border bg-base-100 w-96">
         <div class="card-body">
@@ -110,4 +132,17 @@ templ ValueJoinCard(value int, label string, endpoint string) {
             </div>
         </div>
     </div>
+}
+
+templ SkillsComponent(characterSheet models.CharacterSheetData) {
+	<div class="grid grid-cols-6">
+		for _, skill := range characterSheet.Char.Skills.PlayerSkills {
+			<div class="card bg-base-200 shadow border-t-4 border-primary">
+				<div class="card-body p-4 text-center">
+					<span class="text-xs uppercase font-extrabold text-primary">{ skill.SkillName }</span>
+					<span class="text-3xl font-extrabold text-base-content">{ strconv.Itoa(skill.Value) }</span>
+				</div>
+			</div>
+		}
+	</div>
 }

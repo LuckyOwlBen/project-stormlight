@@ -81,10 +81,13 @@ func (s *Server) Mount() http.Handler {
 
 	// Protected routes
 	r.Group(func(r chi.Router) {
+
+		// Apply authentication middleware to all routes in this group
 		r.Use(s.AuthMiddleware)
 		r.Post("/logout", s.handleLogout)
 		r.Get("/dashboard", s.handleDashboardGet)
 
+		// Character creation and management
 		r.Get("/characters/{id}/sidenav", s.HandleGetSidenav)
 		r.Get("/characters/{id}/basics", s.handleCharacterBasicsGet)
 		r.Get("/characters/{id}/basics/validate", s.handleCharacterBasicsValidate)
@@ -93,33 +96,40 @@ func (s *Server) Mount() http.Handler {
 		r.Post("/characters/{id}/delete", s.handleCharacterDelete)
 		r.Post("/characters/{id}/level-up", s.handleCharacterLevelUpPost)
 
+		//Cultures
 		r.Get("/characters/{id}/cultures", s.handleCharacterCulturesGet)
 		r.Get("/characters/{id}/cultures/points", s.handleCharacterCulturesPointsGet)
 		r.Post("/characters/{id}/cultures", s.handleCharacterCulturesPost)
 
+		// Attributes
 		r.Get("/characters/{id}/attributes", s.handleCharacterAttributesGet)
 		r.Get("/characters/{id}/attributes/points", s.handleCharacterAttributesPointsGet)
 		r.Post("/characters/{id}/attributes", s.handleCharacterAttributesPost)
 
+		// Expertises
 		r.Get("/characters/{id}/expertises", s.handleCharacterExpertisesGet)
 		r.Get("/characters/{id}/expertises/points", s.handleCharacterExpertisesPointsGet)
 		r.Post("/characters/{id}/expertises", s.handleCharacterExpertisesPost)
 
+		// Skills
 		r.Get("/characters/{id}/skills", s.handleCharacterSkillsGet)
 		r.Get("/characters/{id}/skills/points", s.handleCharacterSkillsPointsGet)
 		r.Post("/characters/{id}/skills", s.handleCharacterSkillsPost)
 
+		// Talents
 		r.Get("/characters/{id}/talents", s.handleCharacterTalentsGet)
 		r.Get("/characters/{id}/talents/points", s.handleCharacterTalentsPointsGet)
 		r.Get("/characters/{id}/talents/sections", s.handleCharacterTalentsSectionsGet)
 		r.Post("/characters/{id}/talents", s.handleCharacterTalentsPost)
 
+		// Inventory
 		r.Get("/characters/{id}/inventory", s.handleCharacterInventoryGet)
 		r.Post("/characters/{id}/inventory", s.handleCharacterInventoryPost)
 		r.Post("/characters/{id}/inventory/kit", s.handleCharacterInventoryKitPost)
 		r.Post("/characters/{id}/inventory/buy", s.handleCharacterInventoryBuyPost)
 		r.Post("/characters/{id}/inventory/sell", s.handleCharacterInventorySellPost)
 
+		// Review & Finalize
 		r.Get("/characters/{id}/review", s.handleCharacterReviewGet)
 		r.Post("/characters/{id}/finalize", s.handleCharacterFinalizePost)
 
@@ -128,7 +138,14 @@ func (s *Server) Mount() http.Handler {
 		r.Post("/characters/{id}/bonuses/recalculate", s.handleCharacterBonusesRecalculate)
 		r.Patch("/characters/{id}/bonuses/{bonusId}/toggle", s.handleCharacterBonusToggle)
 
+		// Resource endpoints
 		r.Post("/characters/{id}/resources/health/increment", s.IncrementHealthResource)
+		r.Post("/characters/{id}/resources/health/decrement", s.DecrementHealthResource)
+		r.Post("/characters/{id}/resources/focus/increment", s.IncrementFocusResource)
+		r.Post("/characters/{id}/resources/focus/decrement", s.DecrementFocusResource)
+		r.Post("/characters/{id}/resources/investiture/increment", s.IncrementInvestitureResource)
+		r.Post("/characters/{id}/resources/investiture/decrement", s.DecrementInvestitureResource)
+
 		// Playspace integration
 		r.Get("/playspace/{id}", s.handlePlayspaceGet)
 		r.Get("/playspace/{id}/ws", s.handlePlayspaceWebSocket)
