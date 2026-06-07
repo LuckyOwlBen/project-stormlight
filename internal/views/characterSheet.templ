@@ -16,6 +16,8 @@ templ CharacterSheet(characterSheet models.CharacterSheetData) {
 				<div class="badge badge-lg badge-accent">Level { strconv.Itoa(characterSheet.Char.Level) } { string(characterSheet.Char.Ancestry) }</div>
 			</div>
 
+			@EventModalContainer("", "", characterSheet.Char.ID)
+
 			<!-- Playspace Navigation Tabs -->
 			<div class="tabs tabs-boxed mb-6 justify-center">
 				<a href={ templ.SafeURL("/playspace/" + strconv.Itoa(characterSheet.Char.ID)) } class="tab tab-active">Character Sheet</a>
@@ -219,5 +221,27 @@ templ NotesComponent(notes string, characterID int) {
 			hx-swap="none">
 			{ notes }
 		</textarea>
+	</div>
+}
+
+templ EventModalContainer(endpoint string, message string, characterID int) {
+	<div 
+		hx-trigger="load"
+		hx-ext="ws" 
+		ws-connect={ "/playspace/" + strconv.Itoa(characterID) + "/ws" }
+		hx-target="#notifications"
+	> 
+		@EventModal(endpoint, message)
+	</div>
+}
+
+templ EventModal(endpoint string, message string) {
+	<div id="notifications" hx-swap-oob="beforeend:#notifications">
+		if message != "" {	
+			<div class="notification-item">
+				{ message } 
+				<a href={ templ.SafeURL(endpoint) } class="btn btn-primary">"Lets go"</a>
+			</div>
+		}
 	</div>
 }

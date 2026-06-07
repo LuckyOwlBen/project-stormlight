@@ -1,13 +1,13 @@
 ﻿package api
 
 import (
+	"bytes"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"project-stormlight/internal/character"
 	"project-stormlight/internal/models"
-	"project-stormlight/internal/playspace"
 	"project-stormlight/internal/views"
 
 	"github.com/go-chi/chi/v5"
@@ -279,8 +279,9 @@ func (s *Server) handleCharacterLevelUpPost(w http.ResponseWriter, r *http.Reque
 	redirectURL := models.DetermineNextStepURL(char, "Cultures")
 
 	// 7. Push real-time notification
-	msg := playspace.MarshalLevelUp(char.ID, char.Level, redirectURL)
-	s.hub.SendToCharacter(char.ID, msg)
+	var buf bytes.Buffer
+	views.EventModal(redirectURL, "Character leveled up!").Render(r.Context(), &buf)
+	s.hub.SendToCharacter(char.ID, buf.Bytes())
 
 	w.WriteHeader(http.StatusOK)
 }

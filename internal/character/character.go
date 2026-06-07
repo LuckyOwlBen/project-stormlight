@@ -122,7 +122,7 @@ func (c *Character) Hydrate() {
 		}
 	}
 
-	if c.DerivedAttributes == nil {
+	if c.DerivedAttributes == nil && c.Attributes != nil {
 		c.DerivedAttributes = BuildDisplayObject(*c.Attributes)
 	}
 }

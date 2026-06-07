@@ -16,9 +16,11 @@ templ Layout(title string, showLogout bool) {
             <link href="/assets/css/output.css" rel="stylesheet" />
             <!-- HTMX -->
             <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+                <script src="https://cdn.jsdelivr.net/npm/htmx-ext-ws@2.0.4" integrity="sha384-1RwI/nvUSrMRuNj7hX1+27J8XDdCoSLf0EjEyF69nacuWyiJYoQ/j39RT1mSnd2G" crossorigin="anonymous"></script>
             <title>{ title } - Stormlight Character Creator</title>
         </head>
         <body class="bg-base-100 text-base-content min-h-screen">
+            
             <!-- Navbar -->
             <div class="navbar bg-base-200 z-50 relative shadow-md">
                 <div class="flex-1">
