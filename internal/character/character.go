@@ -32,6 +32,7 @@ type Character struct {
 	Expertises         *Expertises       `json:"expertises,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
 	Resources          *Resources        `json:"resources,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
 	Defenses           *Defenses         `json:"defenses,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
+	DerivedAttributes  map[string]string `json:"derivedAttributes,omitempty" gorm:"-"`
 	Bonuses            *[]CharacterBonus `json:"bonuses,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
 
 	CreatedAt time.Time `json:"createdAt" gorm:"autoCreateTime"`
@@ -40,18 +41,19 @@ type Character struct {
 func NewCharacter(userID int, name string, level int) *Character {
 	// First initialize the shell of the character without ID yet dependencies to satisfy struct
 	c := &Character{
-		UserID:       userID,
-		Name:         name,
-		Level:        level,
-		Ancestry:     Human,
-		CreationStep: "cultures",
-		Attributes:   NewAttributes(0, level),
-		Talents:      NewTalents(0, level),
-		Expertises:   NewExpertises(),
-		PathsTracker: NewPathsTracker(0),
-		Resources:    NewResources(0, level),
-		Defenses:     NewDefenses(0),
-		Inventory:    &[]Inventory{},
+		UserID:            userID,
+		Name:              name,
+		Level:             level,
+		Ancestry:          Human,
+		CreationStep:      "cultures",
+		Attributes:        NewAttributes(0, level),
+		Talents:           NewTalents(0, level),
+		Expertises:        NewExpertises(),
+		PathsTracker:      NewPathsTracker(0),
+		Resources:         NewResources(0, level),
+		Defenses:          NewDefenses(0),
+		Inventory:         &[]Inventory{},
+		DerivedAttributes: BuildDisplayObject(*NewAttributes(0, level)),
 	}
 
 	// Create skills, which requires characterID (temporarily 0 until db insertion sets it, or if you prefer you can map foreign keys later, but it needs the initial array generated).
@@ -89,6 +91,18 @@ func (c *Character) Hydrate() {
 		}
 	}
 
+	if c.Skills != nil && len(c.Skills.PlayerSkills) > 0 {
+		for i, ps := range c.Skills.PlayerSkills {
+			if baseSkill, exists := SkillList[ps.SkillName]; exists {
+				c.Skills.PlayerSkills[i].Name = baseSkill.Name
+				c.Skills.PlayerSkills[i].Attribute = baseSkill.SkillAssociation.Attribute
+				c.Skills.PlayerSkills[i].SkillAssociation.Name = baseSkill.Name
+				c.Skills.PlayerSkills[i].SkillAssociation.Attribute = baseSkill.SkillAssociation.Attribute
+				c.Skills.PlayerSkills[i].SpreadName = baseSkill.SpreadName
+			}
+		}
+	}
+
 	if c.PathsTracker == nil {
 		c.PathsTracker = NewPathsTracker(c.ID)
 	} else {
@@ -106,6 +120,10 @@ func (c *Character) Hydrate() {
 				}
 			}
 		}
+	}
+
+	if c.DerivedAttributes == nil {
+		c.DerivedAttributes = BuildDisplayObject(*c.Attributes)
 	}
 }
 

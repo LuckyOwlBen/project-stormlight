@@ -146,6 +146,10 @@ func (s *Server) Mount() http.Handler {
 		r.Post("/characters/{id}/resources/investiture/increment", s.IncrementInvestitureResource)
 		r.Post("/characters/{id}/resources/investiture/decrement", s.DecrementInvestitureResource)
 
+		// Session Notes
+		r.Get("/characters/{id}/session-notes", s.handleGetSessionNotes)
+		r.Post("/characters/{id}/session-notes", s.handlePostSessionNotes)
+
 		// Playspace integration
 		r.Get("/playspace/{id}", s.handlePlayspaceGet)
 		r.Get("/playspace/{id}/ws", s.handlePlayspaceWebSocket)

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"project-stormlight/internal/character"
 	"project-stormlight/internal/models"
 	"project-stormlight/internal/playspace"
 	"project-stormlight/internal/views"
@@ -41,9 +42,11 @@ func (s *Server) handlePlayspaceGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	characterSheet := models.CharacterSheetData{
-		Char:          char,
-		AttributesMap: allAttributes(*char),
-		DefensesMap:   allDefenses(*char),
+		Char:                   char,
+		AttributesMap:          allAttributes(*char),
+		DefensesMap:            allDefenses(*char),
+		SkillsDisplayStructure: buildSkillDisplayStructure(*char),
+		DerivedAttributes:      char.DerivedAttributes,
 	}
 
 	views.CharacterSheet(characterSheet).Render(r.Context(), w)
@@ -96,4 +99,30 @@ func (s *Server) handlePlayspaceWebSocket(w http.ResponseWriter, r *http.Request
 	s.hub.Register <- client
 	go client.WritePump()
 	client.ReadPump()
+}
+
+func buildSkillDisplayStructure(char character.Character) []character.SkillDisplayStructure {
+	spreadMap := make(map[string][]character.DisplaySkill)
+	for _, skill := range char.Skills.PlayerSkills {
+		attributeBonus := char.Attributes.GetAttributeBonus(skill.SkillAssociation.Attribute)
+		displaySkill := character.DisplaySkill{
+			SkillName:      skill.SkillName,
+			Value:          skill.Value,
+			Bonus:          skill.Bonus,
+			AttributeBonus: attributeBonus,
+			AttributeName:  skill.SkillAssociation.Attribute,
+			Total:          skill.Value + skill.Bonus + attributeBonus,
+		}
+		spreadMap[skill.SpreadName] = append(spreadMap[skill.SpreadName], displaySkill)
+	}
+
+	// Convert the map to a slice of SkillDisplayStructure
+	var result []character.SkillDisplayStructure
+	for spreadName, skills := range spreadMap {
+		result = append(result, character.SkillDisplayStructure{
+			SpreadName: spreadName,
+			Skills:     skills,
+		})
+	}
+	return result
 }

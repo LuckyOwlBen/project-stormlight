@@ -23,6 +23,7 @@ type Skill struct {
 	CharacterID int    `json:"-" gorm:"not null;index"`
 	SkillName   string `json:"skillName" gorm:"not null;size:100"`
 	Value       int    `json:"value" gorm:"not null;default:0"`
+	Bonus       int    `json:"bonus" gorm:"not null;default:0"`
 
 	// We ignore the association in the database, because it just holds static info like which attribute this pairs with!
 	// We can easily hydrate this whenever we load the character.
@@ -45,6 +46,47 @@ type SkillSpread struct {
 type SkillAssociation struct {
 	Name      string `json:"name"`
 	Attribute string `json:"attribute"`
+}
+
+type DisplaySkill struct {
+	SkillName      string `json:"skillName"`
+	Value          int    `json:"value"`
+	Bonus          int    `json:"bonus"`
+	AttributeBonus int    `json:"attribute"`
+	AttributeName  string `json:"attributeName"`
+	Total          int    `json:"total"`
+}
+
+type SkillDisplayStructure struct {
+	SpreadName string         `json:"spreadName"`
+	Skills     []DisplaySkill `json:"skills"`
+}
+
+func (a Attributes) ConvertSkillsToDisplay(skills []Skill) []SkillDisplayStructure {
+	// Group skills by their SpreadName
+	spreadMap := make(map[string][]DisplaySkill)
+	for _, skill := range skills {
+		attributeBonus := a.GetAttributeBonus(skill.SkillAssociation.Attribute)
+		displaySkill := DisplaySkill{
+			SkillName:      skill.SkillName,
+			Value:          skill.Value,
+			Bonus:          skill.Bonus,
+			AttributeBonus: attributeBonus,
+			AttributeName:  skill.SkillAssociation.Attribute,
+			Total:          skill.Value + skill.Bonus + attributeBonus,
+		}
+		spreadMap[skill.SpreadName] = append(spreadMap[skill.SpreadName], displaySkill)
+	}
+
+	// Convert the map to a slice of SkillDisplayStructure
+	var result []SkillDisplayStructure
+	for spreadName, skills := range spreadMap {
+		result = append(result, SkillDisplayStructure{
+			SpreadName: spreadName,
+			Skills:     skills,
+		})
+	}
+	return result
 }
 
 func calculateSkillPoints(level int) int {

@@ -36,17 +36,26 @@ templ CharacterSheet(characterSheet models.CharacterSheetData) {
 					@SkillsComponent(characterSheet)
 				</div>
 
+				//Talents & Expertises Tab
   				<input type="radio" name="my_tabs_5" class="tab" aria-label="Talents & Expertises" />
-  				<div class="tab-content bg-base-100 border-base-300 p-6"></div>
+  				<div class="tab-content bg-base-100 border-base-300 p-6">
+					@TalentsComponent(characterSheet)
+				</div>
 
 			  	<input type="radio" name="my_tabs_5" class="tab" aria-label="Equipment" />
-  				<div class="tab-content bg-base-100 border-base-300 p-6">Tab content 2</div>
+  				<div class="tab-content bg-base-100 border-base-300 p-6">
+					@EquipmentComponent(characterSheet)
+				</div>
 
   				<input type="radio" name="my_tabs_5" class="tab" aria-label="Derived Stats" />
-  				<div class="tab-content bg-base-100 border-base-300 p-6">Tab content 2</div>
+  				<div class="tab-content bg-base-100 border-base-300 p-6">
+					@DerivedAttributesComponent(characterSheet)
+				</div>
 
 	  			<input type="radio" name="my_tabs_5" class="tab" aria-label="Notes" />
-				<div class="tab-content bg-base-100 border-base-300 p-6">Tab content 2</div>				
+				<div class="tab-content bg-base-100 border-base-300 p-6">
+					@NotesComponent(characterSheet.Char.SessionNotes, characterSheet.Char.ID)
+				</div>				
 			</div>
         </div>
     }
@@ -135,14 +144,80 @@ templ ValueJoinCard(value int, label string, endpoint string) {
 }
 
 templ SkillsComponent(characterSheet models.CharacterSheetData) {
-	<div class="grid grid-cols-6">
-		for _, skill := range characterSheet.Char.Skills.PlayerSkills {
+	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+		for _, spread := range characterSheet.SkillsDisplayStructure {
+			<div class="card bg-base-200 shadow border-t-4 border-primary">
+				<div class="card-body p-4 text-center">
+					<span class="text-xs uppercase font-extrabold text-primary">{ spread.SpreadName }</span>
+					@SkillComponentSection(spread)
+				</div>
+			</div>
+	}
+	</div>
+}
+
+templ SkillComponentSection(spread character.SkillDisplayStructure) {
+	<div>
+		for _, skill := range spread.Skills {
 			<div class="card bg-base-200 shadow border-t-4 border-primary">
 				<div class="card-body p-4 text-center">
 					<span class="text-xs uppercase font-extrabold text-primary">{ skill.SkillName }</span>
-					<span class="text-3xl font-extrabold text-base-content">{ strconv.Itoa(skill.Value) }</span>
+					<span class="text-3xl font-extrabold text-base-content">{ strconv.Itoa(skill.Total) }</span>
+					<span class="text-sm text-secondary">({ strconv.Itoa(skill.AttributeBonus) } + { strconv.Itoa(skill.Bonus) })</span>
+					<span class="text-xs uppercase font-extrabold text-primary">{ skill.AttributeName }</span>
 				</div>
 			</div>
 		}
+	</div>
+}
+
+templ TalentsComponent(characterSheet models.CharacterSheetData) {
+	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+		for _, talent := range characterSheet.Char.Talents.TalentMap {
+			<div class="card bg-base-200 shadow border-t-4 border-primary">
+				<div class="card-body p-4 text-center">
+					<span class="text-xs uppercase font-extrabold text-primary">{ talent.Name }</span>
+					<span class="text-sm text-secondary">{ talent.Description }</span>
+				</div>
+			</div>
+	}
+	</div>
+}
+
+templ EquipmentComponent(characterSheet models.CharacterSheetData) {
+	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+		for _, item := range *characterSheet.Char.Inventory {
+			<div class="card bg-base-200 shadow border-t-4 border-primary">
+				<div class="card-body p-4 text-center">
+					<span class="text-xs uppercase font-extrabold text-primary">{ item.Name }</span>
+					<span class="text-sm text-secondary">{ item.Equipped }</span>
+				</div>
+			</div>
+	}
+	</div>
+}
+
+templ DerivedAttributesComponent(characterSheet models.CharacterSheetData) {
+	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+		for attr, value := range characterSheet.DerivedAttributes {
+			<div class="card bg-base-200 shadow border-t-4 border-primary">
+				<div class="card-body p-4 text-center">
+					<span class="text-xs uppercase font-extrabold text-primary">{ attr }</span>
+					<span class="text-3xl font-extrabold text-base-content">{ value }</span>
+				</div>
+			</div>
+	}
+	</div>
+}
+
+templ NotesComponent(notes string, characterID int) {
+	<div id="notes-card" class="card bg-base-200 shadow border-t-4 border-primary">
+		<textarea name="notes" placeholder="Session Notes" class="textarea textarea-xl"
+			hx-post={ "/characters/" + strconv.Itoa(characterID) + "/session-notes" }
+			hx-target="#notes-card"
+			hx-trigger="keyup changed delay:1s"
+			hx-swap="none">
+			{ notes }
+		</textarea>
 	</div>
 }

@@ -35,3 +35,24 @@ func NewAttributes(characterID int, level int) *Attributes {
 		},
 	}
 }
+
+func (a Attributes) GetAttributeBonus(attributeName string) int {
+	attributeValue := 0
+	switch attributeName {
+	case "Strength":
+		attributeValue = a.Strength
+	case "Speed":
+		attributeValue = a.Speed
+	case "Willpower":
+		attributeValue = a.Willpower
+	case "Intellect":
+		attributeValue = a.Intelligence
+	case "Awareness":
+		attributeValue = a.Awareness
+	case "Presence":
+		attributeValue = a.Presence
+	default:
+		return 0 // Unknown attribute, no bonus
+	}
+	return attributeValue
+}
