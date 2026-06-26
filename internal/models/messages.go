@@ -1,4 +1,4 @@
-package playspace
+package models
 
 import "encoding/json"
 

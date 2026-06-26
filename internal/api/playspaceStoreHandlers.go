@@ -252,7 +252,7 @@ func (s *Server) handleGMStoreToggleSectionPost(w http.ResponseWriter, r *http.R
 	}
 
 	// Notify all connected clients of the changes
-	s.hub.Broadcast([]byte(`{"type": "store_update"}`))
+	s.hub.Broadcast([]byte(`<div id="store-controls-container" hx-swap-oob="true" hx-get="/gm/store/controls" hx-trigger="load"></div>`))
 
 	storeState, err := s.store.GetStoreState(r.Context())
 	if err != nil {
@@ -287,7 +287,7 @@ func (s *Server) handleGMStoreToggleSellPost(w http.ResponseWriter, r *http.Requ
 	}
 
 	// Notify all connected clients of the changes
-	s.hub.Broadcast([]byte(`{"type": "store_update"}`))
+	s.hub.Broadcast([]byte(`<div id="store-controls-container" hx-swap-oob="true" hx-get="/gm/store/controls" hx-trigger="load"></div>`))
 
 	storeState, err := s.store.GetStoreState(r.Context())
 	if err != nil {
@@ -334,7 +334,7 @@ func (s *Server) handleGMStoreUpdateSellPercentagePost(w http.ResponseWriter, r 
 	}
 
 	// Notify all connected clients of the changes
-	s.hub.Broadcast([]byte(`{"type": "store_update"}`))
+	s.hub.Broadcast([]byte(`<div id="store-controls-container" hx-swap-oob="true" hx-get="/gm/store/controls" hx-trigger="load"></div>`))
 
 	storeState, err := s.store.GetStoreState(r.Context())
 	if err != nil {

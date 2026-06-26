@@ -1,6 +1,12 @@
 package playspace
 
-import "sync"
+import (
+	"bytes"
+	"context"
+	"project-stormlight/internal/models"
+	"project-stormlight/internal/views"
+	"sync"
+)
 
 // Hub maintains the set of active WebSocket clients and broadcasts
 // presence updates whenever the connected set changes.
@@ -65,13 +71,10 @@ func (h *Hub) Broadcast(msg []byte) {
 // presence_update to all connected clients.
 func (h *Hub) broadcastPresence() {
 	h.mu.RLock()
-	var players []PlayerInfo
-	gmOnline := false
+	var players []models.PlayerInfo
 	for c := range h.clients {
-		if c.IsGM {
-			gmOnline = true
-		} else {
-			players = append(players, PlayerInfo{
+		if !c.IsGM {
+			players = append(players, models.PlayerInfo{
 				Username: c.Username,
 				CharName: c.CharName,
 				CharID:   c.CharID,
@@ -81,11 +84,20 @@ func (h *Hub) broadcastPresence() {
 	}
 	h.mu.RUnlock()
 
-	msg := MarshalPresence(players, gmOnline)
+	var buf bytes.Buffer
+	buf.WriteString(`<div id="activeSessions" hx-swap-oob="true">`)
+	views.ActiveSessionsComponent(players).Render(context.TODO(), &buf)
+	buf.WriteString(`</div>`)
+	msg := buf.Bytes()
 	h.mu.RLock()
 	for c := range h.clients {
+		if !c.IsGM {
+			continue
+		}
+		out := make([]byte, len(msg))
+		copy(out, msg)
 		select {
-		case c.Send <- msg:
+		case c.Send <- out:
 		default:
 		}
 	}

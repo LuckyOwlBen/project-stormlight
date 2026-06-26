@@ -3,9 +3,10 @@ package api
 import (
 	"net/http"
 
-	"github.com/gorilla/websocket"
 	"project-stormlight/internal/playspace"
 	"project-stormlight/internal/views"
+
+	"github.com/gorilla/websocket"
 )
 
 var gmUpgrader = websocket.Upgrader{
@@ -31,7 +32,7 @@ func (s *Server) handleGMGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	views.GMDashboard().Render(r.Context(), w)
+	views.DashboardRoot().Render(r.Context(), w)
 }
 
 // GET /gm/ws
