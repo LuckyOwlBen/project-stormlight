@@ -348,3 +348,66 @@ func (s *Server) handleGMStoreUpdateSellPercentagePost(w http.ResponseWriter, r 
 		http.Redirect(w, r, "/gm", http.StatusSeeOther)
 	}
 }
+
+func (s *Server) handleGMStoreGrantModalGet(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(int)
+	if !ok {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	user, err := s.store.GetUserByID(r.Context(), userID)
+	if err != nil || !user.IsGM {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	playerIDStr := r.URL.Query().Get("playerId")
+	playerID, err := strconv.Atoi(playerIDStr)
+	if err != nil {
+		http.Error(w, "Invalid player ID", http.StatusBadRequest)
+		return
+	}
+
+	views.GrantItemModal(playerID, groupItemsByCategory()).Render(r.Context(), w)
+}
+
+func (s *Server) handleGMStoreGrantItemPost(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(int)
+	if !ok {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	user, err := s.store.GetUserByID(r.Context(), userID)
+	if err != nil || !user.IsGM {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Unable to parse form", http.StatusBadRequest)
+		return
+	}
+
+	charIDStr := r.FormValue("characterId")
+	charID, err := strconv.Atoi(charIDStr)
+	if err != nil {
+		http.Error(w, "Invalid character ID", http.StatusBadRequest)
+		return
+	}
+
+	itemID := r.FormValue("itemId")
+	item, ok := store.Items[itemID]
+	if !ok {
+		http.Error(w, "Item not found", http.StatusBadRequest)
+		return
+	}
+
+	if err := s.store.GrantItemToCharacter(r.Context(), charID, item); err != nil {
+		http.Error(w, fmt.Sprintf("Failed to grant item: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}

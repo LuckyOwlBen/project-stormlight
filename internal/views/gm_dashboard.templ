@@ -3,33 +3,42 @@ package views
 import (
     "project-stormlight/internal/models"
     "strconv"
+    "project-stormlight/internal/store"
 )
 
 templ DashboardRoot() {
     @Layout("GM Dashboard", true) {
-        <div class="container mx-auto p-4 max-w-6xl">
-            <!-- Content Area -->
-            <div class="tabs tabs-lift tabs-bottom mb-6 justify-center">
-                // Overview Tab
-                <input type="radio" name="gm_tabs" class="tab" aria-label="Overview" checked="checked"/>
-                <div class="tab-content bg-base-100 border-base-300 p-6">
-                    @DashboardOverview()
-                </div>
+        <div
+        hx-ext="ws"
+        ws-connect="/gm/ws"
+        hx-swap="innerHTML"
+        >
+            <div class="container mx-auto p-4 max-w-6xl">
+                <!-- Content Area -->
+                <div class="tabs tabs-lift tabs-bottom mb-6 justify-center">
+                    // Overview Tab
+                    <input type="radio" name="gm_tabs" class="tab" aria-label="Overview" checked="checked"/>
+                    <div class="tab-content bg-base-100 border-base-300 p-6">
+                        @DashboardOverview()
+                    </div>
 
-                // Sessions Tab
-                <input type="radio" name="gm_tabs" class="tab" aria-label="Sessions" />
-                <div class="tab-content bg-base-100 border-base-300 p-6">
-                    @ActiveSessionContainer()
-                </div>
+                    // Sessions Tab
+                    <input type="radio" name="gm_tabs" class="tab" aria-label="Sessions" />
+                    <div class="tab-content bg-base-100 border-base-300 p-6">
+                        <div id="activeSessions" hx-swap-oob="true">
+                            @ActiveSessionsComponent([]models.PlayerInfo{})
+                        </div>
+                    </div>
 
-                // Combat Tab
-                <input type="radio" name="gm_tabs" class="tab" aria-label="Combat" />
-                <div class="tab-content bg-base-100 border-base-300 p-6">
-                    @CombatTracker()
-                </div>
-                <input type="radio" name="gm_tabs" class="tab" aria-label="Store Management" />
-                <div class="tab-content bg-base-100 border-base-300 p-6">
-                    @StoreManagementComponent()
+                    // Combat Tab
+                    <input type="radio" name="gm_tabs" class="tab" aria-label="Combat" />
+                    <div class="tab-content bg-base-100 border-base-300 p-6">
+                        @CombatTracker()
+                    </div>
+                    <input type="radio" name="gm_tabs" class="tab" aria-label="Store Management" />
+                    <div class="tab-content bg-base-100 border-base-300 p-6">
+                        @StoreManagementComponent()
+                    </div>
                 </div>
             </div>
         </div>
@@ -43,17 +52,6 @@ templ DashboardOverview() {
     </div>
 }
 
-templ ActiveSessionContainer() {
-    <div
-        hx-ext="ws"
-        ws-connect="/gm/ws"
-        hx-swap="innerHTML"
-    >
-        <div id="activeSessions" hx-swap-oob="true">
-            @ActiveSessionsComponent([]models.PlayerInfo{})
-        </div>
-    </div>
-}
 
 templ ActiveSessionsComponent(p []models.PlayerInfo) {
     <!-- Connected Players -->
@@ -86,7 +84,10 @@ templ ActiveSessionsComponent(p []models.PlayerInfo) {
                         </div>
 						<span class="text-xs font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded">Lvl {player.Level}</span>
 					</div>
-					<button class="btn btn-xs btn-primary font-bold ml-auto" hx-post="/characters/{player.CharID}/level-up" hx-swap="none">Level Up</button>
+                    //have to pre load the modal content to avoid issues with htmx and modals
+                    <div hx-get={"/gm/store/grant-item-modal?playerId=" + strconv.Itoa(player.CharID)} hx-trigger="load" hx-target="body" hx-swap="beforeend"></div>
+                    <button class="btn btn-xs btn-secondary font bold ml-auto"  onclick="document.getElementById('grant-item-modal').showModal()">Grant Item</button> 
+					<button class="btn btn-xs btn-primary font-bold ml-auto" hx-post={"/characters/" + strconv.Itoa(player.CharID) + "/level-up"} hx-swap="none">Level Up</button>
 				</div>
                 }
             } else {
@@ -249,4 +250,33 @@ templ GMStoreControls(storeState *models.StoreState) {
 			</div>
 		</div>
 	</div>
+}
+
+templ GrantItemModal(playerId int, itemMap map[string][]store.Item) {
+    <dialog id="grant-item-modal" class="modal">
+        <div class="modal-box relative">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onclick="document.getElementById('grant-item-modal').close()">✕</button>
+            <h3 class="text-lg font-bold mb-4">Grant Item to Player</h3>
+            <form hx-post="/gm/store/grant-item" hx-target="#grant-item-modal" hx-swap="none" class="space-y-4">
+                <input type="hidden" name="playerId" value={ strconv.Itoa(playerId) } />
+                  <div class="tabs tabs-lift tabs-bottom mb-6 justify-center">
+                    for category := range itemMap{
+                        <input type="radio" name={category} class="tab" aria-label={category} checked={category == "armorItems"} />
+                        for _, item := range itemMap[category] {
+                            <div class="tab-content bg-base-100 border-base-300 p-6">
+                                <span class="font-medium"> {item.Name} </span>
+                                <label class="block text-sm font-medium mb-1">Quantity</label>
+                                <input type="number" name="quantity" min="1" value="1" class="input input-bordered w-full" required />
+                                    
+                                <div class="modal-action">
+                                    <button type="submit" class="btn btn-primary">Grant Item</button>
+                                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('grant-item-modal').close()">Cancel</button>
+                                </div>
+                            </div>
+                        }
+                    }                
+                </div>
+            </form>
+        </div>
+    </dialog>
 }

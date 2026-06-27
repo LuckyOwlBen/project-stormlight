@@ -215,3 +215,42 @@ func (s *Store) SellStoreItem(ctx context.Context, charID int, inventoryItemID i
 			Update("currency_in_chips", gorm.Expr("currency_in_chips + ?", refundValue)).Error
 	})
 }
+
+func (s *Store) GrantItemToCharacter(ctx context.Context, charID int, item store.Item) error {
+	return s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// 1. Add to inventory
+		if item.Stackable {
+			var existing character.Inventory
+			err := tx.Where("character_id = ? AND item_id = ?", charID, item.Id).First(&existing).Error
+			if err == nil {
+				if err := tx.Model(&existing).Update("quantity", existing.Quantity+1).Error; err != nil {
+					return err
+				}
+			} else {
+				newItem := character.Inventory{
+					CharacterID: charID,
+					ItemID:      item.Id,
+					Name:        item.Name,
+					Quantity:    1,
+					Price:       0, // Granted items have no purchase price
+				}
+				if err := tx.Create(&newItem).Error; err != nil {
+					return err
+				}
+			}
+		} else {
+			newItem := character.Inventory{
+				CharacterID: charID,
+				ItemID:      item.Id,
+				Name:        item.Name,
+				Quantity:    1,
+				Price:       0, // Granted items have no purchase price
+			}
+			if err := tx.Create(&newItem).Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+}
