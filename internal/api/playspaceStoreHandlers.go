@@ -1,11 +1,13 @@
 package api
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"sort"
 	"strconv"
 
+	"project-stormlight/internal/models"
 	"project-stormlight/internal/store"
 	"project-stormlight/internal/views"
 
@@ -390,10 +392,10 @@ func (s *Server) handleGMStoreGrantItemPost(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	charIDStr := r.FormValue("characterId")
-	charID, err := strconv.Atoi(charIDStr)
+	playerIDStr := r.FormValue("playerId")
+	playerID, err := strconv.Atoi(playerIDStr)
 	if err != nil {
-		http.Error(w, "Invalid character ID", http.StatusBadRequest)
+		http.Error(w, "Invalid player ID", http.StatusBadRequest)
 		return
 	}
 
@@ -404,10 +406,30 @@ func (s *Server) handleGMStoreGrantItemPost(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if err := s.store.GrantItemToCharacter(r.Context(), charID, item); err != nil {
+	if err := s.store.GrantItemToPlayer(r.Context(), playerID, item); err != nil {
 		http.Error(w, fmt.Sprintf("Failed to grant item: %v", err), http.StatusInternalServerError)
 		return
 	}
+
+	char, err := s.store.GetCharacterByID(r.Context(), playerID)
+	if err != nil {
+		http.Error(w, "Failed to refresh character state", http.StatusInternalServerError)
+		return
+	}
+
+	characterSheet := models.CharacterSheetData{
+		Char:                   char,
+		AttributesMap:          allAttributes(*char),
+		DefensesMap:            allDefenses(*char),
+		SkillsDisplayStructure: buildSkillDisplayStructure(*char),
+		DerivedAttributes:      char.DerivedAttributes,
+	}
+
+	var buf bytes.Buffer
+	buf.WriteString(`<div id="equipmentComponent" hx-swap-oob="true">`)
+	views.EquipmentComponent(characterSheet).Render(r.Context(), &buf)
+	buf.WriteString(`</div>`)
+	s.hub.SendToCharacter(char.ID, buf.Bytes())
 
 	w.WriteHeader(http.StatusOK)
 }

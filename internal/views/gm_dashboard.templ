@@ -254,29 +254,37 @@ templ GMStoreControls(storeState *models.StoreState) {
 
 templ GrantItemModal(playerId int, itemMap map[string][]store.Item) {
     <dialog id="grant-item-modal" class="modal">
-        <div class="modal-box relative">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onclick="document.getElementById('grant-item-modal').close()">✕</button>
-            <h3 class="text-lg font-bold mb-4">Grant Item to Player</h3>
-            <form hx-post="/gm/store/grant-item" hx-target="#grant-item-modal" hx-swap="none" class="space-y-4">
-                <input type="hidden" name="playerId" value={ strconv.Itoa(playerId) } />
-                  <div class="tabs tabs-lift tabs-bottom mb-6 justify-center">
-                    for category := range itemMap{
-                        <input type="radio" name={category} class="tab" aria-label={category} checked={category == "armorItems"} />
-                        for _, item := range itemMap[category] {
-                            <div class="tab-content bg-base-100 border-base-300 p-6">
-                                <span class="font-medium"> {item.Name} </span>
-                                <label class="block text-sm font-medium mb-1">Quantity</label>
-                                <input type="number" name="quantity" min="1" value="1" class="input input-bordered w-full" required />
-                                    
-                                <div class="modal-action">
-                                    <button type="submit" class="btn btn-primary">Grant Item</button>
-                                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('grant-item-modal').close()">Cancel</button>
-                                </div>
+        <div class="modal-box relative max-w-2xl">
+            <input type="hidden" name="playerId" value={ strconv.Itoa(playerId) } />
+            <div class="card bg-base-100 shadow p-4">            
+                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onclick="document.getElementById('grant-item-modal').close()">✕</button>
+                <h3 class="text-lg font-bold mb-4 text-center">Grant Item to Player</h3>
+                <div class="tabs tabs-lift tabs-bottom mb-6 justify-center">
+                    for category := range itemMap {
+                        <input type="radio" name="category" class="tab" aria-label={ category } checked={ category == "armorItems" } />
+                        <div class="tab-content bg-base-100 border-base-300 p-6" style="max-height: 40rem; overflow-y: auto;">
+                            <div class=" grid grid-cols-3 gap-3 max-h-100 overflow-y-auto pr-2">
+                                for _, item := range itemMap[category] {
+                                    <form hx-post="/gm/store/grant-item" hx-swap="none">
+                                        <input type="hidden" name="playerId" value={ strconv.Itoa(playerId) } />
+                                        <input type="hidden" name="itemId" value={ item.Id } />
+                                        <div class="card bg-base-200 shadow p-4">
+                                            <span class="font-medium">{ item.Name }</span>
+                                            <span>
+                                                <label class="block text-sm font-medium mt-2 mb-1">Quantity</label>
+                                                <input type="number" name="quantity" min="1" value="1" class="input input-bordered w-full" required />
+                                            </span>
+                                            <div class="modal-action mt-3">
+                                                <button type="submit" class="btn btn-primary btn-sm">Grant Item</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                }
                             </div>
-                        }
-                    }                
+                        </div>
+                    }
                 </div>
-            </form>
+            </div>
         </div>
     </dialog>
 }
