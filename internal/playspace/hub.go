@@ -75,10 +75,17 @@ func (h *Hub) broadcastPresence() {
 	for c := range h.clients {
 		if !c.IsGM {
 			players = append(players, models.PlayerInfo{
-				Username: c.Username,
-				CharName: c.CharName,
-				CharID:   c.CharID,
-				Level:    c.Level,
+				Username:      c.Username,
+				CharName:      c.CharName,
+				CharID:        c.CharID,
+				Level:         c.Level,
+				CurrentHp:     c.CurrentHp,
+				MaxHp:         c.MaxHp,
+				CurrentFocus:  c.CurrentFocus,
+				MaxFocus:      c.MaxFocus,
+				CurrentInvest: c.CurrentInvest,
+				MaxInvest:     c.MaxInvest,
+				IsInvested:    c.IsInvested,
 			})
 		}
 	}
@@ -99,6 +106,60 @@ func (h *Hub) broadcastPresence() {
 		select {
 		case c.Send <- out:
 		default:
+		}
+	}
+	h.mu.RUnlock()
+}
+
+func (h *Hub) ResourceChangeEvent(charID int, newHp, newFocus, newInvest int) {
+	h.mu.Lock()
+	var players []models.PlayerInfo
+	for c := range h.clients {
+		if c.CharID == charID {
+			players = append(players, models.PlayerInfo{
+				Username:      c.Username,
+				CharName:      c.CharName,
+				CharID:        c.CharID,
+				Level:         c.Level,
+				CurrentHp:     newHp,
+				MaxHp:         c.MaxHp,
+				CurrentFocus:  newFocus,
+				MaxFocus:      c.MaxFocus,
+				CurrentInvest: newInvest,
+				MaxInvest:     c.MaxInvest,
+				IsInvested:    c.IsInvested,
+			})
+		} else if !c.IsGM {
+			players = append(players, models.PlayerInfo{
+				Username:      c.Username,
+				CharName:      c.CharName,
+				CharID:        c.CharID,
+				Level:         c.Level,
+				CurrentHp:     c.CurrentHp,
+				MaxHp:         c.MaxHp,
+				CurrentFocus:  c.CurrentFocus,
+				MaxFocus:      c.MaxFocus,
+				CurrentInvest: c.CurrentInvest,
+				MaxInvest:     c.MaxInvest,
+				IsInvested:    c.IsInvested,
+			})
+		}
+	}
+	h.mu.Unlock()
+	var buf bytes.Buffer
+	buf.WriteString(`<div id="activeSessions" hx-swap-oob="true">`)
+	views.ActiveSessionsComponent(players).Render(context.TODO(), &buf)
+	buf.WriteString(`</div>`)
+	msg := buf.Bytes()
+	h.mu.RLock()
+	for c := range h.clients {
+		if c.IsGM {
+			out := make([]byte, len(msg))
+			copy(out, msg)
+			select {
+			case c.Send <- out:
+			default:
+			}
 		}
 	}
 	h.mu.RUnlock()

@@ -85,15 +85,22 @@ func (s *Server) handlePlayspaceWebSocket(w http.ResponseWriter, r *http.Request
 	}
 
 	client := &playspace.Client{
-		Hub:      s.hub,
-		Conn:     conn,
-		Send:     make(chan []byte, 16),
-		UserID:   userID,
-		Username: user.Username,
-		CharID:   charID,
-		CharName: char.Name,
-		Level:    char.Level,
-		IsGM:     false,
+		Hub:           s.hub,
+		Conn:          conn,
+		Send:          make(chan []byte, 16),
+		UserID:        userID,
+		Username:      user.Username,
+		CharID:        charID,
+		CharName:      char.Name,
+		Level:         char.Level,
+		IsGM:          false,
+		CurrentHp:     char.Resources.HealthCurrent,
+		MaxHp:         char.Resources.HealthMax,
+		CurrentFocus:  char.Resources.FocusCurrent,
+		MaxFocus:      char.Resources.FocusMax,
+		CurrentInvest: char.Resources.InvestitureCurrent,
+		MaxInvest:     char.Resources.InvestitureMax,
+		IsInvested:    char.Resources.InvestitureActive,
 	}
 
 	s.hub.Register <- client

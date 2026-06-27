@@ -69,8 +69,22 @@ templ ActiveSessionsComponent(p []models.PlayerInfo) {
 					<div class="flex items-center gap-2">
 						<div class="badge badge-success badge-xs"></div>
 						<span class="font-medium"> {player.CharName} </span>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-sm">HP:</span>
+                            <progress class="progress progress-error w-full" value={ strconv.Itoa(player.CurrentHp) } max={ strconv.Itoa(player.MaxHp) }></progress>
+                            <span class="text-xs font-semibold px-2 py-1 bg-error/10 text-error rounded-md">{ player.CurrentHp } / { player.MaxHp }</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-sm">Focus:</span>
+                            <progress class="progress progress-info w-full" value={ strconv.Itoa(player.CurrentFocus) } max={ strconv.Itoa(player.MaxFocus) }></progress>
+                            <span class="text-xs font-semibold px-2 py-1 bg-info/10 text-info rounded-md">{ player.CurrentFocus } / { player.MaxFocus }</span>
+                        </div>
+                        <div hidden={ !player.IsInvested } class="flex items-center gap-2">
+                            <span class="font-bold text-sm">Invested:</span>
+                            <progress class="progress progress-success w-full" value={ strconv.Itoa(player.CurrentInvest) } max={ strconv.Itoa(player.MaxInvest) }></progress>
+                            <span class="text-xs font-semibold px-2 py-1 bg-success/10 text-success rounded-md">{ player.CurrentInvest } / { player.MaxInvest }</span>
+                        </div>
 						<span class="text-xs font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded">Lvl {player.Level}</span>
-						<span class="text-xs text-base-content/50">({player.Username})</span>
 					</div>
 					<button class="btn btn-xs btn-primary font-bold ml-auto" hx-post="/characters/{player.CharID}/level-up" hx-swap="none">Level Up</button>
 				</div>

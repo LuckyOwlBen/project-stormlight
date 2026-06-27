@@ -16,15 +16,22 @@ const (
 
 // Client is a single WebSocket connection registered with a Hub.
 type Client struct {
-	Hub      *Hub
-	Conn     *websocket.Conn
-	Send     chan []byte
-	UserID   int
-	Username string
-	CharID   int
-	CharName string
-	Level    int
-	IsGM     bool
+	Hub           *Hub
+	Conn          *websocket.Conn
+	Send          chan []byte
+	UserID        int
+	Username      string
+	CharID        int
+	CharName      string
+	Level         int
+	IsGM          bool
+	CurrentHp     int
+	MaxHp         int
+	CurrentFocus  int
+	MaxFocus      int
+	CurrentInvest int
+	MaxInvest     int
+	IsInvested    bool
 }
 
 // ReadPump pumps messages from the WebSocket connection to the hub.
