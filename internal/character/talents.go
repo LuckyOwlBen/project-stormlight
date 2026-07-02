@@ -256,6 +256,31 @@ type MovementEffect struct {
 	ActionCost string `json:"actionCost,omitempty"` // "free", "part-of-action", or "full-action"
 }
 
+var RadiantMatchTable = []RadiantMatch{}
+
+type RadiantMatch struct {
+	RadiantPath    string `json:"radiantPath"`
+	PrimarySurge   string `json:"primarySurge"`
+	SecondarySurge string `json:"secondarySurge"`
+	Spren          string `json:"spren"`
+	Philosophy     string `json:"philosophy"`
+}
+
+func LoadRadiantMatches() error {
+	fileData, err := data.TalentFiles.ReadFile("talents/radiantMatch.json")
+	if err != nil {
+		return err
+	}
+
+	var matches []RadiantMatch
+	if err := json.Unmarshal(fileData, &matches); err != nil {
+		return err
+	}
+
+	RadiantMatchTable = matches
+	return nil
+}
+
 var (
 	PathMap    = map[string]Path{}
 	SubPathMap = map[string]Talents{}

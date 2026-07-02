@@ -1,0 +1,76 @@
+{
+    "radiantOrders": [
+        {
+            "radiantPath": "dustbringer",
+            "primarySurge": "abrasion",
+            "secondarySurge": "division",
+            "spren": "ashspren",
+            "philosophy": "Great power requires strong discipline."
+        },
+        {
+            "radiantPath": "edgedancer",
+            "primarySurge": "abration",
+            "secondarySurge": "progression",
+            "spren": "cultivationspren",
+            "philosophy": "Remember and serve those who others forget."
+        },
+        {
+            "radiantPath": "elsecaller",
+            "primarySurge": "transformation",
+            "secondarySurge": "transportation",
+            "spren": "inkspren",
+            "philosophy": "Strive to reach your true potential."
+        },
+        {
+            "radiantPath": "lightweaver",
+            "primarySurge": "transformation",
+            "secondarySurge": "illusion",
+            "spren": "cryptic",
+            "philosophy": "Seperate truth from lies."
+        },
+        {
+            "radiantPath": "skybreaker",
+            "primarySurge": "division",
+            "secondarySurge": "gravitation",
+            "spren": "highspren",
+            "philosophy": "Enforce the law and strive for justice."
+        },
+        {
+            "radiantPath": "stoneward",
+            "primarySurge": "cohesion",
+            "secondarySurge": "tension",
+            "spren": "peakspren",
+            "philosophy": "Strength and resilience are the foundation of all."
+        },
+        {
+            "radiantPath": "truthwatcher",
+            "primarySurge": "illumination",
+            "secondarySurge": "progression",
+            "spren": "mistspren",
+            "philosophy": "Search for fundamental truth and share it."
+        },
+        {
+            "radiantPath": "willshaper",
+            "primarySurge": "cohesion",
+            "secondarySurge": "transportation",
+            "spren": "lightspren",
+            "philosophy": "Seek freedom and choice for all peoples."
+        },
+        {
+            "radiantPath": "windrunner",
+            "primarySurge": "adhesion",
+            "secondarySurge": "gravitation",
+            "spren": "windspren",
+            "philosophy": "Protect the innocent and the defenseless."
+        },
+        {
+            "radiantPath": "bondsmith",
+            "primarySurge": "cohesion",
+            "secondarySurge": "tension",
+            "spren": "Unique spren",
+            "philosophy": "Unite before you divide, and strive for peace before engaging in war."
+        }
+
+    ]
+}
+
