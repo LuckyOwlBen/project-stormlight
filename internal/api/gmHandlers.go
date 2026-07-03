@@ -2,7 +2,9 @@ package api
 
 import (
 	"net/http"
+	"strconv"
 
+	"project-stormlight/internal/character"
 	"project-stormlight/internal/playspace"
 	"project-stormlight/internal/views"
 
@@ -66,4 +68,70 @@ func (s *Server) handleGMWebSocket(w http.ResponseWriter, r *http.Request) {
 	s.hub.Register <- client
 	go client.WritePump()
 	client.ReadPump()
+}
+
+func (s *Server) handleSprenGrantGet(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(int)
+	charIdStr := r.URL.Query().Get("charId")
+	charId, _ := strconv.Atoi(charIdStr)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	user, err := s.store.GetUserByID(r.Context(), userID)
+	if err != nil || !user.IsGM {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	char, err := s.store.GetCharacterByID(r.Context(), charId)
+	if err != nil {
+		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+	sprenList := []string{}
+	if char.Talents.SprenBond == "" {
+		sprenList = character.SprenList
+	}
+
+	views.SprenGrantForm(charId, sprenList).Render(r.Context(), w)
+
+}
+
+func (s *Server) handleSprenGrantPost(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(int)
+	charIdStr := r.FormValue("playerId")
+	charId, _ := strconv.Atoi(charIdStr)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	user, err := s.store.GetUserByID(r.Context(), userID)
+	if err != nil || !user.IsGM {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	char, err := s.store.GetCharacterByID(r.Context(), charId)
+	if err != nil {
+		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+
+	spren := r.FormValue("spren")
+	if spren == "" {
+		http.Error(w, "Spren is required", http.StatusBadRequest)
+		return
+	}
+
+	char.Talents.SprenBond = spren
+	err = s.store.UpdateCharacter(r.Context(), char)
+	if err != nil {
+		http.Error(w, "Failed to update character", http.StatusInternalServerError)
+		return
+	}
+	s.hub.SendEventToCharacterSheet(char.ID, "You have bonded with a spren", "")
+	views.SprenGrantForm(charId, []string{}).Render(r.Context(), w)
 }

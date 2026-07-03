@@ -1,7 +1,7 @@
 {
     "id": "surges",
     "name": "Surges",
-    "subpaths": [
+    "paths": [
         "abrasion",
         "adhesion",
         "cohesion",

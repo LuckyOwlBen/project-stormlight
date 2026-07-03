@@ -1,7 +1,6 @@
 ﻿package api
 
 import (
-	"bytes"
 	"net/http"
 	"strconv"
 	"strings"
@@ -279,9 +278,9 @@ func (s *Server) handleCharacterLevelUpPost(w http.ResponseWriter, r *http.Reque
 	redirectURL := models.DetermineNextStepURL(char, "Cultures")
 
 	// 7. Push real-time notification
-	var buf bytes.Buffer
-	views.EventModal(redirectURL, "Character leveled up!").Render(r.Context(), &buf)
-	s.hub.SendToCharacter(char.ID, buf.Bytes())
+	s.hub.SendEventToCharacterSheet(char.ID, "Your character has leveled up!", redirectURL)
+
+	// 8. Respond with success
 
 	w.WriteHeader(http.StatusOK)
 }

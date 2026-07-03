@@ -13,6 +13,7 @@ var talentPointsPerLevel = [21]int{2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 
 type TalentsTracker struct {
 	ID           int             `json:"id" gorm:"primaryKey"`
 	CharacterID  int             `json:"-" gorm:"not null;uniqueIndex"`
+	SprenBond    string          `json:"sprenBond" gorm:"not null;default:''"`
 	List         []TalentHistory `json:"list" gorm:"foreignKey:TalentsTrackerID;constraint:OnDelete:CASCADE;"`
 	PointTracker `gorm:"embedded"`
 
@@ -256,25 +257,29 @@ type MovementEffect struct {
 	ActionCost string `json:"actionCost,omitempty"` // "free", "part-of-action", or "full-action"
 }
 
-var RadiantMatchTable = []RadiantMatch{}
+var RadiantMatchTable = map[string]RadiantMatch{}
+var SprenList = []string{}
 
 type RadiantMatch struct {
 	RadiantPath    string `json:"radiantPath"`
 	PrimarySurge   string `json:"primarySurge"`
 	SecondarySurge string `json:"secondarySurge"`
-	Spren          string `json:"spren"`
 	Philosophy     string `json:"philosophy"`
 }
 
 func LoadRadiantMatches() error {
-	fileData, err := data.TalentFiles.ReadFile("talents/radiantMatch.json")
+	fileData, err := data.RadiantMatchFiles.ReadFile("radiantMatch.json")
 	if err != nil {
 		return err
 	}
 
-	var matches []RadiantMatch
+	var matches map[string]RadiantMatch
 	if err := json.Unmarshal(fileData, &matches); err != nil {
 		return err
+	}
+
+	for key := range matches {
+		SprenList = append(SprenList, key)
 	}
 
 	RadiantMatchTable = matches

@@ -1,7 +1,7 @@
 {
     "id": "radiant",
     "name": "Radiant",
-    "subpaths": [
+    "paths": [
         "bondsmith",
         "dustbringer",
         "edgedancer",

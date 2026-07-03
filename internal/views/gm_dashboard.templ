@@ -86,7 +86,9 @@ templ ActiveSessionsComponent(p []models.PlayerInfo) {
 					</div>
                     //have to pre load the modal content to avoid issues with htmx and modals
                     <div hx-get={"/gm/store/grant-item-modal?playerId=" + strconv.Itoa(player.CharID)} hx-trigger="load" hx-target="body" hx-swap="beforeend"></div>
-                    <button class="btn btn-xs btn-secondary font bold ml-auto"  onclick="document.getElementById('grant-item-modal').showModal()">Grant Item</button> 
+                    <div hx-get={"/gm/spren-grant-modal?charId=" + strconv.Itoa(player.CharID)} hx-trigger="load" hx-target="body" hx-swap="beforeend"></div>
+                    <button class="btn btn-xs btn-primary font-bold ml-auto" onclick="document.getElementById('grant-spren-modal').showModal()">Grant Spren</button>
+                    <button class="btn btn-xs btn-primary font-bold ml-auto" onclick="document.getElementById('grant-item-modal').showModal()">Grant Item</button> 
 					<button class="btn btn-xs btn-primary font-bold ml-auto" hx-post={"/characters/" + strconv.Itoa(player.CharID) + "/level-up"} hx-swap="none">Level Up</button>
 				</div>
                 }
@@ -188,9 +190,7 @@ templ GMStoreControls(storeState *models.StoreState) {
 					<input 
 						type="checkbox" 
 						class="toggle toggle-success" 
-						if storeState.CanSell { checked } 
-						onChange="this.form.dispatchEvent(new Event('submit'))"
-					/>
+						if storeState.CanSell { checked } onChange="this.form.dispatchEvent(new Event('submit'))"/>
 				</form>
 			</div>
 
@@ -285,6 +285,37 @@ templ GrantItemModal(playerId int, itemMap map[string][]store.Item) {
                     }
                 </div>
             </div>
+        </div>
+    </dialog>
+}
+
+templ SprenGrantForm(playerId int, sprenList []string) {
+    <dialog id="grant-spren-modal" class="modal">
+        <div class="modal-box relative max-w-2xl">
+            if (len(sprenList) == 0) {
+                <div class="text-center py-10">
+                    <h2 class="text-lg font-bold text-primary">No Spren Available</h2>
+                    <p class="opacity-70">This player already has a bond.</p>
+                </div>
+            } else {
+                <form hx-post="/gm/grant-spren" hx-swap="none" class="space-y-4">
+                    <input type="hidden" name="playerId" value={ strconv.Itoa(playerId) } />
+                    <div>{playerId}</div>
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Select Spren</span>
+                        </label>
+                        <select name="spren" class="select select-bordered w-full" required>
+                            for _, spren := range sprenList {
+                                <option value={ spren }>{ spren }</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="modal-action">
+                        <button type="submit" class="btn btn-primary">Grant Spren</button>
+                    </div>
+                </form>
+            }
         </div>
     </dialog>
 }

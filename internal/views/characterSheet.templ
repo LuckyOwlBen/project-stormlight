@@ -21,8 +21,9 @@ templ CharacterSheet(characterSheet models.CharacterSheetData) {
 					<h1 class="text-4xl font-bold text-primary">{ characterSheet.Char.Name }</h1>
 					<div class="badge badge-lg badge-accent">Level { strconv.Itoa(characterSheet.Char.Level) } { string(characterSheet.Char.Ancestry) }</div>
 				</div>
-
-				@EventModal("", "")
+				<div id="eventModal" hx-swap-oob="true">
+					@EventModal("", "")
+				</div>
 
 				<!-- Playspace Navigation Tabs -->
 				<div class="tabs tabs-boxed mb-6 justify-center">
@@ -234,12 +235,10 @@ templ NotesComponent(notes string, characterID int) {
 }
 
 templ EventModal(endpoint string, message string) {
-	<div id="notifications" hx-swap-oob="beforeend:#notifications">
-		if message != "" {	
-			<div class="notification-item">
-				{ message } 
-				<a href={ templ.SafeURL(endpoint) } class="btn btn-primary">"Lets go"</a>
-			</div>
-		}
-	</div>
+	if message != "" {	
+		<div class="notification-item">
+			{ message } 
+			<a href={ templ.SafeURL(endpoint) } class="btn btn-primary">"Lets go"</a>
+		</div>
+	}
 }

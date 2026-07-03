@@ -167,6 +167,8 @@ func (s *Server) Mount() http.Handler {
 		r.Post("/gm/store/update-sell-percentage", s.handleGMStoreUpdateSellPercentagePost)
 		r.Get("/gm/store/grant-item-modal", s.handleGMStoreGrantModalGet)
 		r.Post("/gm/store/grant-item", s.handleGMStoreGrantItemPost)
+		r.Get("/gm/spren-grant-modal", s.handleSprenGrantGet)
+		r.Post("/gm/grant-spren", s.handleSprenGrantPost)
 	})
 
 	return r

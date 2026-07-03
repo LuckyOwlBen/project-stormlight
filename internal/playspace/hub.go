@@ -179,6 +179,24 @@ func (h *Hub) SendToCharacter(charID int, msg []byte) {
 	}
 }
 
+func (h *Hub) SendEventToCharacterSheet(charID int, message string, endpoint string) {
+	h.mu.RLock()
+	for c := range h.clients {
+		if c.CharID == charID {
+			var buf bytes.Buffer
+			buf.WriteString(`<div id="eventModal" hx-swap-oob="true">`)
+			views.EventModal(endpoint, message).Render(context.TODO(), &buf)
+			buf.WriteString(`</div>`)
+			msg := buf.Bytes()
+			select {
+			case c.Send <- msg:
+			default:
+			}
+		}
+	}
+	h.mu.RUnlock()
+}
+
 // UpdateClientLevel locks client registry, updates the level inside all matching connections, and broadcasts.
 func (h *Hub) UpdateClientLevel(charID int, newLevel int) {
 	h.mu.Lock()

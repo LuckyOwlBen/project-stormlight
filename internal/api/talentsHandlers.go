@@ -46,6 +46,16 @@ func (s *Server) handleCharacterTalentsGet(w http.ResponseWriter, r *http.Reques
 		filteredPaths[id] = path
 	}
 
+	if char.Talents.SprenBond != "" {
+		radiantMatches := character.RadiantMatchTable[char.Talents.SprenBond]
+		radiantPath := character.Path{}
+		newSubPaths := []string{radiantMatches.RadiantPath, radiantMatches.PrimarySurge, radiantMatches.SecondarySurge}
+		radiantPath.SubPaths = newSubPaths
+		radiantPath.ID = "radiant"
+		radiantPath.Name = radiantMatches.RadiantPath
+		filteredPaths["radiant"] = radiantPath
+	}
+
 	// Pre-compute eligibility states for the initial render (no pending selections yet).
 	evaluations := map[string][]character.TalentWithState{}
 	if selectedPath != "" {
