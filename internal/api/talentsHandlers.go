@@ -274,6 +274,11 @@ func (s *Server) handleCharacterTalentsSectionsGet(w http.ResponseWriter, r *htt
 
 	maxTier := character.MaxVisibleTierForPath(ownedIDs, pendingIDs, path, character.SubPathMap)
 	evaluations := make(map[string][]character.TalentWithState, len(path.SubPaths))
+	if selectedPath == "radiant" || selectedPath == "surges" {
+		radiantMatches := character.RadiantMatchTable[char.Talents.SprenBond]
+		newSubPaths := []string{radiantMatches.RadiantPath, radiantMatches.PrimarySurge, radiantMatches.SecondarySurge}
+		path.SubPaths = newSubPaths
+	}
 	for _, subPathID := range path.SubPaths {
 		sp := character.SubPathMap[subPathID]
 		evaluations[subPathID] = character.EvaluateSubPathNodes(char, pendingIDs, maxTier, sp.Nodes)
