@@ -41,6 +41,9 @@ func (s *Store) InitSchema(ctx context.Context) error {
 		&character.CharacterBonus{},
 		&models.StoreState{},
 		&models.StoreSection{},
+		&models.CombatSession{},
+		&models.CombatParticipant{},
+		&models.Enemy{},
 	)
 	if err != nil {
 		return err
