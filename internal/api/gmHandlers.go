@@ -132,6 +132,6 @@ func (s *Server) handleSprenGrantPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to update character", http.StatusInternalServerError)
 		return
 	}
-	s.hub.SendEventToCharacterSheet(char.ID, "You have bonded with a spren", "")
+	s.hub.SendEventToCharacterSheet(char.ID, "You have bonded with a spren", views.ModalCloseButton("Commence the Friendship!"))
 	views.SprenGrantForm(charId, []string{}).Render(r.Context(), w)
 }

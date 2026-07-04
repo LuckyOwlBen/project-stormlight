@@ -22,7 +22,7 @@ templ CharacterSheet(characterSheet models.CharacterSheetData) {
 					<div class="badge badge-lg badge-accent">Level { strconv.Itoa(characterSheet.Char.Level) } { string(characterSheet.Char.Ancestry) }</div>
 				</div>
 				<div id="eventModal" hx-swap-oob="true">
-					@EventModal("", "")
+					@EventModal("", nil)
 				</div>
 
 				<!-- Playspace Navigation Tabs -->
@@ -234,11 +234,78 @@ templ NotesComponent(notes string, characterID int) {
 	</div>
 }
 
-templ EventModal(endpoint string, message string) {
-	if message != "" {	
+templ EventModal(message string, button templ.Component) {
+	if message != "" {
 		<div class="notification-item">
 			{ message } 
-			<a href={ templ.SafeURL(endpoint) } class="btn btn-primary">"Lets go"</a>
+			if button != nil {
+				@button 
+			}
 		</div>
 	}
+}
+
+templ HREFButton(label string, href string) {
+	<a href={ templ.SafeURL(href) } class="btn btn-primary">{ label }</a>
+}
+
+templ CombatPaceSelector(characterID int) {
+	<dialog id="combat-pace-selector" class="modal">
+        <div class="modal-box relative max-w-2xl">
+			<div class="flex justify-center space-x-4">
+				<button class="btn btn-primary" 
+					hx-post={ "/characters/" + strconv.Itoa(characterID) + "/combat/pace/slow" }
+					hx-target="#combat-pace-selector"
+					hx-swap="outerHTML">Slow</button>
+				<button class="btn btn-primary" 
+					hx-post={ "/characters/" + strconv.Itoa(characterID) + "/combat/pace/fast" }
+					hx-target="#combat-pace-selector"
+					hx-swap="outerHTML">Fast</button>
+			</div>
+		</div>
+	</dialog>
+}
+
+templ TwoPostButtonsWithParams(label1 string, endpoint1 string, label2 string, endpoint2 string, target string, params map[string]string) {
+	<div class="flex justify-center space-x-4">
+		<button class="btn btn-primary" 
+			hx-post={ endpoint1 }
+			hx-vals={ templ.JSONString(params) }
+			hx-target={ target }
+			hx-swap="outerHTML">
+			{ label1 }
+		</button>
+		<button class="btn btn-primary" 
+			hx-post={ endpoint2 }
+			hx-vals={ templ.JSONString(params) }
+			hx-target={ target }
+			hx-swap="outerHTML">
+			{ label2 }
+		</button>
+	</div>
+}
+
+templ POSTButtonWithParams(label string, endpoint string, target string, params map[string]string) {
+	<button class="btn btn-primary" 
+		hx-post={ endpoint }
+		hx-vals={ templ.JSONString(params) }
+		hx-target={ target }
+		hx-swap="outerHTML">
+		{ label }
+	</button>
+}
+
+templ POSTButton(label string, endpoint string, target string) {
+	<button class="btn btn-primary"
+		hx-post={ endpoint }
+		hx-target={ target }
+		hx-swap="outerHTML">
+		{ label }
+	</button>
+}
+
+templ ModalCloseButton(label string) {
+	<button class="btn btn-primary">
+		{ label }
+	</button>
 }

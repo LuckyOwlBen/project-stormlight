@@ -1,7 +1,6 @@
 package api
 
 import (
-	"bytes"
 	"fmt"
 	"net/http"
 	"sort"
@@ -424,12 +423,7 @@ func (s *Server) handleGMStoreGrantItemPost(w http.ResponseWriter, r *http.Reque
 		SkillsDisplayStructure: buildSkillDisplayStructure(*char),
 		DerivedAttributes:      char.DerivedAttributes,
 	}
-
-	var buf bytes.Buffer
-	buf.WriteString(`<div id="equipmentComponent" hx-swap-oob="true">`)
-	views.EquipmentComponent(characterSheet).Render(r.Context(), &buf)
-	buf.WriteString(`</div>`)
-	s.hub.SendToCharacter(char.ID, buf.Bytes())
+	s.hub.UpdateEquipmentComponentOnCharacterSheet(characterSheet, r)
 
 	w.WriteHeader(http.StatusOK)
 }

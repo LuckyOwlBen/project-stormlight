@@ -31,10 +31,15 @@ templ DashboardRoot() {
                     </div>
 
                     // Combat Tab
+                    <div hx-get="/combat/tracker" hx-trigger="load" hx-swap-oob="true"></div>
                     <input type="radio" name="gm_tabs" class="tab" aria-label="Combat" />
                     <div class="tab-content bg-base-100 border-base-300 p-6">
-                        @CombatTracker()
+                        <div id="combatTracker" hx-swap-oob="true">
+                            @CombatTracker(nil, nil, []models.PlayerInfo{})
+                        </div>
                     </div>
+
+                    // Store Management Tab
                     <input type="radio" name="gm_tabs" class="tab" aria-label="Store Management" />
                     <div class="tab-content bg-base-100 border-base-300 p-6">
                         @StoreManagementComponent()
@@ -101,63 +106,103 @@ templ ActiveSessionsComponent(p []models.PlayerInfo) {
     </div>
 }
 
-templ CombatTracker() {
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Control Panel (Left) -->
-        <div class="lg:col-span-1 space-y-6">
-            <div class="card bg-base-200 shadow border-t-4 border-primary">
-                <div class="card-body p-4">
-                    <h2 class="text-sm font-bold uppercase opacity-70 mb-2">Combat Controls</h2>
-                    <button class="btn btn-primary w-full" hx-post="/combat/start">
-                        Start Combat Session
-                    </button>
-                </div>
-            </div>
+templ CombatTracker(sessions []models.CombatSession, enemies []models.Enemy, sessionPlayers []models.PlayerInfo) {
+    <div class="card bg-base-200 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title mb-4 flex justify-between items-center">
+                <span>Combat Tracker</span>
+                <div class="badge badge-accent" id="gm-combat-count">0</div>
+            </h2>
 
-            <div class="card bg-base-200 shadow border-t-4 border-secondary">
-                <div class="card-body p-4">
-                    <h2 class="text-sm font-bold uppercase opacity-70 mb-2">Add Enemy</h2>
-                    <form hx-post="/combat/enemy/add" class="space-y-3">
-                        <input type="text" name="name" placeholder="Enemy Name" class="input input-bordered w-full" required />
-                        <div class="flex gap-2">
-                            <input type="number" name="hp" placeholder="HP" class="input input-bordered w-1/2" required />
-                            <select name="mode" class="select select-bordered w-1/2">
-                                <option value="fast">Fast</option>
-                                <option value="slow">Slow</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-secondary btn-sm w-full">Add to Session</button>
-                    </form>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold text-sm mb-2">Load Session</h3>
+                    @SessionList(sessions)
                 </div>
-            </div>
-
-            <div class="card bg-base-200 shadow border-t-4 border-accent">
-                <div class="card-body p-4">
-                    <h2 class="text-sm font-bold uppercase opacity-70 mb-2">Enemy Library</h2>
-                    <div id="enemy-library" class="space-y-2 max-h-64 overflow-y-auto">
-                        <!-- Placeholder for reused enemies -->
-                        <p class="text-xs opacity-50 italic">No library loaded...</p>
-                    </div>
+                <div>
+                    <h3 class="font-bold text-sm mb-2">Enemies Archive</h3>
+                    @EnemyList(enemies)
+                    @AddEnemyForm()
+                </div>
+                <div>
+                    <h3 class="font-bold text-sm mb-2">Connected Players</h3>
+                    @PlayerList(sessionPlayers)
                 </div>
             </div>
         </div>
+    </div>
+}
 
-        <!-- Active Combat Tracker (Right) -->
-        <div class="lg:col-span-2">
-            <div class="card bg-base-100 shadow border-t-4 border-primary min-h-[400px]">
-                <div class="card-body p-6">
-                    <h2 class="text-xl font-bold mb-4">Active Combat Tracker</h2>
-                    <div id="combat-turn-order" class="space-y-3">
-                        <!-- This is where the turn order list will be rendered via WebSockets -->
-                        <div class="text-center py-20 opacity-25">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 11-4 0" />
-                            </svg>
-                            <p>No active combat session. Start one to begin tracking turns.</p>
-                        </div>
-                    </div>
+templ EnemyList(enemies []models.Enemy) {
+    <div class="space-y-2">
+        for _, enemy := range enemies {
+            <div class="flex items-center justify-between p-3 bg-base-100 rounded-lg shadow-sm border border-base-300">
+                <div>
+                    <div class="font-bold text-sm">{ enemy.Name }</div>
+                    <div class="text-xs opacity-60">HP: { strconv.Itoa(enemy.HP) } / { strconv.Itoa(enemy.HP) }</div>
+                </div>
+                <form hx-post="/combat/enemy/remove" hx-target="#combat-tracker-container" hx-swap="innerHTML">
+                    <input type="hidden" name="enemyId" value={ strconv.Itoa(enemy.ID) } />
+                    <button type="submit" class="btn btn-error btn-xs flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-3.5 h-3.5 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        Remove
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
+}
+
+templ SessionList(sessions []models.CombatSession) {
+    <div class="space-y-2">
+        for _, session := range sessions {
+            <div class="flex items-center justify-between p-3 bg-base-100 rounded-lg shadow-sm border border-base-300">
+                <div>
+                    <div class="font-bold text-sm">Session ID: { strconv.Itoa(session.ID) }</div>
+                    <div class="text-xs opacity-60">Players: { strconv.Itoa(len(session.Participants)) }</div>
+                </div>
+                <form hx-post="/combat/session/end" hx-target="#combat-tracker-container" hx-swap="innerHTML">
+                    <input type="hidden" name="sessionId" value={ strconv.Itoa(session.ID) } />
+                    <button type="submit" class="btn btn-error btn-xs flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-3.5 h-3.5 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        End Session
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
+}
+
+templ PlayerList(players []models.PlayerInfo) {
+    <div class="space-y-2">
+        for _, player := range players {
+            <div class="flex items-center justify-between p-3 bg-base-100 rounded-lg shadow-sm border border-base-300">
+                <div>
+                    <div class="font-bold text-sm">{ player.CharName }</div>
+                    <div class="text-xs opacity-60">HP: { strconv.Itoa(player.CurrentHp) } / { strconv.Itoa(player.MaxHp) }</div>
                 </div>
             </div>
+        }
+    </div>
+}
+
+templ AddEnemyForm() {
+    <div class="card bg-base-200 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title mb-4 flex justify-between items-center">
+                <span>Add Enemy</span>
+            </h2>
+            <form hx-post="/combat/enemy/add" class="space-y-4">
+                <input type="text" name="name" placeholder="Enemy Name" class="input input-bordered w-full" required />
+                <div class="flex gap-2">
+                    <input type="number" name="hp" placeholder="HP" class="input input-bordered w-1/2" required />
+                    <select name="mode" class="select select-bordered w-1/2">
+                        <option value="fast">Fast</option>
+                        <option value="slow">Slow</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Add to Session</button>
+            </form>
         </div>
     </div>
 }

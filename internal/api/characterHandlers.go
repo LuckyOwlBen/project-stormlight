@@ -278,7 +278,7 @@ func (s *Server) handleCharacterLevelUpPost(w http.ResponseWriter, r *http.Reque
 	redirectURL := models.DetermineNextStepURL(char, "Cultures")
 
 	// 7. Push real-time notification
-	s.hub.SendEventToCharacterSheet(char.ID, "Your character has leveled up!", redirectURL)
+	s.hub.SendEventToCharacterSheet(char.ID, "Your character has leveled up!", views.HREFButton("Lets Go!", redirectURL))
 
 	// 8. Respond with success
 

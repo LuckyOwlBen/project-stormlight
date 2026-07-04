@@ -3,9 +3,12 @@ package playspace
 import (
 	"bytes"
 	"context"
+	"net/http"
 	"project-stormlight/internal/models"
 	"project-stormlight/internal/views"
 	"sync"
+
+	"github.com/a-h/templ"
 )
 
 // Hub maintains the set of active WebSocket clients and broadcasts
@@ -68,7 +71,7 @@ func (h *Hub) Broadcast(msg []byte) {
 }
 
 // broadcastPresence computes the current player list and pushes a
-// presence_update to all connected clients.
+// presence_update to the gm.
 func (h *Hub) broadcastPresence() {
 	h.mu.RLock()
 	var players []models.PlayerInfo
@@ -96,6 +99,27 @@ func (h *Hub) broadcastPresence() {
 	views.ActiveSessionsComponent(players).Render(context.TODO(), &buf)
 	buf.WriteString(`</div>`)
 	msg := buf.Bytes()
+	h.SendToGM(msg)
+}
+
+func (h *Hub) UpdateCombatSection(sessions []models.CombatSession, enemies []models.Enemy, r *http.Request) {
+	h.mu.RLock()
+	sessionPlayers := []models.PlayerInfo{}
+	for c := range h.clients {
+		if !c.IsGM {
+			sessionPlayers = append(sessionPlayers, models.PlayerInfo{})
+		}
+	}
+	var buf bytes.Buffer
+	buf.WriteString(`<div id="combatTracker" hx-swap-oob="true">`)
+	views.CombatTracker(sessions, enemies, sessionPlayers).Render(r.Context(), &buf)
+	buf.WriteString(`</div>`)
+	msg := buf.Bytes()
+	h.SendToGM(msg)
+	h.mu.RUnlock()
+}
+
+func (h *Hub) SendToGM(msg []byte) {
 	h.mu.RLock()
 	for c := range h.clients {
 		if !c.IsGM {
@@ -168,26 +192,8 @@ func (h *Hub) ResourceChangeEvent(charID int, newHp, newFocus, newInvest int) {
 // SendToCharacter sends a raw message back to all active client connections representing the given character ID.
 func (h *Hub) SendToCharacter(charID int, msg []byte) {
 	h.mu.RLock()
-	defer h.mu.RUnlock()
 	for c := range h.clients {
 		if c.CharID == charID {
-			select {
-			case c.Send <- msg:
-			default:
-			}
-		}
-	}
-}
-
-func (h *Hub) SendEventToCharacterSheet(charID int, message string, endpoint string) {
-	h.mu.RLock()
-	for c := range h.clients {
-		if c.CharID == charID {
-			var buf bytes.Buffer
-			buf.WriteString(`<div id="eventModal" hx-swap-oob="true">`)
-			views.EventModal(endpoint, message).Render(context.TODO(), &buf)
-			buf.WriteString(`</div>`)
-			msg := buf.Bytes()
 			select {
 			case c.Send <- msg:
 			default:
@@ -195,6 +201,40 @@ func (h *Hub) SendEventToCharacterSheet(charID int, message string, endpoint str
 		}
 	}
 	h.mu.RUnlock()
+}
+
+func (h *Hub) SendToAllCharacters(msg []byte) {
+	h.mu.RLock()
+	for c := range h.clients {
+		if !c.IsGM {
+			select {
+			case c.Send <- msg:
+			default:
+			}
+		}
+	}
+	h.mu.RUnlock()
+}
+
+func (h *Hub) UpdateEquipmentComponentOnCharacterSheet(characterSheet models.CharacterSheetData, r *http.Request) {
+	var buf bytes.Buffer
+	buf.WriteString(`<div id="equipmentComponent" hx-swap-oob="true">`)
+	views.EquipmentComponent(characterSheet).Render(r.Context(), &buf)
+	buf.WriteString(`</div>`)
+	msg := buf.Bytes()
+	h.SendToCharacter(characterSheet.Char.ID, msg)
+}
+
+func (h *Hub) SendEventToCharacterSheet(charID int, message string, button templ.Component) {
+	var buf bytes.Buffer
+	buf.WriteString(`<div id="eventModal" hx-swap-oob="true">`)
+	views.EventModal(message, button).Render(context.TODO(), &buf)
+	buf.WriteString(`</div>`)
+	msg := buf.Bytes()
+	if charID == 0 {
+		h.SendToAllCharacters(msg)
+	}
+	h.SendToCharacter(charID, msg)
 }
 
 // UpdateClientLevel locks client registry, updates the level inside all matching connections, and broadcasts.

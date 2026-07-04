@@ -5,22 +5,27 @@ import (
 	"project-stormlight/internal/models"
 )
 
-func (s *Store) RetrieveCurrentCombatSessions(ctx context.Context) (models.CombatSession, error) {
-	var session []models.CombatSession
-	if err := s.db.WithContext(ctx).Find(&session).Error; err != nil {
+func (s *Store) RetrieveCombatSessionById(ctx context.Context, id int) (models.CombatSession, error) {
+	var session models.CombatSession
+	if err := s.db.WithContext(ctx).First(&session, id).Error; err != nil {
 		return models.CombatSession{}, err
 	}
-	if len(session) == 0 {
-		return models.CombatSession{}, nil
-	}
-	return session[0], nil
+	return session, nil
 }
 
-func (s *Store) CreateCombatSession(ctx context.Context, session *models.CombatSession) error {
-	if err := s.db.WithContext(ctx).Create(session).Error; err != nil {
-		return err
+func (s *Store) RetrieveAllCombatSessions(ctx context.Context) ([]models.CombatSession, error) {
+	var sessions []models.CombatSession
+	if err := s.db.WithContext(ctx).Find(&sessions).Error; err != nil {
+		return nil, err
 	}
-	return nil
+	return sessions, nil
+}
+
+func (s *Store) CreateCombatSession(ctx context.Context, session *models.CombatSession) (int, error) {
+	if err := s.db.WithContext(ctx).Create(session).Error; err != nil {
+		return 0, err
+	}
+	return session.ID, nil
 }
 
 func (s *Store) UpdateCombatSession(ctx context.Context, session *models.CombatSession) error {
@@ -43,6 +48,14 @@ func (s *Store) RetrieveCombatParticipantsBySessionID(ctx context.Context, sessi
 		return nil, err
 	}
 	return participants, nil
+}
+
+func (s *Store) RetrieveCombatParticipantByCharacterID(ctx context.Context, characterID int) (models.CombatParticipant, error) {
+	var participant models.CombatParticipant
+	if err := s.db.WithContext(ctx).Where("character_id = ?", characterID).First(&participant).Error; err != nil {
+		return models.CombatParticipant{}, err
+	}
+	return participant, nil
 }
 
 func (s *Store) CreateCombatParticipant(ctx context.Context, participant *models.CombatParticipant) error {
