@@ -43,6 +43,12 @@ func (s *Server) handleCharacterSkillsGet(w http.ResponseWriter, r *http.Request
 		filteredGroups[groupName] = skills
 	}
 
+	if char.Talents != nil && char.Talents.SprenBond != "" {
+		if surgeSkills := character.SurgeSkillsForBond(char.Talents.SprenBond); len(surgeSkills) > 0 {
+			filteredGroups["surgeSkills"] = surgeSkills
+		}
+	}
+
 	component := views.SkillSelection(char, filteredGroups)
 	component.Render(r.Context(), w)
 }

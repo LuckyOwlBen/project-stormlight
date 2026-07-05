@@ -127,6 +127,21 @@ func (s *Server) handleSprenGrantPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	char.Talents.SprenBond = spren
+
+	// Add the two surge skills and grant 2 bonus points so the player can invest in them.
+	if char.Skills != nil {
+		for _, surgeSkill := range character.SurgeSkillsForBond(spren) {
+			char.Skills.PlayerSkills = append(char.Skills.PlayerSkills, character.Skill{
+				CharacterID:      char.ID,
+				SkillsID:         char.Skills.ID,
+				SkillName:        surgeSkill.SkillName,
+				SkillAssociation: surgeSkill.SkillAssociation,
+			})
+		}
+		char.Skills.TotalPoints += 2
+		char.Skills.PointsRemaining += 2
+	}
+
 	err = s.store.UpdateCharacter(r.Context(), char)
 	if err != nil {
 		http.Error(w, "Failed to update character", http.StatusInternalServerError)

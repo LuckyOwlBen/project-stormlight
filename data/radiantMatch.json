@@ -7,7 +7,7 @@
     },
     "cultivationspren": {
         "radiantPath": "edgedancer",
-            "primarySurge": "abration",
+            "primarySurge": "abrasion",
             "secondarySurge": "progression",
             "philosophy": "Remember and serve those who others forget."
     },
@@ -20,8 +20,8 @@
     "cryptic": {
         "radiantPath": "lightweaver",
             "primarySurge": "transformation",
-            "secondarySurge": "illusion",
-            "philosophy": "Seperate truth from lies."
+            "secondarySurge": "illumination",
+            "philosophy": "Separate truth from lies."
     },
     "highspren": {
         "radiantPath": "skybreaker",

@@ -2,8 +2,30 @@ package character
 
 import (
 	"encoding/json"
+	"strings"
+
 	"project-stormlight/data"
 )
+
+// SurgeSkillsForBond returns the two surge Skill definitions for a character's spren bond.
+// RadiantMatch surge names are lowercase; this normalizes them to match SkillList keys (Title Case).
+func SurgeSkillsForBond(sprenBond string) []Skill {
+	match, ok := RadiantMatchTable[sprenBond]
+	if !ok {
+		return nil
+	}
+	var skills []Skill
+	for _, surgeName := range []string{match.PrimarySurge, match.SecondarySurge} {
+		if len(surgeName) == 0 {
+			continue
+		}
+		skillName := strings.ToUpper(surgeName[:1]) + surgeName[1:]
+		if s, ok := SkillList[skillName]; ok {
+			skills = append(skills, s)
+		}
+	}
+	return skills
+}
 
 var skillPointsPerLevel = [21]int{4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}
 

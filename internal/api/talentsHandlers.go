@@ -59,7 +59,7 @@ func (s *Server) handleCharacterTalentsGet(w http.ResponseWriter, r *http.Reques
 	// Pre-compute eligibility states for the initial render (no pending selections yet).
 	evaluations := map[string][]character.TalentWithState{}
 	if selectedPath != "" {
-		if path, ok := character.PathMap[selectedPath]; ok {
+		if path, ok := filteredPaths[selectedPath]; ok {
 			ownedIDs := make([]string, 0, len(char.Talents.List))
 			if char.Talents != nil {
 				for _, h := range char.Talents.List {
@@ -272,13 +272,13 @@ func (s *Server) handleCharacterTalentsSectionsGet(w http.ResponseWriter, r *htt
 		ownedIDs = append(ownedIDs, h.TalentID)
 	}
 
+	if selectedPath == "radiant" {
+		radiantMatches := character.RadiantMatchTable[char.Talents.SprenBond]
+		path.SubPaths = []string{radiantMatches.RadiantPath, radiantMatches.PrimarySurge, radiantMatches.SecondarySurge}
+	}
+
 	maxTier := character.MaxVisibleTierForPath(ownedIDs, pendingIDs, path, character.SubPathMap)
 	evaluations := make(map[string][]character.TalentWithState, len(path.SubPaths))
-	if selectedPath == "radiant" || selectedPath == "surges" {
-		radiantMatches := character.RadiantMatchTable[char.Talents.SprenBond]
-		newSubPaths := []string{radiantMatches.RadiantPath, radiantMatches.PrimarySurge, radiantMatches.SecondarySurge}
-		path.SubPaths = newSubPaths
-	}
 	for _, subPathID := range path.SubPaths {
 		sp := character.SubPathMap[subPathID]
 		evaluations[subPathID] = character.EvaluateSubPathNodes(char, pendingIDs, maxTier, sp.Nodes)
