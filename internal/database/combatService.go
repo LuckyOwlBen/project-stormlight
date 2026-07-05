@@ -15,7 +15,7 @@ func (s *Store) RetrieveCombatSessionById(ctx context.Context, id int) (models.C
 
 func (s *Store) RetrieveAllCombatSessions(ctx context.Context) ([]models.CombatSession, error) {
 	var sessions []models.CombatSession
-	if err := s.db.WithContext(ctx).Find(&sessions).Error; err != nil {
+	if err := s.db.WithContext(ctx).Preload("Participants").Preload("Enemies").Find(&sessions).Error; err != nil {
 		return nil, err
 	}
 	return sessions, nil
@@ -81,7 +81,7 @@ func (s *Store) DeleteCombatParticipant(ctx context.Context, id int) error {
 
 func (s *Store) RetrieveAllStoredEnemies(ctx context.Context) ([]models.Enemy, error) {
 	var enemies []models.Enemy
-	if err := s.db.WithContext(ctx).Find(&enemies).Error; err != nil {
+	if err := s.db.WithContext(ctx).Where("is_template = ?", true).Find(&enemies).Error; err != nil {
 		return nil, err
 	}
 	return enemies, nil

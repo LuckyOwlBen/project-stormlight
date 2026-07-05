@@ -424,6 +424,7 @@ func (s *Server) handleGMStoreGrantItemPost(w http.ResponseWriter, r *http.Reque
 		DerivedAttributes:      char.DerivedAttributes,
 	}
 	s.hub.UpdateEquipmentComponentOnCharacterSheet(characterSheet, r)
+	s.hub.SendEventToCharacterSheet(playerID, "The GM has granted you: "+item.Name, views.ModalCloseButton("Thanks!"))
 
 	w.WriteHeader(http.StatusOK)
 }

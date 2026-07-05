@@ -102,21 +102,92 @@ func (h *Hub) broadcastPresence() {
 	h.SendToGM(msg)
 }
 
-func (h *Hub) UpdateCombatSection(sessions []models.CombatSession, enemies []models.Enemy, r *http.Request) {
+func (h *Hub) UpdateCombatSection(data models.CombatTrackerData, r *http.Request) {
 	h.mu.RLock()
-	sessionPlayers := []models.PlayerInfo{}
 	for c := range h.clients {
 		if !c.IsGM {
-			sessionPlayers = append(sessionPlayers, models.PlayerInfo{})
+			data.SessionPlayers = append(data.SessionPlayers, models.PlayerInfo{
+				Username:      c.Username,
+				CharName:      c.CharName,
+				CharID:        c.CharID,
+				Level:         c.Level,
+				CurrentHp:     c.CurrentHp,
+				MaxHp:         c.MaxHp,
+				CurrentFocus:  c.CurrentFocus,
+				MaxFocus:      c.MaxFocus,
+				CurrentInvest: c.CurrentInvest,
+				MaxInvest:     c.MaxInvest,
+				IsInvested:    c.IsInvested,
+			})
 		}
 	}
+	h.mu.RUnlock()
+
 	var buf bytes.Buffer
 	buf.WriteString(`<div id="combatTracker" hx-swap-oob="true">`)
-	views.CombatTracker(sessions, enemies, sessionPlayers).Render(r.Context(), &buf)
+	views.CombatTracker(data).Render(r.Context(), &buf)
 	buf.WriteString(`</div>`)
-	msg := buf.Bytes()
-	h.SendToGM(msg)
+	h.SendToGM(buf.Bytes())
+}
+
+// ConnectedPlayerMap returns a CharID-keyed map of PlayerInfo for all non-GM clients.
+// Used by handlers to join participant records with player names.
+func (h *Hub) ConnectedPlayerMap() map[int]models.PlayerInfo {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	m := make(map[int]models.PlayerInfo)
+	for c := range h.clients {
+		if !c.IsGM && c.CharID != 0 {
+			m[c.CharID] = models.PlayerInfo{
+				Username:      c.Username,
+				CharName:      c.CharName,
+				CharID:        c.CharID,
+				Level:         c.Level,
+				CurrentHp:     c.CurrentHp,
+				MaxHp:         c.MaxHp,
+				CurrentFocus:  c.CurrentFocus,
+				MaxFocus:      c.MaxFocus,
+				CurrentInvest: c.CurrentInvest,
+				MaxInvest:     c.MaxInvest,
+				IsInvested:    c.IsInvested,
+			}
+		}
+	}
+	return m
+}
+
+// BroadcastCombatStart sends a personalised pace-selection EventModal to every
+// connected non-GM player. Each modal contains Fast/Slow buttons wired to that
+// player's character ID so the selection is attributed correctly.
+func (h *Hub) BroadcastCombatStart() {
+	h.mu.RLock()
+	type charEntry struct{ charID int }
+	var players []charEntry
+	for c := range h.clients {
+		if !c.IsGM && c.CharID != 0 {
+			players = append(players, charEntry{c.CharID})
+		}
+	}
 	h.mu.RUnlock()
+
+	for _, p := range players {
+		h.SendEventToCharacterSheet(p.charID, "Choose your combat pace!", views.CombatPaceChoiceButtons(p.charID))
+	}
+}
+
+// ConnectedCharacterIDs returns the CharID of every non-GM client currently
+// registered with the hub. Used to auto-enrol players when a combat session
+// is created.
+func (h *Hub) ConnectedCharacterIDs() []int {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	var ids []int
+	for c := range h.clients {
+		if !c.IsGM && c.CharID != 0 {
+			ids = append(ids, c.CharID)
+		}
+	}
+	return ids
 }
 
 func (h *Hub) SendToGM(msg []byte) {

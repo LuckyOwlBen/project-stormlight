@@ -6,21 +6,29 @@ import (
 
 // CombatSession represents an active or historical combat encounter.
 type CombatSession struct {
-	ID           int                  `json:"id" gorm:"primaryKey"`
-	Active       bool                 `json:"active" gorm:"not null;default:false"`
-	Participants []CombatParticipant `json:"participants" gorm:"foreignKey:SessionID;constraint:OnDelete:CASCADE;"`
-	Enemies      []Enemy              `json:"enemies" gorm:"foreignKey:SessionID;constraint:OnDelete:CASCADE;"`
-	CreatedAt    time.Time            `json:"createdAt" gorm:"autoCreateTime"`
-	UpdatedAt    time.Time            `json:"updatedAt" gorm:"autoUpdateTime"`
+	ID               int                 `json:"id" gorm:"primaryKey"`
+	Active           bool                `json:"active" gorm:"not null;default:false"`
+	CurrentTurnIndex int                 `json:"currentTurnIndex" gorm:"not null;default:-1"`
+	Participants     []CombatParticipant `json:"participants" gorm:"foreignKey:SessionID;constraint:OnDelete:CASCADE;"`
+	Enemies          []Enemy             `json:"enemies" gorm:"foreignKey:SessionID;constraint:OnDelete:CASCADE;"`
+	CreatedAt        time.Time           `json:"createdAt" gorm:"autoCreateTime"`
+	UpdatedAt        time.Time           `json:"updatedAt" gorm:"autoUpdateTime"`
 }
 
 // CombatParticipant links a character to a specific combat session with their chosen action economy.
 type CombatParticipant struct {
 	ID          int       `json:"id" gorm:"primaryKey"`
 	SessionID   int       `json:"sessionId" gorm:"not null;index"`
-	CharacterID int       `json:"characterId" gorm:"not null"` // Reference to character.Character.ID
+	CharacterID int       `json:"characterId" gorm:"not null"`  // Reference to character.Character.ID
 	Mode        string    `json:"mode" gorm:"not null;size:10"` // "fast" or "slow"
 	CreatedAt   time.Time `json:"createdAt" gorm:"autoCreateTime"`
+}
+
+// PaceRollCallEntry represents a single player's pace selection status for display in the GM's combat tracker.
+type PaceRollCallEntry struct {
+	CharName string
+	CharID   int
+	Mode     string // "Fast", "Slow", or "Pending"
 }
 
 // Enemy represents both reusable templates and specific instances used in a combat session.
@@ -28,8 +36,36 @@ type Enemy struct {
 	ID         int       `json:"id" gorm:"primaryKey"`
 	SessionID  *int      `json:"sessionId,omitempty" gorm:"index"` // Nullable if it's a template (library)
 	Name       string    `json:"name" gorm:"not null;size:100"`
-	HP         int       `json:"hp" gorm:"not null;default:0"`
-	Mode       string    `json:"mode" gorm:"not null;size:10"` // "fast" or "slow"
+	HP         int       `json:"hp" gorm:"not null;default:0"`        // max HP
+	CurrentHP  int       `json:"currentHp" gorm:"not null;default:0"` // tracked during combat
+	Mode       string    `json:"mode" gorm:"not null;size:10"`        // "fast" or "slow"
 	IsTemplate bool      `json:"isTemplate" gorm:"not null;default:true"`
 	CreatedAt  time.Time `json:"createdAt" gorm:"autoCreateTime"`
+}
+
+// TurnEntry is a computed view-model for a single position in the combat turn order.
+type TurnEntry struct {
+	EntryType string // "player" or "enemy"
+	Name      string
+	CharID    int    // non-zero for players
+	EnemyID   int    // non-zero for enemies
+	Mode      string // "Fast" or "Slow" (for group assignment)
+	CurrentHP int
+	MaxHP     int
+	IsCurrent bool
+}
+
+// CombatTrackerData bundles all data needed to render the GM's combat tracker OOB update.
+type CombatTrackerData struct {
+	Sessions        []CombatSession
+	ArchiveEnemies  []Enemy
+	SessionPlayers  []PlayerInfo
+	PaceEntries     []PaceRollCallEntry
+	FastPlayers     []TurnEntry
+	FastNPCs        []TurnEntry
+	SlowPlayers     []TurnEntry
+	SlowNPCs        []TurnEntry
+	ActiveSession   *CombatSession // session with Active=true, if any
+	PlanningSession *CombatSession // first session with Active=false, if any
+	RoundPending    bool
 }

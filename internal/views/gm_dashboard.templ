@@ -35,7 +35,7 @@ templ DashboardRoot() {
                     <input type="radio" name="gm_tabs" class="tab" aria-label="Combat" />
                     <div class="tab-content bg-base-100 border-base-300 p-6">
                         <div id="combatTracker" hx-swap-oob="true">
-                            @CombatTracker(nil, nil, []models.PlayerInfo{})
+                            @CombatTracker(models.CombatTrackerData{})
                         </div>
                     </div>
 
@@ -106,71 +106,216 @@ templ ActiveSessionsComponent(p []models.PlayerInfo) {
     </div>
 }
 
-templ CombatTracker(sessions []models.CombatSession, enemies []models.Enemy, sessionPlayers []models.PlayerInfo) {
+templ CombatTracker(data models.CombatTrackerData) {
     <div class="card bg-base-200 shadow-xl">
         <div class="card-body">
-            <h2 class="card-title mb-4 flex justify-between items-center">
-                <span>Combat Tracker</span>
-                <div class="badge badge-accent" id="gm-combat-count">0</div>
-            </h2>
+            <h2 class="card-title mb-2">Combat Tracker</h2>
+            if data.ActiveSession != nil {
+                @ActiveCombat(data)
+            } else {
+                @PlanMode(data)
+            }
+        </div>
+    </div>
+}
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <h3 class="font-bold text-sm mb-2">Load Session</h3>
-                    @SessionList(sessions)
-                </div>
-                <div>
-                    <h3 class="font-bold text-sm mb-2">Enemies Archive</h3>
-                    @EnemyList(enemies)
-                    @AddEnemyForm()
-                </div>
-                <div>
-                    <h3 class="font-bold text-sm mb-2">Connected Players</h3>
-                    @PlayerList(sessionPlayers)
-                </div>
+templ PlanMode(data models.CombatTrackerData) {
+    <div class="flex justify-between items-center mb-4">
+        <span class="badge badge-outline">Planning</span>
+        <button class="btn btn-success btn-sm" hx-post="/combat/session/create" hx-swap="none">
+            Create Session
+        </button>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+            <h3 class="font-bold text-sm mb-2">Sessions</h3>
+            <div class="space-y-2">
+                for _, session := range data.Sessions {
+                    if !session.Active {
+                        <div class="flex items-center justify-between p-3 bg-base-100 rounded-lg shadow-sm border border-base-300">
+                            <div>
+                                <div class="font-bold text-sm">Session #{ strconv.Itoa(session.ID) }</div>
+                                <div class="text-xs opacity-60">{ strconv.Itoa(len(session.Participants)) } players · { strconv.Itoa(len(session.Enemies)) } enemies</div>
+                            </div>
+                            <div class="flex gap-1">
+                                <button class="btn btn-success btn-xs"
+                                    hx-post={ "/combat/session/" + strconv.Itoa(session.ID) + "/start" }
+                                    hx-swap="none">
+                                    Start Combat
+                                </button>
+                                <form hx-post="/combat/session/end" hx-swap="none">
+                                    <input type="hidden" name="sessionId" value={ strconv.Itoa(session.ID) } />
+                                    <button type="submit" class="btn btn-error btn-xs">End Session</button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                }
+                if len(data.Sessions) == 0 {
+                    <p class="text-base-content/50 text-sm italic">No sessions yet.</p>
+                }
+            </div>
+        </div>
+        <div>
+            <h3 class="font-bold text-sm mb-2">Enemy Archive</h3>
+            @EnemyArchiveList(data.ArchiveEnemies, data.PlanningSession)
+            @AddEnemyToArchiveForm()
+        </div>
+        if data.PlanningSession != nil {
+            <div>
+                <h3 class="font-bold text-sm mb-2">Session Enemies</h3>
+                @SessionEnemyList(data.PlanningSession.Enemies, data.PlanningSession.ID)
+            </div>
+        }
+        <div>
+            if len(data.PaceEntries) > 0 {
+                <h3 class="font-bold text-sm mb-2">Pace Roll-Call</h3>
+                @PaceRollCall(data.PaceEntries)
+            } else {
+                <h3 class="font-bold text-sm mb-2">Connected Players</h3>
+                @PlayerList(data.SessionPlayers)
+            }
+        </div>
+    </div>
+}
+
+templ ActiveCombat(data models.CombatTrackerData) {
+    <div class="flex justify-between items-center mb-4">
+        <span class="badge badge-error">⚔ Active Combat — Session #{ strconv.Itoa(data.ActiveSession.ID) }</span>
+        <div class="flex gap-2">
+            <button class="btn btn-primary btn-sm"
+                hx-post={ "/combat/session/" + strconv.Itoa(data.ActiveSession.ID) + "/next-turn" }
+                hx-swap="none">
+                Next Turn
+            </button>
+            <button class="btn btn-warning btn-sm"
+                hx-post={ "/combat/session/" + strconv.Itoa(data.ActiveSession.ID) + "/end-combat" }
+                hx-swap="none">
+                End Combat
+            </button>
+        </div>
+    </div>
+    if data.RoundPending {
+        <div class="alert alert-warning mb-4">
+            <span>⏳ Awaiting pace selection — round begins when all players respond.</span>
+        </div>
+        @PaceRollCall(data.PaceEntries)
+    } else {
+        <div class="grid grid-cols-2 gap-4">
+            @TurnGroupPanel("Fast Players", data.FastPlayers, data.ActiveSession.ID, false)
+            @TurnGroupPanel("Fast NPCs", data.FastNPCs, data.ActiveSession.ID, true)
+            @TurnGroupPanel("Slow Players", data.SlowPlayers, data.ActiveSession.ID, false)
+            @TurnGroupPanel("Slow NPCs", data.SlowNPCs, data.ActiveSession.ID, true)
+        </div>
+    }
+}
+
+templ TurnGroupPanel(title string, entries []models.TurnEntry, sessionID int, isEnemy bool) {
+    <div class="card bg-base-100 shadow border border-base-300">
+        <div class="card-body p-3">
+            <h3 class="font-bold text-sm mb-2">{ title }</h3>
+            <div class="space-y-1">
+                for _, entry := range entries {
+                    <div class={ "flex items-center justify-between p-2 rounded", templ.KV("bg-primary/20 ring-1 ring-primary", entry.IsCurrent) }>
+                        <div class="flex items-center gap-2">
+                            if entry.IsCurrent {
+                                <span class="text-primary font-bold text-xs">▶</span>
+                            }
+                            <span class="text-sm font-medium">{ entry.Name }</span>
+                            <span class="text-xs opacity-60">{ strconv.Itoa(entry.CurrentHP) }/{ strconv.Itoa(entry.MaxHP) } HP</span>
+                        </div>
+                        if isEnemy {
+                            <div class="flex items-center gap-1">
+                                <button class="btn btn-xs btn-outline"
+                                    hx-post={ "/combat/enemy/" + strconv.Itoa(entry.EnemyID) + "/hp/increment" }
+                                    hx-swap="none">+</button>
+                                <button class="btn btn-xs btn-outline"
+                                    hx-post={ "/combat/enemy/" + strconv.Itoa(entry.EnemyID) + "/hp/decrement" }
+                                    hx-swap="none">-</button>
+                                <button class="btn btn-xs btn-error"
+                                    hx-post={ "/combat/session/" + strconv.Itoa(sessionID) + "/enemy/" + strconv.Itoa(entry.EnemyID) + "/remove" }
+                                    hx-swap="none">✕</button>
+                            </div>
+                        }
+                    </div>
+                }
+                if len(entries) == 0 {
+                    <p class="text-xs opacity-40 italic">None</p>
+                }
             </div>
         </div>
     </div>
 }
 
-templ EnemyList(enemies []models.Enemy) {
+templ EnemyArchiveList(enemies []models.Enemy, planningSession *models.CombatSession) {
     <div class="space-y-2">
         for _, enemy := range enemies {
             <div class="flex items-center justify-between p-3 bg-base-100 rounded-lg shadow-sm border border-base-300">
                 <div>
                     <div class="font-bold text-sm">{ enemy.Name }</div>
-                    <div class="text-xs opacity-60">HP: { strconv.Itoa(enemy.HP) } / { strconv.Itoa(enemy.HP) }</div>
+                    <div class="text-xs opacity-60">HP: { strconv.Itoa(enemy.HP) }</div>
                 </div>
-                <form hx-post="/combat/enemy/remove" hx-target="#combat-tracker-container" hx-swap="innerHTML">
-                    <input type="hidden" name="enemyId" value={ strconv.Itoa(enemy.ID) } />
-                    <button type="submit" class="btn btn-error btn-xs flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-3.5 h-3.5 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        Remove
-                    </button>
-                </form>
+                <div class="flex items-center gap-1">
+                    if planningSession != nil {
+                        <button class="btn btn-xs btn-success"
+                            hx-post={ "/combat/session/" + strconv.Itoa(planningSession.ID) + "/enemy/add" }
+                            hx-vals={ `{"templateId":"` + strconv.Itoa(enemy.ID) + `"}` }
+                            hx-swap="none">
+                            + Session
+                        </button>
+                    }
+                    <form hx-post="/combat/enemy/remove" hx-swap="none">
+                        <input type="hidden" name="enemyId" value={ strconv.Itoa(enemy.ID) } />
+                        <button type="submit" class="btn btn-error btn-xs">✕</button>
+                    </form>
+                </div>
             </div>
+        }
+        if len(enemies) == 0 {
+            <p class="text-base-content/50 text-sm italic">Archive is empty.</p>
         }
     </div>
 }
 
-templ SessionList(sessions []models.CombatSession) {
+templ SessionEnemyList(enemies []models.Enemy, sessionID int) {
     <div class="space-y-2">
-        for _, session := range sessions {
+        for _, enemy := range enemies {
             <div class="flex items-center justify-between p-3 bg-base-100 rounded-lg shadow-sm border border-base-300">
                 <div>
-                    <div class="font-bold text-sm">Session ID: { strconv.Itoa(session.ID) }</div>
-                    <div class="text-xs opacity-60">Players: { strconv.Itoa(len(session.Participants)) }</div>
+                    <div class="font-bold text-sm">{ enemy.Name }</div>
+                    <div class="text-xs opacity-60">HP: { strconv.Itoa(enemy.HP) }</div>
                 </div>
-                <form hx-post="/combat/session/end" hx-target="#combat-tracker-container" hx-swap="innerHTML">
-                    <input type="hidden" name="sessionId" value={ strconv.Itoa(session.ID) } />
-                    <button type="submit" class="btn btn-error btn-xs flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-3.5 h-3.5 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        End Session
-                    </button>
-                </form>
+                <div class="flex items-center gap-1">
+                    <button class={ "btn btn-xs", templ.KV("btn-accent", enemy.Mode == "fast") }
+                        hx-post={ "/combat/enemy/" + strconv.Itoa(enemy.ID) + "/pace/fast" }
+                        hx-swap="none">Fast</button>
+                    <button class={ "btn btn-xs", templ.KV("btn-secondary", enemy.Mode == "slow") }
+                        hx-post={ "/combat/enemy/" + strconv.Itoa(enemy.ID) + "/pace/slow" }
+                        hx-swap="none">Slow</button>
+                    <button class="btn btn-xs btn-error"
+                        hx-post={ "/combat/session/" + strconv.Itoa(sessionID) + "/enemy/" + strconv.Itoa(enemy.ID) + "/remove" }
+                        hx-swap="none">✕</button>
+                </div>
             </div>
         }
+        if len(enemies) == 0 {
+            <p class="text-base-content/50 text-sm italic">No enemies in this session.</p>
+        }
     </div>
+}
+
+templ AddEnemyToArchiveForm() {
+    <form hx-post="/combat/enemy/add" hx-swap="none" class="mt-3 space-y-2">
+        <input type="text" name="name" placeholder="Enemy Name" class="input input-bordered input-sm w-full" required />
+        <div class="flex gap-2">
+            <input type="number" name="hp" placeholder="HP" class="input input-bordered input-sm w-1/2" required />
+            <select name="mode" class="select select-bordered select-sm w-1/2">
+                <option value="fast">Fast</option>
+                <option value="slow">Slow</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm w-full">Add to Archive</button>
+    </form>
 }
 
 templ PlayerList(players []models.PlayerInfo) {
@@ -183,27 +328,48 @@ templ PlayerList(players []models.PlayerInfo) {
                 </div>
             </div>
         }
+        if len(players) == 0 {
+            <p class="text-base-content/50 text-sm italic">No players connected.</p>
+        }
     </div>
 }
 
-templ AddEnemyForm() {
-    <div class="card bg-base-200 shadow-xl">
-        <div class="card-body">
-            <h2 class="card-title mb-4 flex justify-between items-center">
-                <span>Add Enemy</span>
-            </h2>
-            <form hx-post="/combat/enemy/add" class="space-y-4">
-                <input type="text" name="name" placeholder="Enemy Name" class="input input-bordered w-full" required />
-                <div class="flex gap-2">
-                    <input type="number" name="hp" placeholder="HP" class="input input-bordered w-1/2" required />
-                    <select name="mode" class="select select-bordered w-1/2">
-                        <option value="fast">Fast</option>
-                        <option value="slow">Slow</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary w-full">Add to Session</button>
-            </form>
-        </div>
+templ PaceRollCall(entries []models.PaceRollCallEntry) {
+    <div class="space-y-2">
+        for _, entry := range entries {
+            <div class="flex items-center justify-between p-3 bg-base-100 rounded-lg shadow-sm border border-base-300">
+                <div class="font-bold text-sm">{ entry.CharName }</div>
+                if entry.Mode == "Fast" {
+                    <div class="badge badge-accent">Fast</div>
+                } else if entry.Mode == "Slow" {
+                    <div class="badge badge-secondary">Slow</div>
+                } else {
+                    <div class="badge badge-ghost">Pending...</div>
+                }
+            </div>
+        }
+        if len(entries) == 0 {
+            <p class="text-base-content/50 text-sm italic">No players enrolled.</p>
+        }
+    </div>
+}
+
+templ CombatPaceChoiceButtons(characterID int) {
+    <div class="flex justify-center gap-3 mt-2">
+        <button
+            class="btn btn-accent btn-sm"
+            hx-post={ "/characters/" + strconv.Itoa(characterID) + "/combat/pace/fast" }
+            hx-target="#eventModal"
+            hx-swap="innerHTML">
+            Fast
+        </button>
+        <button
+            class="btn btn-secondary btn-sm"
+            hx-post={ "/characters/" + strconv.Itoa(characterID) + "/combat/pace/slow" }
+            hx-target="#eventModal"
+            hx-swap="innerHTML">
+            Slow
+        </button>
     </div>
 }
 

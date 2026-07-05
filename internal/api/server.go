@@ -172,6 +172,21 @@ func (s *Server) Mount() http.Handler {
 
 		// Combat endpoints
 		r.Get("/combat/tracker", s.handleCombatTrackerGet)
+		r.Post("/combat/session/create", s.handleCombatSessionCreate)
+		r.Post("/combat/session/end", s.handleCombatSessionEnd)
+		r.Post("/combat/session/{id}/start", s.handleCombatSessionStart)
+		r.Post("/combat/session/{id}/next-turn", s.handleCombatNextTurn)
+		r.Post("/combat/session/{id}/end-combat", s.handleCombatEndCombat)
+		r.Post("/combat/session/{id}/enemy/add", s.handleCombatSessionAddEnemy)
+		r.Post("/combat/session/{id}/enemy/{enemyId}/remove", s.handleCombatSessionRemoveEnemy)
+		r.Post("/combat/enemy/add", s.handleCombatEnemyAdd)
+		r.Post("/combat/enemy/remove", s.handleCombatEnemyRemove)
+		r.Post("/combat/enemy/{id}/pace/{mode}", s.handleEnemyPaceUpdate)
+		r.Post("/combat/enemy/{id}/hp/increment", s.handleEnemyHpIncrement)
+		r.Post("/combat/enemy/{id}/hp/decrement", s.handleEnemyHpDecrement)
+		r.Post("/combat/notify-turn/{charId}", s.handleCombatNotifyTurn)
+		r.Post("/characters/{id}/combat/pace/fast", s.handleCharacterPaceFast)
+		r.Post("/characters/{id}/combat/pace/slow", s.handleCharacterPaceSlow)
 	})
 
 	return r
