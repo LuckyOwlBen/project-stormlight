@@ -7,6 +7,7 @@ import (
 	"project-stormlight/internal/character"
 	"project-stormlight/internal/models"
 	"project-stormlight/internal/playspace"
+	"project-stormlight/internal/store"
 	"project-stormlight/internal/views"
 
 	"github.com/go-chi/chi/v5"
@@ -49,7 +50,28 @@ func (s *Server) handlePlayspaceGet(w http.ResponseWriter, r *http.Request) {
 		DerivedAttributes:      char.DerivedAttributes,
 	}
 
+	if petName, hasPet := equippedPetName(char); hasPet {
+		if petRes, petErr := s.store.GetOrCreatePetResources(r.Context(), charID, petName); petErr == nil {
+			characterSheet.PetResources = petRes
+		}
+	}
+
 	views.CharacterSheet(characterSheet).Render(r.Context(), w)
+}
+
+// equippedPetName returns the name and true if the character has a pet equipped.
+func equippedPetName(char *character.Character) (string, bool) {
+	if char.Inventory == nil {
+		return "", false
+	}
+	for _, item := range *char.Inventory {
+		if item.Equipped {
+			if si, ok := store.Items[item.ItemID]; ok && si.Type == "pet" {
+				return item.Name, true
+			}
+		}
+	}
+	return "", false
 }
 
 // GET /playspace/{id}/ws

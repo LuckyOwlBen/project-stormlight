@@ -8,4 +8,5 @@ type CharacterSheetData struct {
 	DefensesMap            map[string]int
 	SkillsDisplayStructure []character.SkillDisplayStructure
 	DerivedAttributes      map[string]string
+	PetResources           *character.PetResources
 }

@@ -1,0 +1,48 @@
+package views
+
+import (
+	"strconv"
+
+	"project-stormlight/internal/character"
+)
+
+templ PetStatusComponent(charID int, pet character.PetResources) {
+	<div class="flex flex-col gap-6 max-w-lg">
+		<div class="flex items-center gap-3">
+			<h2 class="text-2xl font-bold text-primary">{ pet.PetName }</h2>
+			<div class="badge badge-accent">Companion</div>
+		</div>
+		<div class="flex flex-wrap gap-4">
+			@PetValueCard(pet.HpCurrent, pet.HpMax, "HP", "/characters/"+strconv.Itoa(charID)+"/pet/hp")
+			@PetValueCard(pet.FocusCurrent, pet.FocusMax, "Focus", "/characters/"+strconv.Itoa(charID)+"/pet/focus")
+		</div>
+	</div>
+}
+
+templ PetValueCard(current int, max int, label string, endpoint string) {
+	<div id={ "pet-card-" + label } class="card card-border bg-base-100 w-64">
+		<div class="card-body">
+			<h2 class="card-title">{ label }</h2>
+			<p class="text-sm opacity-60">{ strconv.Itoa(current) } / { strconv.Itoa(max) }</p>
+			<div class="join">
+				<button
+					class="btn join-item"
+					hx-post={ endpoint + "/decrement" }
+					hx-target={ "#pet-card-" + label }
+					hx-swap="outerHTML"
+				>-</button>
+				<input
+					type="number"
+					class="input input-bordered join-item w-20 text-center"
+					value={ strconv.Itoa(current) }
+				/>
+				<button
+					class="btn join-item"
+					hx-post={ endpoint + "/increment" }
+					hx-target={ "#pet-card-" + label }
+					hx-swap="outerHTML"
+				>+</button>
+			</div>
+		</div>
+	</div>
+}

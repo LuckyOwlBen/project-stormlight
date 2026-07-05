@@ -66,7 +66,14 @@ templ CharacterSheet(characterSheet models.CharacterSheetData) {
 					<input type="radio" name="my_tabs_5" class="tab" aria-label="Notes" />
 					<div class="tab-content bg-base-100 border-base-300 p-6">
 						@NotesComponent(characterSheet.Char.SessionNotes, characterSheet.Char.ID)
-					</div>				
+					</div>
+
+					if characterSheet.PetResources != nil {
+						<input type="radio" name="my_tabs_5" class="tab" aria-label={ characterSheet.PetResources.PetName }/>
+						<div class="tab-content bg-base-100 border-base-300 p-6">
+							@PetStatusComponent(characterSheet.Char.ID, *characterSheet.PetResources)
+						</div>
+					}
 				</div>
 			</div>
 		</div>

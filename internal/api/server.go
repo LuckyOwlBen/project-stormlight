@@ -146,6 +146,12 @@ func (s *Server) Mount() http.Handler {
 		r.Post("/characters/{id}/resources/investiture/increment", s.IncrementInvestitureResource)
 		r.Post("/characters/{id}/resources/investiture/decrement", s.DecrementInvestitureResource)
 
+		// Pet resource endpoints
+		r.Post("/characters/{id}/pet/hp/increment", s.IncrementPetHp)
+		r.Post("/characters/{id}/pet/hp/decrement", s.DecrementPetHp)
+		r.Post("/characters/{id}/pet/focus/increment", s.IncrementPetFocus)
+		r.Post("/characters/{id}/pet/focus/decrement", s.DecrementPetFocus)
+
 		// Session Notes
 		r.Get("/characters/{id}/session-notes", s.handleGetSessionNotes)
 		r.Post("/characters/{id}/session-notes", s.handlePostSessionNotes)

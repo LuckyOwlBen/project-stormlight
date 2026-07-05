@@ -39,6 +39,7 @@ func (s *Store) InitSchema(ctx context.Context) error {
 		&character.Resources{},
 		&character.Defenses{},
 		&character.CharacterBonus{},
+		&character.PetResources{},
 		&models.StoreState{},
 		&models.StoreSection{},
 		&models.CombatSession{},
