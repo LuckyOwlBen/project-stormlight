@@ -74,9 +74,11 @@ func (h *Hub) Broadcast(msg []byte) {
 // presence_update to the gm.
 func (h *Hub) broadcastPresence() {
 	h.mu.RLock()
+	seen := make(map[int]bool)
 	var players []models.PlayerInfo
 	for c := range h.clients {
-		if !c.IsGM {
+		if !c.IsGM && c.CharID != 0 && !seen[c.CharID] {
+			seen[c.CharID] = true
 			players = append(players, models.PlayerInfo{
 				Username:      c.Username,
 				CharName:      c.CharName,
@@ -104,8 +106,10 @@ func (h *Hub) broadcastPresence() {
 
 func (h *Hub) UpdateCombatSection(data models.CombatTrackerData, r *http.Request) {
 	h.mu.RLock()
+	seen := make(map[int]bool)
 	for c := range h.clients {
-		if !c.IsGM {
+		if !c.IsGM && c.CharID != 0 && !seen[c.CharID] {
+			seen[c.CharID] = true
 			data.SessionPlayers = append(data.SessionPlayers, models.PlayerInfo{
 				Username:      c.Username,
 				CharName:      c.CharName,
@@ -208,9 +212,20 @@ func (h *Hub) SendToGM(msg []byte) {
 
 func (h *Hub) ResourceChangeEvent(charID int, newHp, newFocus, newInvest int) {
 	h.mu.Lock()
-	var players []models.PlayerInfo
+	// Update cached fields on every matching connection so ConnectedPlayerMap
+	// returns fresh data on the next call (e.g. for combat tracker refresh).
 	for c := range h.clients {
 		if c.CharID == charID {
+			c.CurrentHp = newHp
+			c.CurrentFocus = newFocus
+			c.CurrentInvest = newInvest
+		}
+	}
+	seen := make(map[int]bool)
+	var players []models.PlayerInfo
+	for c := range h.clients {
+		if c.CharID == charID && !seen[charID] {
+			seen[charID] = true
 			players = append(players, models.PlayerInfo{
 				Username:      c.Username,
 				CharName:      c.CharName,
@@ -224,7 +239,8 @@ func (h *Hub) ResourceChangeEvent(charID int, newHp, newFocus, newInvest int) {
 				MaxInvest:     c.MaxInvest,
 				IsInvested:    c.IsInvested,
 			})
-		} else if !c.IsGM {
+		} else if !c.IsGM && c.CharID != charID && !seen[c.CharID] {
+			seen[c.CharID] = true
 			players = append(players, models.PlayerInfo{
 				Username:      c.Username,
 				CharName:      c.CharName,

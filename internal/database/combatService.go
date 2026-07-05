@@ -7,7 +7,7 @@ import (
 
 func (s *Store) RetrieveCombatSessionById(ctx context.Context, id int) (models.CombatSession, error) {
 	var session models.CombatSession
-	if err := s.db.WithContext(ctx).First(&session, id).Error; err != nil {
+	if err := s.db.WithContext(ctx).Preload("Participants").Preload("SessionEnemies").First(&session, id).Error; err != nil {
 		return models.CombatSession{}, err
 	}
 	return session, nil
@@ -15,7 +15,7 @@ func (s *Store) RetrieveCombatSessionById(ctx context.Context, id int) (models.C
 
 func (s *Store) RetrieveAllCombatSessions(ctx context.Context) ([]models.CombatSession, error) {
 	var sessions []models.CombatSession
-	if err := s.db.WithContext(ctx).Preload("Participants").Preload("Enemies").Find(&sessions).Error; err != nil {
+	if err := s.db.WithContext(ctx).Preload("Participants").Preload("SessionEnemies").Find(&sessions).Error; err != nil {
 		return nil, err
 	}
 	return sessions, nil
@@ -81,7 +81,7 @@ func (s *Store) DeleteCombatParticipant(ctx context.Context, id int) error {
 
 func (s *Store) RetrieveAllStoredEnemies(ctx context.Context) ([]models.Enemy, error) {
 	var enemies []models.Enemy
-	if err := s.db.WithContext(ctx).Where("is_template = ?", true).Find(&enemies).Error; err != nil {
+	if err := s.db.WithContext(ctx).Find(&enemies).Error; err != nil {
 		return nil, err
 	}
 	return enemies, nil
@@ -111,6 +111,44 @@ func (s *Store) UpdateStoredEnemy(ctx context.Context, enemy *models.Enemy) erro
 
 func (s *Store) DeleteStoredEnemy(ctx context.Context, id int) error {
 	if err := s.db.WithContext(ctx).Delete(&models.Enemy{}, id).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+// ── CombatSessionEnemy (join/state table) ─────────────────────────────────────
+
+func (s *Store) CreateCombatSessionEnemy(ctx context.Context, se *models.CombatSessionEnemy) error {
+	if err := s.db.WithContext(ctx).Create(se).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Store) RetrieveCombatSessionEnemyByID(ctx context.Context, id int) (*models.CombatSessionEnemy, error) {
+	var se models.CombatSessionEnemy
+	if err := s.db.WithContext(ctx).First(&se, id).Error; err != nil {
+		return nil, err
+	}
+	return &se, nil
+}
+
+func (s *Store) UpdateCombatSessionEnemy(ctx context.Context, se *models.CombatSessionEnemy) error {
+	if err := s.db.WithContext(ctx).Save(se).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Store) DeleteCombatSessionEnemy(ctx context.Context, id int) error {
+	if err := s.db.WithContext(ctx).Delete(&models.CombatSessionEnemy{}, id).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Store) DeleteCombatSessionEnemiesBySessionID(ctx context.Context, sessionID int) error {
+	if err := s.db.WithContext(ctx).Where("session_id = ?", sessionID).Delete(&models.CombatSessionEnemy{}).Error; err != nil {
 		return err
 	}
 	return nil

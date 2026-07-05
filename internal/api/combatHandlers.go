@@ -25,6 +25,17 @@ func (s *Server) refreshCombatTracker(w http.ResponseWriter, r *http.Request) {
 	s.hub.UpdateCombatSection(data, r)
 }
 
+// pushCombatTrackerUpdate silently refreshes the GM's combat tracker without
+// writing any error response to w. Safe to call after a response has already
+// been committed (e.g. from a resource increment handler).
+func (s *Server) pushCombatTrackerUpdate(r *http.Request) {
+	data, err := s.buildCombatTrackerData(r.Context())
+	if err != nil {
+		return
+	}
+	s.hub.UpdateCombatSection(data, r)
+}
+
 func (s *Server) buildCombatTrackerData(ctx context.Context) (models.CombatTrackerData, error) {
 	sessions, err := s.store.RetrieveAllCombatSessions(ctx)
 	if err != nil {
@@ -50,17 +61,35 @@ func (s *Server) buildCombatTrackerData(ctx context.Context) (models.CombatTrack
 		}
 	}
 
+	// Build vault lookup for enemy name enrichment.
+	enemyMap := make(map[int]models.Enemy, len(archiveEnemies))
+	for _, e := range archiveEnemies {
+		enemyMap[e.ID] = e
+	}
+
 	if data.ActiveSession != nil {
 		data.PaceEntries, data.RoundPending = buildPaceEntries(data.ActiveSession.Participants, playerMap)
+		enrichSessionEnemies(data.ActiveSession.SessionEnemies, enemyMap)
 		if !data.RoundPending {
 			data.FastPlayers, data.FastNPCs, data.SlowPlayers, data.SlowNPCs =
 				buildTurnGroups(data.ActiveSession, playerMap)
 		}
 	} else if data.PlanningSession != nil {
 		data.PaceEntries, _ = buildPaceEntries(data.PlanningSession.Participants, playerMap)
+		enrichSessionEnemies(data.PlanningSession.SessionEnemies, enemyMap)
 	}
 
 	return data, nil
+}
+
+// enrichSessionEnemies fills the EnemyName display field on each CombatSessionEnemy
+// from the vault lookup map. Safe to call with a nil or empty slice.
+func enrichSessionEnemies(ses []models.CombatSessionEnemy, vaultMap map[int]models.Enemy) {
+	for i := range ses {
+		if v, ok := vaultMap[ses[i].EnemyID]; ok {
+			ses[i].EnemyName = v.Name
+		}
+	}
 }
 
 func buildPaceEntries(participants []models.CombatParticipant, playerMap map[int]models.PlayerInfo) ([]models.PaceRollCallEntry, bool) {
@@ -83,6 +112,7 @@ func buildPaceEntries(participants []models.CombatParticipant, playerMap map[int
 
 // buildTurnGroups computes four ordered slices (Fast Players, Fast NPCs, Slow Players, Slow NPCs).
 // IsCurrent is set on the entry matching session.CurrentTurnIndex in the flat order.
+// SessionEnemies must already be enriched with EnemyName/MaxHP before calling.
 func buildTurnGroups(session *models.CombatSession, playerMap map[int]models.PlayerInfo) (fastPlayers, fastNPCs, slowPlayers, slowNPCs []models.TurnEntry) {
 	var flat []models.TurnEntry
 	for _, p := range session.Participants {
@@ -95,13 +125,13 @@ func buildTurnGroups(session *models.CombatSession, playerMap map[int]models.Pla
 			Mode: "Fast", CurrentHP: info.CurrentHp, MaxHP: info.MaxHp,
 		})
 	}
-	for _, e := range session.Enemies {
-		if e.Mode != "fast" {
+	for _, se := range session.SessionEnemies {
+		if se.Mode != "fast" {
 			continue
 		}
 		flat = append(flat, models.TurnEntry{
-			EntryType: "enemy", Name: e.Name, EnemyID: e.ID,
-			Mode: "fast", CurrentHP: e.CurrentHP, MaxHP: e.HP,
+			EntryType: "enemy", Name: se.EnemyName, EnemyID: se.ID,
+			Mode: "fast", CurrentHP: se.CurrentHP, MaxHP: se.MaxHP,
 		})
 	}
 	for _, p := range session.Participants {
@@ -114,13 +144,13 @@ func buildTurnGroups(session *models.CombatSession, playerMap map[int]models.Pla
 			Mode: "Slow", CurrentHP: info.CurrentHp, MaxHP: info.MaxHp,
 		})
 	}
-	for _, e := range session.Enemies {
-		if e.Mode != "slow" {
+	for _, se := range session.SessionEnemies {
+		if se.Mode != "slow" {
 			continue
 		}
 		flat = append(flat, models.TurnEntry{
-			EntryType: "enemy", Name: e.Name, EnemyID: e.ID,
-			Mode: "slow", CurrentHP: e.CurrentHP, MaxHP: e.HP,
+			EntryType: "enemy", Name: se.EnemyName, EnemyID: se.ID,
+			Mode: "slow", CurrentHP: se.CurrentHP, MaxHP: se.MaxHP,
 		})
 	}
 	if idx := session.CurrentTurnIndex; idx >= 0 && idx < len(flat) {
@@ -196,6 +226,7 @@ func (s *Server) handleCombatSessionEnd(w http.ResponseWriter, r *http.Request) 
 	for _, p := range participants {
 		s.store.DeleteCombatParticipant(r.Context(), p.ID)
 	}
+	s.store.DeleteCombatSessionEnemiesBySessionID(r.Context(), sessionID)
 	if err := s.store.DeleteCombatSession(r.Context(), sessionID); err != nil {
 		http.Error(w, "Failed to delete session", http.StatusInternalServerError)
 		return
@@ -275,25 +306,24 @@ func (s *Server) handleCombatSessionAddEnemy(w http.ResponseWriter, r *http.Requ
 		http.Error(w, "Invalid session ID", http.StatusBadRequest)
 		return
 	}
-	templateID, err := strconv.Atoi(r.FormValue("templateId"))
+	vaultID, err := strconv.Atoi(r.FormValue("templateId"))
 	if err != nil {
-		http.Error(w, "Invalid template ID", http.StatusBadRequest)
+		http.Error(w, "Invalid enemy ID", http.StatusBadRequest)
 		return
 	}
-	tmpl, err := s.store.RetrieveStoredEnemyByID(r.Context(), templateID)
+	vault, err := s.store.RetrieveStoredEnemyByID(r.Context(), vaultID)
 	if err != nil {
-		http.Error(w, "Template enemy not found", http.StatusNotFound)
+		http.Error(w, "Enemy not found in vault", http.StatusNotFound)
 		return
 	}
-	instance := &models.Enemy{
-		SessionID:  &sessionID,
-		Name:       tmpl.Name,
-		HP:         tmpl.HP,
-		CurrentHP:  tmpl.HP,
-		Mode:       "slow",
-		IsTemplate: false,
+	se := &models.CombatSessionEnemy{
+		SessionID: sessionID,
+		EnemyID:   vaultID,
+		Mode:      vault.Mode,
+		CurrentHP: vault.HP,
+		MaxHP:     vault.HP,
 	}
-	if err := s.store.CreateStoredEnemy(r.Context(), instance); err != nil {
+	if err := s.store.CreateCombatSessionEnemy(r.Context(), se); err != nil {
 		http.Error(w, "Failed to add enemy to session", http.StatusInternalServerError)
 		return
 	}
@@ -301,13 +331,13 @@ func (s *Server) handleCombatSessionAddEnemy(w http.ResponseWriter, r *http.Requ
 }
 
 func (s *Server) handleCombatSessionRemoveEnemy(w http.ResponseWriter, r *http.Request) {
-	enemyID, err := strconv.Atoi(chi.URLParam(r, "enemyId"))
+	seID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, "Invalid enemy ID", http.StatusBadRequest)
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
 	}
-	if err := s.store.DeleteStoredEnemy(r.Context(), enemyID); err != nil {
-		http.Error(w, "Failed to remove enemy", http.StatusInternalServerError)
+	if err := s.store.DeleteCombatSessionEnemy(r.Context(), seID); err != nil {
+		http.Error(w, "Failed to remove enemy from session", http.StatusInternalServerError)
 		return
 	}
 	s.refreshCombatTracker(w, r)
@@ -327,7 +357,7 @@ func (s *Server) handleCombatEnemyAdd(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid enemy data", http.StatusBadRequest)
 		return
 	}
-	enemy := &models.Enemy{Name: name, HP: hp, CurrentHP: hp, Mode: mode, IsTemplate: true}
+	enemy := &models.Enemy{Name: name, HP: hp, Mode: mode}
 	if err := s.store.CreateStoredEnemy(r.Context(), enemy); err != nil {
 		http.Error(w, "Failed to create enemy", http.StatusInternalServerError)
 		return
@@ -348,30 +378,50 @@ func (s *Server) handleCombatEnemyRemove(w http.ResponseWriter, r *http.Request)
 	s.refreshCombatTracker(w, r)
 }
 
-// ── Enemy HP ──────────────────────────────────────────────────────────────────
+// ── Session enemy HP + pace ───────────────────────────────────────────────────
 
-func (s *Server) handleEnemyHpIncrement(w http.ResponseWriter, r *http.Request) {
-	s.adjustEnemyHP(w, r, +1)
+func (s *Server) handleSessionEnemyHpIncrement(w http.ResponseWriter, r *http.Request) {
+	s.adjustSessionEnemyHP(w, r, +1)
 }
 
-func (s *Server) handleEnemyHpDecrement(w http.ResponseWriter, r *http.Request) {
-	s.adjustEnemyHP(w, r, -1)
+func (s *Server) handleSessionEnemyHpDecrement(w http.ResponseWriter, r *http.Request) {
+	s.adjustSessionEnemyHP(w, r, -1)
 }
 
-func (s *Server) adjustEnemyHP(w http.ResponseWriter, r *http.Request, delta int) {
-	enemyID, err := strconv.Atoi(chi.URLParam(r, "id"))
+func (s *Server) adjustSessionEnemyHP(w http.ResponseWriter, r *http.Request, delta int) {
+	seID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, "Invalid enemy ID", http.StatusBadRequest)
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
 	}
-	enemy, err := s.store.RetrieveStoredEnemyByID(r.Context(), enemyID)
+	se, err := s.store.RetrieveCombatSessionEnemyByID(r.Context(), seID)
 	if err != nil {
-		http.Error(w, "Enemy not found", http.StatusNotFound)
+		http.Error(w, "Session enemy not found", http.StatusNotFound)
 		return
 	}
-	enemy.CurrentHP = max(0, min(enemy.CurrentHP+delta, enemy.HP))
-	if err := s.store.UpdateStoredEnemy(r.Context(), enemy); err != nil {
-		http.Error(w, "Failed to update enemy HP", http.StatusInternalServerError)
+	se.CurrentHP = max(0, min(se.CurrentHP+delta, se.MaxHP))
+	if err := s.store.UpdateCombatSessionEnemy(r.Context(), se); err != nil {
+		http.Error(w, "Failed to update HP", http.StatusInternalServerError)
+		return
+	}
+	s.refreshCombatTracker(w, r)
+}
+
+func (s *Server) handleSessionEnemyPaceUpdate(w http.ResponseWriter, r *http.Request) {
+	seID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	mode := chi.URLParam(r, "mode")
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+	se, err := s.store.RetrieveCombatSessionEnemyByID(r.Context(), seID)
+	if err != nil {
+		http.Error(w, "Session enemy not found", http.StatusNotFound)
+		return
+	}
+	se.Mode = mode
+	if err := s.store.UpdateCombatSessionEnemy(r.Context(), se); err != nil {
+		http.Error(w, "Failed to update pace", http.StatusInternalServerError)
 		return
 	}
 	s.refreshCombatTracker(w, r)
@@ -404,28 +454,6 @@ func (s *Server) setCharacterPace(w http.ResponseWriter, r *http.Request, mode s
 		return
 	}
 	views.EventModal("", nil).Render(r.Context(), w)
-	s.refreshCombatTracker(w, r)
-}
-
-// ── Enemy pace ────────────────────────────────────────────────────────────────
-
-func (s *Server) handleEnemyPaceUpdate(w http.ResponseWriter, r *http.Request) {
-	enemyID, err := strconv.Atoi(chi.URLParam(r, "id"))
-	mode := chi.URLParam(r, "mode")
-	if err != nil {
-		http.Error(w, "Invalid enemy ID", http.StatusBadRequest)
-		return
-	}
-	enemy, err := s.store.RetrieveStoredEnemyByID(r.Context(), enemyID)
-	if err != nil {
-		http.Error(w, "Enemy not found", http.StatusNotFound)
-		return
-	}
-	enemy.Mode = mode
-	if err := s.store.UpdateStoredEnemy(r.Context(), enemy); err != nil {
-		http.Error(w, "Failed to update enemy pace", http.StatusInternalServerError)
-		return
-	}
 	s.refreshCombatTracker(w, r)
 }
 

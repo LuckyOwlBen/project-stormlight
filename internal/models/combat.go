@@ -6,13 +6,13 @@ import (
 
 // CombatSession represents an active or historical combat encounter.
 type CombatSession struct {
-	ID               int                 `json:"id" gorm:"primaryKey"`
-	Active           bool                `json:"active" gorm:"not null;default:false"`
-	CurrentTurnIndex int                 `json:"currentTurnIndex" gorm:"not null;default:-1"`
-	Participants     []CombatParticipant `json:"participants" gorm:"foreignKey:SessionID;constraint:OnDelete:CASCADE;"`
-	Enemies          []Enemy             `json:"enemies" gorm:"foreignKey:SessionID;constraint:OnDelete:CASCADE;"`
-	CreatedAt        time.Time           `json:"createdAt" gorm:"autoCreateTime"`
-	UpdatedAt        time.Time           `json:"updatedAt" gorm:"autoUpdateTime"`
+	ID               int                  `json:"id" gorm:"primaryKey"`
+	Active           bool                 `json:"active" gorm:"not null;default:false"`
+	CurrentTurnIndex int                  `json:"currentTurnIndex" gorm:"not null;default:-1"`
+	Participants     []CombatParticipant  `json:"participants" gorm:"foreignKey:SessionID;constraint:OnDelete:CASCADE;"`
+	SessionEnemies   []CombatSessionEnemy `json:"sessionEnemies" gorm:"foreignKey:SessionID;constraint:OnDelete:CASCADE;"`
+	CreatedAt        time.Time            `json:"createdAt" gorm:"autoCreateTime"`
+	UpdatedAt        time.Time            `json:"updatedAt" gorm:"autoUpdateTime"`
 }
 
 // CombatParticipant links a character to a specific combat session with their chosen action economy.
@@ -31,16 +31,28 @@ type PaceRollCallEntry struct {
 	Mode     string // "Fast", "Slow", or "Pending"
 }
 
-// Enemy represents both reusable templates and specific instances used in a combat session.
+// Enemy is a vault of reusable enemy templates. It has no session coupling.
 type Enemy struct {
-	ID         int       `json:"id" gorm:"primaryKey"`
-	SessionID  *int      `json:"sessionId,omitempty" gorm:"index"` // Nullable if it's a template (library)
-	Name       string    `json:"name" gorm:"not null;size:100"`
-	HP         int       `json:"hp" gorm:"not null;default:0"`        // max HP
-	CurrentHP  int       `json:"currentHp" gorm:"not null;default:0"` // tracked during combat
-	Mode       string    `json:"mode" gorm:"not null;size:10"`        // "fast" or "slow"
-	IsTemplate bool      `json:"isTemplate" gorm:"not null;default:true"`
-	CreatedAt  time.Time `json:"createdAt" gorm:"autoCreateTime"`
+	ID        int       `json:"id" gorm:"primaryKey"`
+	Name      string    `json:"name" gorm:"not null;size:100"`
+	HP        int       `json:"hp" gorm:"not null;default:0"` // max HP / template value
+	Mode      string    `json:"mode" gorm:"not null;size:10"` // default pace when added to a session
+	CreatedAt time.Time `json:"createdAt" gorm:"autoCreateTime"`
+}
+
+// CombatSessionEnemy links a vault Enemy to a CombatSession and tracks
+// per-session state (current HP, chosen pace). It is the only record
+// that changes during combat; the vault Enemy is never mutated.
+type CombatSessionEnemy struct {
+	ID        int       `json:"id" gorm:"primaryKey"`
+	SessionID int       `json:"sessionId" gorm:"not null;index"`
+	EnemyID   int       `json:"enemyId" gorm:"not null"`
+	Mode      string    `json:"mode" gorm:"not null;size:10;default:'slow'"`
+	CurrentHP int       `json:"currentHp" gorm:"not null;default:0"`
+	MaxHP     int       `json:"maxHp" gorm:"not null;default:0"` // snapshot of vault HP at add time
+	CreatedAt time.Time `json:"createdAt" gorm:"autoCreateTime"`
+	// Populated from the vault at render time — never stored.
+	EnemyName string `json:"-" gorm:"-"`
 }
 
 // TurnEntry is a computed view-model for a single position in the combat turn order.

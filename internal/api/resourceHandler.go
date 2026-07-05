@@ -40,6 +40,7 @@ func (s *Server) IncrementHealthResource(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	s.hub.ResourceChangeEvent(charID, newValue, resourcesTable.FocusCurrent, resourcesTable.InvestitureCurrent)
+	s.pushCombatTrackerUpdate(r)
 	views.ValueJoinCard(newValue, "health", "/characters/"+charIDStr+"/resources/health").Render(r.Context(), w)
 }
 
@@ -76,6 +77,7 @@ func (s *Server) DecrementHealthResource(w http.ResponseWriter, r *http.Request)
 	}
 
 	s.hub.ResourceChangeEvent(charID, newValue, resourcesTable.FocusCurrent, resourcesTable.InvestitureCurrent)
+	s.pushCombatTrackerUpdate(r)
 
 	views.ValueJoinCard(newValue, "health", "/characters/"+charIDStr+"/resources/health").Render(r.Context(), w)
 }
@@ -111,6 +113,7 @@ func (s *Server) IncrementFocusResource(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	s.hub.ResourceChangeEvent(charID, resourcesTable.HealthCurrent, newValue, resourcesTable.InvestitureCurrent)
+	s.pushCombatTrackerUpdate(r)
 	views.ValueJoinCard(newValue, "focus", "/characters/"+charIDStr+"/resources/focus").Render(r.Context(), w)
 }
 
@@ -146,6 +149,7 @@ func (s *Server) DecrementFocusResource(w http.ResponseWriter, r *http.Request) 
 	}
 
 	s.hub.ResourceChangeEvent(charID, resourcesTable.HealthCurrent, newValue, resourcesTable.InvestitureCurrent)
+	s.pushCombatTrackerUpdate(r)
 
 	views.ValueJoinCard(newValue, "focus", "/characters/"+charIDStr+"/resources/focus").Render(r.Context(), w)
 }
@@ -182,6 +186,7 @@ func (s *Server) IncrementInvestitureResource(w http.ResponseWriter, r *http.Req
 	}
 
 	s.hub.ResourceChangeEvent(charID, resourcesTable.HealthCurrent, resourcesTable.FocusCurrent, newValue)
+	s.pushCombatTrackerUpdate(r)
 
 	views.ValueJoinCard(newValue, "investiture", "/characters/"+charIDStr+"/resources/investiture").Render(r.Context(), w)
 }
@@ -218,6 +223,7 @@ func (s *Server) DecrementInvestitureResource(w http.ResponseWriter, r *http.Req
 	}
 
 	s.hub.ResourceChangeEvent(charID, resourcesTable.HealthCurrent, resourcesTable.FocusCurrent, newValue)
+	s.pushCombatTrackerUpdate(r)
 
 	views.ValueJoinCard(newValue, "investiture", "/characters/"+charIDStr+"/resources/investiture").Render(r.Context(), w)
 
