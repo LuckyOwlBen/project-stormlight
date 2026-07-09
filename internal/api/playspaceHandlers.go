@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -11,6 +12,7 @@ import (
 	"project-stormlight/internal/views"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/render"
 	"github.com/gorilla/websocket"
 )
 
@@ -42,13 +44,7 @@ func (s *Server) handlePlayspaceGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	characterSheet := models.CharacterSheetData{
-		Char:                   char,
-		AttributesMap:          allAttributes(*char),
-		DefensesMap:            allDefenses(*char),
-		SkillsDisplayStructure: buildSkillDisplayStructure(*char),
-		DerivedAttributes:      char.DerivedAttributes,
-	}
+	characterSheet := buildCharacterSheetData(*char)
 
 	if petName, hasPet := equippedPetName(char); hasPet {
 		if petRes, petErr := s.store.GetOrCreatePetResources(r.Context(), charID, petName); petErr == nil {
@@ -154,4 +150,86 @@ func buildSkillDisplayStructure(char character.Character) []character.SkillDispl
 		})
 	}
 	return result
+}
+
+type InventoryUpdateRequest struct {
+	ItemID      int  `form:"itemID"`
+	CharacterID int  `form:"characterID"`
+	Equipped    bool `form:"equipped"`
+}
+
+func (inventoryUpdateRequest *InventoryUpdateRequest) Bind(r *http.Request) error {
+	if inventoryUpdateRequest.ItemID <= 0 {
+		return fmt.Errorf("invalid itemId: must be a positive integer")
+	}
+	if inventoryUpdateRequest.Equipped != true && inventoryUpdateRequest.Equipped != false {
+		return fmt.Errorf("invalid equipped value: must be true or false")
+	}
+	return nil
+}
+
+func (s *Server) updateEquippedStatus(w http.ResponseWriter, r *http.Request) {
+	var inventoryUpdateRequest InventoryUpdateRequest
+	if err := render.Bind(r, &inventoryUpdateRequest); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	charID := inventoryUpdateRequest.CharacterID
+	itemID := inventoryUpdateRequest.ItemID
+	equippedBool := inventoryUpdateRequest.Equipped
+
+	currentCharacter, err := s.store.GetCharacterByID(r.Context(), charID)
+	if err != nil {
+		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+	if currentCharacter.Inventory != nil {
+		inventory := *currentCharacter.Inventory
+		if len(inventory) == 0 {
+			http.Error(w, "Inventory is empty", http.StatusNotFound)
+			return
+		}
+		mappedInventory := mapInventorySlice(inventory)
+		newInventory := mappedInventory[itemID]
+		newInventory.Equipped = !equippedBool
+		mappedInventory[itemID] = newInventory
+
+		// Convert the map back to a slice
+		updatedInventory := make([]character.Inventory, 0, len(mappedInventory))
+		for _, item := range mappedInventory {
+			updatedInventory = append(updatedInventory, item)
+		}
+
+		updatedCharacter := *currentCharacter
+		updatedCharacter.Inventory = &updatedInventory
+		if err := s.store.UpdateCharacter(r.Context(), &updatedCharacter); err != nil {
+			http.Error(w, "Failed to update inventory", http.StatusInternalServerError)
+			return
+		}
+		characterSheet := buildCharacterSheetData(updatedCharacter)
+		s.hub.UpdateEquipmentComponentOnCharacterSheet(characterSheet, r)
+		return
+	} else {
+		http.Error(w, "Inventory not found", http.StatusNotFound)
+		return
+	}
+}
+
+func mapInventorySlice(inventory []character.Inventory) map[int]character.Inventory {
+	result := make(map[int]character.Inventory)
+	for _, item := range inventory {
+		result[item.ID] = item
+	}
+	return result
+}
+
+func buildCharacterSheetData(char character.Character) models.CharacterSheetData {
+	characterSheet := models.CharacterSheetData{
+		Char:                   &char,
+		AttributesMap:          allAttributes(char),
+		DefensesMap:            allDefenses(char),
+		SkillsDisplayStructure: buildSkillDisplayStructure(char),
+		DerivedAttributes:      char.DerivedAttributes,
+	}
+	return characterSheet
 }

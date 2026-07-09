@@ -163,6 +163,7 @@ func (s *Server) Mount() http.Handler {
 		r.Get("/playspace/{id}/store/content", s.handlePlayspaceStoreContentGet)
 		r.Post("/playspace/{id}/store/buy", s.handlePlayspaceStoreBuyPost)
 		r.Post("/playspace/{id}/store/sell", s.handlePlayspaceStoreSellPost)
+		r.Post("/playspace/toggle-equipped", s.updateEquippedStatus)
 
 		// GM views
 		r.Get("/gm", s.handleGMGet)

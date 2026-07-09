@@ -209,6 +209,18 @@ templ EquipmentComponent(characterSheet models.CharacterSheetData) {
 			<div class="card bg-base-200 shadow border-t-4 border-primary">
 				<div class="card-body p-4 text-center">
 					<span class="text-xs uppercase font-extrabold text-primary">{ item.Name }</span>
+					<form
+						hx-post={ "/playspace/toggle-equipped" }
+						hx-target="#equipmentComponent"
+						hx-swap="outerHTML"
+					>
+						<input type="hidden" name="itemID" value={ strconv.Itoa(item.ID) } />
+						<input type="hidden" name="characterID" value={ strconv.Itoa(characterSheet.Char.ID) } />
+						<input type="hidden" name="equipped" value={ strconv.FormatBool(item.Equipped) } />
+						<button class="btn btn-primary btn-sm mt-2"type="submit">
+							Toggle Equipped
+						</button>
+					</form>
 					<span class="text-sm text-secondary">{ item.Equipped }</span>
 				</div>
 			</div>

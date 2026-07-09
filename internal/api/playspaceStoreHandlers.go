@@ -6,7 +6,6 @@ import (
 	"sort"
 	"strconv"
 
-	"project-stormlight/internal/models"
 	"project-stormlight/internal/store"
 	"project-stormlight/internal/views"
 
@@ -416,13 +415,7 @@ func (s *Server) handleGMStoreGrantItemPost(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	characterSheet := models.CharacterSheetData{
-		Char:                   char,
-		AttributesMap:          allAttributes(*char),
-		DefensesMap:            allDefenses(*char),
-		SkillsDisplayStructure: buildSkillDisplayStructure(*char),
-		DerivedAttributes:      char.DerivedAttributes,
-	}
+	characterSheet := buildCharacterSheetData(*char)
 	s.hub.UpdateEquipmentComponentOnCharacterSheet(characterSheet, r)
 	s.hub.SendEventToCharacterSheet(playerID, "The GM has granted you: "+item.Name, views.ModalCloseButton("Thanks!"))
 
