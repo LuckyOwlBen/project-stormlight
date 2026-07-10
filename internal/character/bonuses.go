@@ -115,3 +115,69 @@ func RecalculateBonuses(char *Character) []CharacterBonus {
 
 	return result
 }
+
+func ApplyBonusesToCharacter(char *Character, bonuses []CharacterBonus) {
+	for _, bonus := range bonuses {
+		if !bonus.Active {
+			continue
+		}
+
+		switch bonus.TargetModule {
+		case "skill":
+			applySkillBonus(char, bonus)
+		case "resource":
+			applyResourceBonus(char, bonus)
+		case "defense":
+			applyDefenseBonus(char, bonus)
+		}
+	}
+}
+
+func applySkillBonus(char *Character, bonus CharacterBonus) {
+	if char.Skills == nil {
+		char.Skills = &Skills{CharacterID: char.ID}
+	}
+	for i := range char.Skills.PlayerSkills {
+		s := &char.Skills.PlayerSkills[i] // pointer to the slice element, so we mutate in place
+		if s.SkillName == bonus.TargetField {
+			s.Bonus += bonus.Value
+			return
+		}
+	}
+	// No matching skill found in PlayerSkills — decide whether to append
+	// a new Skill row, or treat this as an error/no-op.
+}
+
+func applyResourceBonus(char *Character, bonus CharacterBonus) {
+	if char.Resources == nil {
+		char.Resources = &Resources{CharacterID: char.ID}
+	}
+	switch bonus.TargetField {
+	case "healthCurrent":
+		char.Resources.HealthCurrent += bonus.Value
+	case "healthMax":
+		char.Resources.HealthMax += bonus.Value
+	case "focusCurrent":
+		char.Resources.FocusCurrent += bonus.Value
+	case "focusMax":
+		char.Resources.FocusMax += bonus.Value
+	case "investitureCurrent":
+		char.Resources.InvestitureCurrent += bonus.Value
+	case "investitureMax":
+		char.Resources.InvestitureMax += bonus.Value
+	}
+}
+
+func applyDefenseBonus(char *Character, bonus CharacterBonus) {
+	if char.Defenses == nil {
+		char.Defenses = &Defenses{CharacterID: char.ID}
+	}
+	switch bonus.TargetField {
+	case "physical":
+		char.Defenses.Physical += bonus.Value
+	case "cognitive":
+		char.Defenses.Cognitive += bonus.Value
+	case "spiritual":
+		char.Defenses.Spiritual += bonus.Value
+	}
+}

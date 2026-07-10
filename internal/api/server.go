@@ -134,9 +134,6 @@ func (s *Server) Mount() http.Handler {
 		r.Post("/characters/{id}/finalize", s.handleCharacterFinalizePost)
 
 		// Bonus ledger
-		r.Get("/characters/{id}/bonuses", s.handleCharacterBonusesGet)
-		r.Post("/characters/{id}/bonuses/recalculate", s.handleCharacterBonusesRecalculate)
-		r.Patch("/characters/{id}/bonuses/{bonusId}/toggle", s.handleCharacterBonusToggle)
 
 		// Resource endpoints
 		r.Post("/characters/{id}/resources/health/increment", s.IncrementHealthResource)
