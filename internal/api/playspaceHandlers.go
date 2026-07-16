@@ -43,7 +43,10 @@ func (s *Server) handlePlayspaceGet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Character not found", http.StatusNotFound)
 		return
 	}
-
+	character.RecalculateBonuses(char)
+	character.RecalculateDefenses(char)
+	character.RecalculateResources(char)
+	character.RecalculateDerivedAttributes(char)
 	characterSheet := buildCharacterSheetData(*char)
 
 	if petName, hasPet := equippedPetName(char); hasPet {

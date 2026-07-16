@@ -25,11 +25,11 @@ func NewDefenses(characterID int) *Defenses {
 }
 
 // RecalculateDefenses derives the three defense values from the character's attributes.
-func RecalculateDefenses(attrs *Attributes) Defenses {
-	return Defenses{
-		CharacterID: attrs.CharacterID,
-		Physical:    10 + attrs.Strength + attrs.Speed,
-		Cognitive:   10 + attrs.Intelligence + attrs.Willpower,
-		Spiritual:   10 + attrs.Awareness + attrs.Presence,
+func RecalculateDefenses(char *Character) {
+
+	char.Defenses = &Defenses{
+		Physical:  10 + char.Attributes.Strength + char.Attributes.Speed,
+		Cognitive: 10 + char.Attributes.Intelligence + char.Attributes.Willpower,
+		Spiritual: 10 + char.Attributes.Awareness + char.Attributes.Presence,
 	}
 }

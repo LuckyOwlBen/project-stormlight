@@ -335,3 +335,30 @@ func (h *Hub) UpdateClientLevel(charID int, newLevel int) {
 	h.mu.Unlock()
 	h.broadcastPresence()
 }
+
+func (h *Hub) UpdateSkillsComponentOnCharacterSheet(characterSheet models.CharacterSheetData, r *http.Request) {
+	var buf bytes.Buffer
+	buf.WriteString(`<div id="skillsComponent" hx-swap-oob="true">`)
+	views.SkillsComponent(characterSheet).Render(r.Context(), &buf)
+	buf.WriteString(`</div>`)
+	msg := buf.Bytes()
+	h.SendToCharacter(characterSheet.Char.ID, msg)
+}
+
+func (h *Hub) UpdateDerivedAttributesComponentOnCharacterSheet(characterSheet models.CharacterSheetData, r *http.Request) {
+	var buf bytes.Buffer
+	buf.WriteString(`<div id="derivedAttributesComponent" hx-swap-oob="true">`)
+	views.DerivedAttributesComponent(characterSheet).Render(r.Context(), &buf)
+	buf.WriteString(`</div>`)
+	msg := buf.Bytes()
+	h.SendToCharacter(characterSheet.Char.ID, msg)
+}
+
+func (h *Hub) UpdateBasicsComponentOnCharacterSheet(characterSheet models.CharacterSheetData, r *http.Request) {
+	var buf bytes.Buffer
+	buf.WriteString(`<div id="basicsComponent" hx-swap-oob="true">`)
+	views.BasicsComponent(characterSheet).Render(r.Context(), &buf)
+	buf.WriteString(`</div>`)
+	msg := buf.Bytes()
+	h.SendToCharacter(characterSheet.Char.ID, msg)
+}

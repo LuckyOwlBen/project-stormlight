@@ -36,13 +36,17 @@ templ CharacterSheet(characterSheet models.CharacterSheetData) {
 					//Overview Tab
 					<input type="radio" name="my_tabs_5" class="tab" aria-label="Overview" checked="checked"/>
 					<div class="tab-content bg-base-100 border-base-300 p-6">
-						@BasicsComponent(characterSheet)
+						<div id="basicsComponent" hx-swap-oob="true">
+							@BasicsComponent(characterSheet)
+						</div>
 					</div>
 
 					//Skills Tab
 					<input type="radio" name="my_tabs_5" class="tab" aria-label="Skills" />
 					<div class="tab-content bg-base-100 border-base-300 p-6">
-						@SkillsComponent(characterSheet)
+						<div id="skillsComponent" hx-swap-oob="true">
+							@SkillsComponent(characterSheet)
+						</div>
 					</div>
 
 					//Talents & Expertises Tab
@@ -54,13 +58,15 @@ templ CharacterSheet(characterSheet models.CharacterSheetData) {
 					<input type="radio" name="my_tabs_5" class="tab" aria-label="Equipment" />
 					<div class="tab-content bg-base-100 border-base-300 p-6">
 						<div id="equipmentComponent" hx-swap-oob="true">
-								@EquipmentComponent(characterSheet)
+							@EquipmentComponent(characterSheet)
 						</div>
 					</div>
 
 					<input type="radio" name="my_tabs_5" class="tab" aria-label="Derived Stats" />
 					<div class="tab-content bg-base-100 border-base-300 p-6">
-						@DerivedAttributesComponent(characterSheet)
+						<div id="derivedAttributesComponent" hx-swap-oob="true">
+							@DerivedAttributesComponent(characterSheet)
+						</div>
 					</div>
 
 					<input type="radio" name="my_tabs_5" class="tab" aria-label="Notes" />
@@ -92,10 +98,10 @@ templ BasicsComponent(characterSheet models.CharacterSheetData) {
 
 templ ResourcesComponent(characterId int, resources character.Resources ) {
 	<div class="card bg-base-200 shadow border-t-4 border-primary">
-		@ValueJoinCard(resources.HealthCurrent, "Health", "/characters/" + strconv.Itoa(characterId) + "/resources/health")
-		@ValueJoinCard(resources.FocusCurrent, "Focus", "/characters/" + strconv.Itoa(characterId) + "/resources/focus")
+		@ValueJoinCard(resources.HealthCurrent, resources.HealthMax, "Health", "/characters/" + strconv.Itoa(characterId) + "/resources/health")
+		@ValueJoinCard(resources.FocusCurrent, resources.FocusMax, "Focus", "/characters/" + strconv.Itoa(characterId) + "/resources/focus")
 		if resources.InvestitureActive {
-			@ValueJoinCard(resources.InvestitureCurrent, "Investiture", "/characters/" + strconv.Itoa(characterId) + "/resources/investiture")
+			@ValueJoinCard(resources.InvestitureCurrent, resources.InvestitureMax, "Investiture", "/characters/" + strconv.Itoa(characterId) + "/resources/investiture")
 		} else {
 			@UninvestedPlaceholder()
 		}
@@ -141,18 +147,34 @@ templ UninvestedPlaceholder() {
 	</div>
 }
 
-templ ValueJoinCard(value int, label string, endpoint string) {
+
+/*
+Radial progress needs --value CSS variable to work.
+To change the size, use --size CSS variable which has a default value of 5rem.
+To change the thickness, use --thickness CSS variable which is 10% of the size by default.
+
+For Radial progress we need to use a div instead of the progress tag because browsers can't show text inside progress tag, and Firefox doesn’t render pseudo-elements inside progress tag at all.
+Adding role="progressbar" makes it accessible to screen readers as well.
+*/
+templ ValueJoinCard(current int, max int, label string, endpoint string) {
     <div id={ "card-" + label } class="card card-border bg-base-100 w-96">
-        <div class="card-body">
+        <div class="card-body" width="100%">
             <h2 class="card-title">{ label }</h2>
-            <div class="join">
+            <div class="join" width="100%">
                 <button class="btn join-item"
                         hx-post={ endpoint + "/decrement" }
                         hx-target={ "#card-" + label }
                         hx-swap="outerHTML">-</button>
-                <input type="number"
-                       class="input input-bordered join-item w-20 text-center"
-                       value={ strconv.Itoa(value) }/>
+				<div class="card bg-base-200 shadow border-t-4 border-primary" style="width: 100%;">
+					<div
+						class="radial-progress text-primary-content border-primary border-4 join-item"
+						style={ "--value:" + strconv.Itoa(max) + ";" }
+						aria-valuenow={ strconv.Itoa(current) } 
+						aria-valuemax={ strconv.Itoa(max) } 
+						role="progressbar">
+						{ strconv.Itoa(current) } / { strconv.Itoa(max) }
+					</div>
+				</div>
                 <button class="btn join-item"
                         hx-post={ endpoint + "/increment" }
                         hx-target={ "#card-" + label }

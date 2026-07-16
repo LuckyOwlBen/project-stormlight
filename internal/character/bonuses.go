@@ -112,7 +112,7 @@ func RecalculateBonuses(char *Character) []CharacterBonus {
 			result = append(result, cb)
 		}
 	}
-
+	ApplyBonusesToCharacter(char, result)
 	return result
 }
 

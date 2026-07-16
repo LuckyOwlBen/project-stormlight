@@ -67,6 +67,15 @@ func (s *Store) UpdateCharacter(ctx context.Context, char *character.Character) 
 	if char.Talents != nil {
 		s.db.WithContext(ctx).Model(char.Talents).Association("List").Replace(char.Talents.List)
 	}
+	if char.Defenses != nil {
+		s.db.WithContext(ctx).Model(char.Defenses).Association("Defenses").Replace(char.Defenses)
+	}
+	if char.Resources != nil {
+		s.db.WithContext(ctx).Model(char.Resources).Updates(char.Resources)
+	}
+	if char.Bonuses != nil {
+		s.db.WithContext(ctx).Model(char.Bonuses).Updates(char.Bonuses)
+	}
 
 	// Session uses Save which will update all fields, including nested relationships.
 	return s.db.WithContext(ctx).Session(&gorm.Session{FullSaveAssociations: true}).Save(char).Error
