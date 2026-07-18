@@ -19,7 +19,7 @@ type Resources struct {
 	InvestitureActive  bool `json:"investitureActive" gorm:"not null;default:false"`
 }
 
-func getHealthForLevel(level int, strength int) int {
+func getHealthForCurrentLevel(level int, strength int) int {
 	if level < 1 || level > len(HealthPerLevel) {
 		return 0
 	}
@@ -30,11 +30,23 @@ func getHealthForLevel(level int, strength int) int {
 	return healthGain
 }
 
+func getHealthForLevel(level int, strength int) int {
+	totalHealth := 0
+	for i := 1; i <= level && i <= len(HealthPerLevel); i++ {
+		healthGain := HealthPerLevel[i-1]
+		if HealthStrengthBonusLevels[i-1] {
+			healthGain += strength
+		}
+		totalHealth += healthGain
+	}
+	return totalHealth
+}
+
 func NewResources(characterID int, level int) *Resources {
 	return &Resources{
 		CharacterID:        characterID,
-		HealthCurrent:      getHealthForLevel(level, 0), // Start with base health for the level; strength bonus will be added when attributes are assigned
-		HealthMax:          getHealthForLevel(level, 0),
+		HealthCurrent:      getHealthForCurrentLevel(level, 0), // Start with base health for the level; strength bonus will be added when attributes are assigned
+		HealthMax:          getHealthForCurrentLevel(level, 0),
 		FocusCurrent:       2, // Starting focus points
 		FocusMax:           2,
 		InvestitureCurrent: 0,
