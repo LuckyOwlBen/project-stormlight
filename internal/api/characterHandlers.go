@@ -106,17 +106,18 @@ func (s *Server) handleCharacterBasicsPost(w http.ResponseWriter, r *http.Reques
 		char.Name = "Unnamed"
 	}
 
-	levelStr := r.FormValue("level")
-	level, err := strconv.Atoi(levelStr)
-	if err == nil {
-		char.Level = level
-	}
-
 	ancestryStr := r.FormValue("ancestry")
 	if ancestryStr == "Singer" {
 		char.Ancestry = character.Singer
 	} else {
 		char.Ancestry = character.Human
+	}
+
+	levelStr := r.FormValue("level")
+	level, err := strconv.Atoi(levelStr)
+	if err == nil {
+		char.Level = level
+		char.SetLevel(level) // Recalculate attributes, skills, etc. based on new level
 	}
 
 	char.CreationStep = "attributes"

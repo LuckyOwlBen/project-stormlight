@@ -173,11 +173,11 @@ func applyDefenseBonus(char *Character, bonus CharacterBonus) {
 		char.Defenses = &Defenses{CharacterID: char.ID}
 	}
 	switch bonus.TargetField {
-	case "physical":
+	case "Physical":
 		char.Defenses.Physical += bonus.Value
-	case "cognitive":
+	case "Cognitive":
 		char.Defenses.Cognitive += bonus.Value
-	case "spiritual":
+	case "Spiritual":
 		char.Defenses.Spiritual += bonus.Value
 	}
 }

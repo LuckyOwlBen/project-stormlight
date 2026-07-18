@@ -127,6 +127,53 @@ func (c *Character) Hydrate() {
 	}
 }
 
+func (c *Character) SetLevel(level int) {
+	c.Level = level
+
+	//1. Attributes
+	if c.Attributes != nil {
+		pts := 0
+		for i := 1; i <= level; i++ {
+			pts += calculateAttributePoints(i)
+		}
+		c.Attributes.Strength = 0
+		c.Attributes.Speed = 0
+		c.Attributes.Willpower = 0
+		c.Attributes.Intelligence = 0
+		c.Attributes.Awareness = 0
+		c.Attributes.Presence = 0
+		c.Attributes.TotalPoints = pts
+		c.Attributes.PointsRemaining = pts
+		c.Attributes.PendingPoints = 0
+		c.Attributes.Finalized = false
+	}
+
+	//2. Skills
+	if c.Skills != nil {
+		pts := 0
+		for i := 1; i <= level; i++ {
+			pts += calculateSkillPoints(i)
+		}
+		c.Skills.TotalPoints = pts
+		c.Skills.PointsRemaining = pts
+		c.Skills.PendingPoints = 0
+		c.Skills.Finalized = false
+	}
+
+	//3. Talents
+	if c.Talents != nil {
+		pts := 0
+		for i := 1; i <= level; i++ {
+			pts += calculateTalentPoints(i)
+		}
+		c.Talents.TotalPoints = pts
+		c.Talents.PointsRemaining = pts
+		c.Talents.PendingPoints = 0
+		c.Talents.Finalized = false
+	}
+
+}
+
 // LevelUp increments the character's level, adds points to category trackers, and marks them unfinalized.
 func (c *Character) LevelUp() {
 	c.Level++

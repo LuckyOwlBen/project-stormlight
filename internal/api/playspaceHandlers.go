@@ -43,10 +43,10 @@ func (s *Server) handlePlayspaceGet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Character not found", http.StatusNotFound)
 		return
 	}
-	character.RecalculateBonuses(char)
 	character.RecalculateDefenses(char)
 	character.RecalculateResources(char)
 	character.RecalculateDerivedAttributes(char)
+	character.RecalculateBonuses(char)
 
 	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
 		http.Error(w, "Failed to update character", http.StatusInternalServerError)
