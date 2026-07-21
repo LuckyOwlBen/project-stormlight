@@ -239,6 +239,30 @@ func buildCharacterSheetData(char character.Character) models.CharacterSheetData
 		DefensesMap:            allDefenses(char),
 		SkillsDisplayStructure: buildSkillDisplayStructure(char),
 		DerivedAttributes:      char.DerivedAttributes,
+		ActionTypeMap:          buildActionTypeMap(char),
 	}
 	return characterSheet
+}
+
+func buildActionTypeMap(char character.Character) []character.TalentDisplayStructure {
+	// 1. Bucket by action type
+	groupedMap := make(map[string][]character.TalentHistory)
+	for _, t := range char.Talents.List {
+		groupedMap[t.ActionType] = append(groupedMap[t.ActionType], t)
+	}
+
+	// 2. Map into an ordered slice based on desired display sequence
+	desiredOrder := []string{"Action", "Passive", "Special", "Reaction", "Free"}
+
+	var groups []character.TalentDisplayStructure
+	for _, category := range desiredOrder {
+		if items, exists := groupedMap[category]; exists {
+			groups = append(groups, character.TalentDisplayStructure{
+				Category: category,
+				Talents:  items,
+			})
+		}
+	}
+
+	return groups
 }

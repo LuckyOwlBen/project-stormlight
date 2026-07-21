@@ -257,6 +257,11 @@ type MovementEffect struct {
 	ActionCost string `json:"actionCost,omitempty"` // "free", "part-of-action", or "full-action"
 }
 
+type TalentDisplayStructure struct {
+	Category string          `json:"category"`
+	Talents  []TalentHistory `json:"talents"`
+}
+
 var RadiantMatchTable = map[string]RadiantMatch{}
 var SprenList = []string{}
 

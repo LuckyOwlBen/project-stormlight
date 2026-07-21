@@ -213,16 +213,80 @@ templ SkillComponentSection(spread character.SkillDisplayStructure) {
 }
 
 templ TalentsComponent(characterSheet models.CharacterSheetData) {
+	<span class="text-2xl font-semibold mb-4">{ strconv.Itoa(len(characterSheet.ActionTypeMap)) }</span>
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-		for _, talent := range characterSheet.Char.Talents.TalentMap {
+		if characterSheet.ActionTypeMap != nil && len(characterSheet.ActionTypeMap) > 0 {
+			for _, actionType := range characterSheet.ActionTypeMap {
+				<div class="talent-group">
+					<h3>{ actionType.Category }</h3>
+					<ul>
+						for _, talent := range actionType.Talents {
+							<li>
+								if talent.ActionType == "Special" {
+										@SpecialTalentCard(talent)
+								} else if talent.ActionType == "Action" {
+										@ActionTalentCard(talent)
+								} else if talent.ActionType == "Passive" {
+										@PassiveTalentCard(talent)
+								} else if talent.ActionType == "Reaction" {
+										@ReactionTalentCard(talent)
+								} else if talent.ActionType == "Free" {
+										@FreeActionTalentCard(talent)
+								}
+							</li>
+						}
+					</ul>
+				</div>
+			}
+		} else {
 			<div class="card bg-base-200 shadow border-t-4 border-primary">
 				<div class="card-body p-4 text-center">
-					<span class="text-xs uppercase font-extrabold text-primary">{ talent.Name }</span>
-					<span class="text-sm text-secondary">{ talent.Description }</span>
+					<span class="text-xs uppercase font-extrabold text-primary">No Talents or Expertises</span>
+					<span class="text-sm text-secondary">This character has no talents or expertises.</span>
 				</div>
 			</div>
-	}
+		}
 	</div>
+}
+
+templ SpecialTalentCard(talent character.TalentHistory) {
+	<div class="card bg-base-200 shadow border-t-4 border-primary">
+		<span class="text-xs uppercase font-extrabold text-primary">{ talent.Name }</span>
+		<span class="text-sm text-secondary">{ talent.Description }</span>
+	</div>
+	
+}
+
+templ ActionTalentCard(talent character.TalentHistory) {
+	<div class="card bg-base-200 shadow border-t-4 border-primary">
+		<span class="text-xs uppercase font-extrabold text-primary">{ talent.Name }</span>
+		<span class="text-sm text-secondary">{ talent.Description }</span>
+	</div>
+	
+}
+
+templ PassiveTalentCard(talent character.TalentHistory) {
+	<div class="card bg-base-200 shadow border-t-4 border-primary">
+		<span class="text-xs uppercase font-extrabold text-primary">{ talent.Name }</span>
+		<span class="text-sm text-secondary">{ talent.Description }</span>
+	</div>
+	
+}
+
+templ ReactionTalentCard(talent character.TalentHistory) {
+	<div class="card bg-base-200 shadow border-t-4 border-primary">
+		<span class="text-xs uppercase font-extrabold text-primary">{ talent.Name }</span>
+		<span class="text-sm text-secondary">{ talent.Description }</span>
+	</div>
+	
+}
+
+templ FreeActionTalentCard(talent character.TalentHistory) {
+	<div class="card bg-base-200 shadow border-t-4 border-primary">
+		<span class="text-xs uppercase font-extrabold text-primary">{ talent.Name }</span>
+		<span class="text-sm text-secondary">{ talent.Description }</span>
+	</div>
+	
 }
 
 templ EquipmentComponent(characterSheet models.CharacterSheetData) {
