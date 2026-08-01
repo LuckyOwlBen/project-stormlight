@@ -362,3 +362,12 @@ func (h *Hub) UpdateBasicsComponentOnCharacterSheet(characterSheet models.Charac
 	msg := buf.Bytes()
 	h.SendToCharacter(characterSheet.Char.ID, msg)
 }
+
+func (h *Hub) UpdateTalentsComponentOnCharacterSheet(characterSheet models.CharacterSheetData, r *http.Request) {
+	var buf bytes.Buffer
+	buf.WriteString(`<div id="talentsComponent" hx-swap-oob="true">`)
+	views.TalentsComponent(characterSheet).Render(r.Context(), &buf)
+	buf.WriteString(`</div>`)
+	msg := buf.Bytes()
+	h.SendToCharacter(characterSheet.Char.ID, msg)
+}

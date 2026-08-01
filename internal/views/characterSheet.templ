@@ -213,15 +213,18 @@ templ SkillComponentSection(spread character.SkillDisplayStructure) {
 }
 
 templ TalentsComponent(characterSheet models.CharacterSheetData) {
-	<span class="text-2xl font-semibold mb-4">{ strconv.Itoa(len(characterSheet.ActionTypeMap)) }</span>
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 		if characterSheet.ActionTypeMap != nil && len(characterSheet.ActionTypeMap) > 0 {
 			for _, actionType := range characterSheet.ActionTypeMap {
 				<div class="card bg-base-200 shadow border-t-4 border-primary">
 					<div class="card-body p-4 text-center">
 						<span class="text-xs uppercase font-extrabold text-primary">{ actionType.Category }</span>
-						for _, talent := range actionType.Talents {
-							@TalentRadioAccordian(talent)
+						if actionType.Category == "Stance" {
+							@StanceCard(actionType.Talents)
+						} else {
+							for _, talent := range actionType.Talents {
+								@TalentRadioAccordian(talent)
+							}
 						}
 					</div>
 				</div>
@@ -242,7 +245,9 @@ templ TalentRadioAccordian(talent character.TalentHistory) {
 		if talent.ActionType == actionType {
 			<div class="collapse bg-base-100 border border-base-300">
 				<input type="radio" name="my-accordion-1" checked="checked" />
-				<div class="collapse-title font-semibold">{ actionType }</div>
+				<div class="collapse-title font-semibold">
+					<span>{ talent.Name }</span> <span>cost: { strconv.Itoa(talent.ActionCost) }</span>  
+				</div>
 				<div class="collapse-content text-sm">@TalentCard(talent)</div>
 			</div>
 		}
@@ -251,11 +256,78 @@ templ TalentRadioAccordian(talent character.TalentHistory) {
 
 templ TalentCard(talent character.TalentHistory) {
 	<div class="card bg-base-200 shadow border-t-4 border-primary">
-		<span class="text-xs uppercase font-extrabold text-primary">{ talent.Name }</span>
-		<span class="text-sm text-secondary">{ talent.Description }</span>
+		if talent.AttackDefinition != nil {
+			if talent.AttackDefinition.BaseDamage != "" {
+				<span class="text-sm">Base Damage: { talent.AttackDefinition.BaseDamage }</span>
+			}
+			if talent.AttackDefinition.DamageType != "" {
+				<span class="text-sm">Damage Type: { talent.AttackDefinition.DamageType }</span>
+			}
+			if talent.AttackDefinition.DamageScaling != nil && len(talent.AttackDefinition.DamageScaling) > 0 {
+				for _, damageScaling := range talent.AttackDefinition.DamageScaling {
+					<span class="text-sm">Damage Scaling: { damageScaling.Damage } - { damageScaling.Tier }</span>
+				}
+			}
+			<span class="text-sm">Range: { talent.AttackDefinition.Range }</span>
+			<span class="text-sm">Target Defense: { talent.AttackDefinition.TargetDefense }</span>
+			<span class="text-sm">Weapon Type: { talent.AttackDefinition.WeaponType }</span>
+			for _, conditionalAdvantage := range talent.AttackDefinition.ConditionalAdvantages {
+				<span class="text-sm">Conditional Advantage: { conditionalAdvantage.Condition } - { conditionalAdvantage.Value }</span>
+			}
+			<span class="text-sm">Resource Cost Type:		
+			{talent.AttackDefinition.ResourceCost.Type} - {talent.AttackDefinition.ResourceCost.Amount}</span>
+			for _, mechanic := range talent.AttackDefinition.SpecialMechanics {
+				<span class="text-sm">Special Mechanic: { mechanic }</span>
+			}
+		}
+		if talent.SpecialActivation != "" {
+			<span class="text-sm">Special Activation: { talent.SpecialActivation }</span>
+		} else {
+			<span class="text-sm">{ talent.Description }</span>
+		}
 	</div>
 }
 
+templ StanceCard(stance []character.TalentHistory) {
+	<div class="card bg-base-200 shadow border-t-4 border-primary">
+		<div class="card-body p-4 text-center">
+			<fieldset class="fieldset">
+				<legend class="fieldset-legend">Stances</legend>
+				<form
+					hx-post={ "/playspace/toggle-active-stance" }
+					hx-target="#stanceComponent"
+					hx-swap="innerHTML"
+					hx-trigger="change">
+					<input type="hidden" name="id" value={ strconv.Itoa(stance[0].CharacterID) } />
+					<select class="select" name="activeStance">
+					for _, s := range stance {
+						<option value={ s.TalentID }>{ s.Name }</option>
+					}
+				</select>
+				</form>
+			</fieldset>
+					<div id="stanceComponent">
+						<div class="card bg-base-200 shadow border-t-4 border-primary">
+							<div class="card-body p-4 text-center">
+								<span class="text-sm">Active Stance: { stance[0].Name }</span>
+								<span class="text-sm">{ stance[0].Description }</span>
+								<span class="text-sm">Cost: { strconv.Itoa(stance[0].ActionCost) }</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+}
+
+templ ActiveStanceCard(stance character.TalentHistory) {
+	<div class="card bg-base-200 shadow border-t-4 border-primary">
+		<div class="card-body p-4 text-center">
+			<span class="text-sm">Active Stance: { stance.Name }</span>
+			<span class="text-sm">{ stance.Description }</span>
+			<span class="text-sm">Cost: { strconv.Itoa(stance.ActionCost) }</span>
+		</div>
+	</div>
+}
 
 templ EquipmentComponent(characterSheet models.CharacterSheetData) {
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">

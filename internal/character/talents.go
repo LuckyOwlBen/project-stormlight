@@ -30,6 +30,7 @@ type TalentHistory struct {
 	CharacterID      int    `json:"-" gorm:"not null;index"`
 	TalentID         string `json:"talentId" gorm:"not null"`
 	Source           string `json:"source" gorm:"size:100"`
+	Active           bool   `json:"active" gorm:"not null;default:false"` // Whether this talent is currently active (e.g., stance, ability, etc.)
 	Finalized        bool   `json:"finalized" gorm:"not null;default:false"`
 
 	// Easy access to the raw talent definitions via hydration without persisting them directly to DB again

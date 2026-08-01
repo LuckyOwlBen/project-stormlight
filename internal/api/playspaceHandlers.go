@@ -224,6 +224,55 @@ func (s *Server) updateEquippedStatus(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+type StanceUpdateRequest struct {
+	CharacterID int    `form:"id"`
+	TalentID    string `form:"activeStance"`
+}
+
+var stanceUpdateRequest StanceUpdateRequest
+
+func (r *StanceUpdateRequest) Bind(req *http.Request) error {
+	if r.CharacterID <= 0 {
+		return fmt.Errorf("invalid characterID: must be a positive integer")
+	}
+	if r.TalentID == "" {
+		return fmt.Errorf("invalid talentID: must be a non-empty string")
+	}
+	return nil
+}
+
+func (s *Server) changeActiveStance(w http.ResponseWriter, r *http.Request) {
+	var stanceUpdateRequest StanceUpdateRequest
+	if err := render.Bind(r, &stanceUpdateRequest); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	characterObject, err := s.store.GetCharacterByID(r.Context(), stanceUpdateRequest.CharacterID)
+	if err != nil {
+		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+
+	var activeTalent *character.TalentHistory
+
+	for i := range characterObject.Talents.List {
+		if characterObject.Talents.List[i].TalentID == stanceUpdateRequest.TalentID {
+			characterObject.Talents.List[i].Active = true
+			activeTalent = &characterObject.Talents.List[i]
+		} else if characterObject.Talents.List[i].ActionType == "Stance" {
+			characterObject.Talents.List[i].Active = false
+		}
+	}
+	if err := s.store.UpdateCharacter(r.Context(), characterObject); err != nil {
+		http.Error(w, "Failed to update character", http.StatusInternalServerError)
+		return
+	}
+	if activeTalent != nil {
+		views.ActiveStanceCard(*activeTalent).Render(r.Context(), w)
+	}
+}
+
 func mapInventorySlice(inventory []character.Inventory) map[int]character.Inventory {
 	result := make(map[int]character.Inventory)
 	for _, item := range inventory {
@@ -252,7 +301,7 @@ func buildActionTypeMap(char character.Character) []character.TalentDisplayStruc
 	}
 
 	// 2. Map into an ordered slice based on desired display sequence
-	desiredOrder := []string{"Action", "Passive", "Special", "Reaction", "Free"}
+	desiredOrder := []string{"Action", "Passive", "Special", "Reaction", "Free", "Stance"}
 
 	var groups []character.TalentDisplayStructure
 	for _, category := range desiredOrder {

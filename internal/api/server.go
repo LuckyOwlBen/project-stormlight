@@ -161,6 +161,7 @@ func (s *Server) Mount() http.Handler {
 		r.Post("/playspace/{id}/store/buy", s.handlePlayspaceStoreBuyPost)
 		r.Post("/playspace/{id}/store/sell", s.handlePlayspaceStoreSellPost)
 		r.Post("/playspace/toggle-equipped", s.updateEquippedStatus)
+		r.Post("/playspace/toggle-active-stance", s.changeActiveStance)
 
 		// GM views
 		r.Get("/gm", s.handleGMGet)

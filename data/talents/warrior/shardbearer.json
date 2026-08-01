@@ -61,7 +61,7 @@
             "otherEffects": [
                 "While in Stonestance: enemies within your melee weapon's reach must spend 1 additional action to attack allies who are not in Stonestance."
             ],
-            "actionType": "Action"
+            "actionType": "Stance"
         },
         {
             "id": "windstance",
@@ -87,7 +87,7 @@
             "otherEffects": [
                 "While in Windstance: if 2 or more enemies are within your reach, use a reaction to gain 1 action (spend only to Disengage or make an attack targeting one or more of those enemies)."
             ],
-            "actionType": "Action"
+            "actionType": "Stance"
         },
         {
             "id": "mighty",
@@ -157,7 +157,7 @@
             "otherEffects": [
                 "While in Bloodstance: Opportunity range expands by 2 for attack tests and physical tests."
             ],
-            "actionType": "Action"
+            "actionType": "Stance"
         },
         {
             "id": "shatteringBlow",

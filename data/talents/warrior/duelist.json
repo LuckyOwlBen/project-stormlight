@@ -27,7 +27,7 @@
             "otherEffects": [
                 "While in Flamestance: if exactly 1 enemy is within your reach and no allies are within the reach of that enemy or you, use a reaction to gain 1 action (spend only to Gain Advantage or make an attack targeting that enemy)."
             ],
-            "actionType": "Action"
+            "actionType": "Stance"
         },
         {
             "id": "practicedKata",
@@ -81,7 +81,7 @@
             "otherEffects": [
                 "While in Ironstance: when a character within your reach misses or grazes you with an attack, you can use Reactive Strike against them as if they had voluntarily left your reach."
             ],
-            "actionType": "Action"
+            "actionType": "Stance"
         },
         {
             "id": "signatureWeapon",
@@ -206,7 +206,7 @@
                 "While in Vinestance: after being hit or grazed by a melee attack, use a reaction to test Athletics vs. attacker's Cognitive defense.",
                 "On success: attacker loses 1d4 focus and you can push them horizontally up to 5 feet \u00c3\u2014 your Athletics ranks."
             ],
-            "actionType": "Action"
+            "actionType": "Stance"
         },
         {
             "id": "witsEnd",

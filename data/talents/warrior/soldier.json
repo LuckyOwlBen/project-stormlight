@@ -25,7 +25,7 @@
                 "Move up to half your movement rate, ignoring difficult terrain.",
                 "Gain 1 action that can be spent only on Brace or Gain Advantage."
             ],
-            "actionType": "Action"
+            "actionType": "Stance"
         },
         {
             "id": "combatTraining",
