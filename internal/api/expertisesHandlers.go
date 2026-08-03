@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"project-stormlight/internal/character"
 	"project-stormlight/internal/models"
@@ -84,11 +85,11 @@ func (s *Server) handleCharacterExpertisesGet(w http.ResponseWriter, r *http.Req
 		maxExpertises = 0
 	}
 
-	// Count only non-culture expertises against the Intelligence budget.
-	// The 2 cultural expertises granted during culture selection are free.
+	// Count only non-culture, non-talent expertises against the Intelligence budget.
+	// The 2 cultural expertises from culture selection and talent-granted ones are free.
 	chosen := 0
 	for _, e := range char.Expertises.List {
-		if e.Source != "culture_selection" {
+		if e.Source != "culture_selection" && !strings.HasPrefix(e.Source, "talent:") {
 			chosen++
 		}
 	}
@@ -142,10 +143,10 @@ func (s *Server) handleCharacterExpertisesPost(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	// Preserve cultural expertises seeded during culture selection.
+	// Preserve cultural expertises seeded during culture selection and any talent-granted ones.
 	var preserved []character.Expertise
 	for _, e := range char.Expertises.List {
-		if e.Source == "culture_selection" {
+		if e.Source == "culture_selection" || strings.HasPrefix(e.Source, "talent:") {
 			preserved = append(preserved, e)
 		}
 	}

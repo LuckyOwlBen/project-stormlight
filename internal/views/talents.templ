@@ -1,7 +1,9 @@
 package views
 
 import (
+	"fmt"
 	"strconv"
+	"strings"
 	"project-stormlight/internal/character"
 )
 
@@ -26,6 +28,64 @@ func isTalentPending(pendingIDs []string, talentID string) bool {
     return false
 }
 
+// grantChoice pairs one resolved "choice"/"category" ExpertiseGrant with its selectable
+// options and any names already picked (so the modal can be reopened to edit a choice).
+type grantChoice struct {
+    GrantIndex  int
+    ChoiceCount int
+    Options     []character.Expertise
+    Selected    map[string]bool
+}
+
+func pendingGrantChoices(char *character.Character, talent character.Talent) []grantChoice {
+    var result []grantChoice
+    for i, grant := range talent.ExpertiseGrants {
+        if grant.Type != "choice" && grant.Type != "category" {
+            continue
+        }
+        options, err := character.ResolveExpertiseGrantOptions(grant)
+        if err != nil {
+            continue
+        }
+        choiceCount := grant.ChoiceCount
+        if choiceCount <= 0 {
+            choiceCount = 1
+        }
+        selected := make(map[string]bool)
+        if char != nil && char.Expertises != nil {
+            source := fmt.Sprintf("talent:%s:%d", talent.Id, i)
+            for _, e := range char.Expertises.List {
+                if e.Source == source {
+                    selected[e.Name] = true
+                }
+            }
+        }
+        result = append(result, grantChoice{
+            GrantIndex:  i,
+            ChoiceCount: choiceCount,
+            Options:     options,
+            Selected:    selected,
+        })
+    }
+    return result
+}
+
+// grantedExpertiseNames returns the names of expertises already granted by this talent,
+// across all of its fixed/choice/category grants, for display once resolved.
+func grantedExpertiseNames(char *character.Character, talentID string) []string {
+    if char == nil || char.Expertises == nil {
+        return nil
+    }
+    prefix := "talent:" + talentID + ":"
+    var names []string
+    for _, e := range char.Expertises.List {
+        if strings.HasPrefix(e.Source, prefix) {
+            names = append(names, e.Name)
+        }
+    }
+    return names
+}
+
 templ TalentSelection(char *character.Character, allPaths map[string]character.Path, subPaths map[string]character.Talents, selectedPath string, evaluations map[string][]character.TalentWithState) {
     @CreationLayout(char, "talents", "Select Talents", NavState{BackEnabled: true, NextEnabled: char.Talents.PointsRemaining == 0}) {
         <div class="flex justify-between items-center mb-6">
@@ -38,7 +98,9 @@ templ TalentSelection(char *character.Character, allPaths map[string]character.P
                 @PointsRemaining(char.Talents.PointsRemaining)
             </div>
         </div>
-        
+
+        @TalentExpertiseModalPlaceholder()
+
         <form id="creation-form" action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents") } 
             method="POST"
         >
@@ -83,13 +145,27 @@ templ TalentSectionsFragment(char *character.Character, path character.Path, sub
                     <div class="card w-full bg-base-200 shadow-xl mb-6 border-2 border-primary">
                         <div class="card-body">
                             <label class="label cursor-pointer flex justify-start gap-4">
-                                <input type="checkbox" name="talents" value={ path.TalentNodes[0].Id } class="checkbox checkbox-primary" checked?={ hasTalent(char, path.TalentNodes[0].Id) || isTalentPending(pendingIDs, path.TalentNodes[0].Id) } />
+                                <input
+                                    type="checkbox"
+                                    name="talents"
+                                    value={ path.TalentNodes[0].Id }
+                                    class="checkbox checkbox-primary"
+                                    checked?={ hasTalent(char, path.TalentNodes[0].Id) || isTalentPending(pendingIDs, path.TalentNodes[0].Id) }
+                                    if character.TalentNeedsExpertiseChoice(path.TalentNodes[0]) {
+                                        hx-get={ string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/" + path.TalentNodes[0].Id + "/expertise-choice")) }
+                                        hx-target="#talent-expertise-modal"
+                                        hx-swap="outerHTML"
+                                        hx-trigger="change[target.checked]"
+                                        hx-on::after-request="document.getElementById('talent-expertise-modal').showModal()"
+                                    }
+                                />
                                 <div>
                                     <h2 class="card-title m-0 inline-block">{ path.TalentNodes[0].Name } (Base Path Talent)</h2>
                                     <span class="badge badge-secondary ml-2">Tier 0</span>
                                 </div>
                             </label>
                             <p class="text-sm mt-2">{ path.TalentNodes[0].Description }</p>
+                            @grantedExpertiseBadge(char, path.TalentNodes[0].Id)
                         </div>
                     </div>
                 }
@@ -112,6 +188,13 @@ templ TalentSectionsFragment(char *character.Character, path character.Path, sub
                                                         class="checkbox checkbox-primary checkbox-sm"
                                                         checked?={ hasTalent(char, tw.Talent.Id) || isTalentPending(pendingIDs, tw.Talent.Id) }
                                                         disabled?={ tw.State == character.StateIneligible }
+                                                        if character.TalentNeedsExpertiseChoice(tw.Talent) {
+                                                            hx-get={ string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/" + tw.Talent.Id + "/expertise-choice")) }
+                                                            hx-target="#talent-expertise-modal"
+                                                            hx-swap="outerHTML"
+                                                            hx-trigger="change[target.checked]"
+                                                            hx-on::after-request="document.getElementById('talent-expertise-modal').showModal()"
+                                                        }
                                                     />
                                                     <div>
                                                         <h4 class="font-bold m-0">{ tw.Talent.Name }</h4>
@@ -132,6 +215,7 @@ templ TalentSectionsFragment(char *character.Character, path character.Path, sub
                                                         </ul>
                                                     </div>
                                                 }
+                                                @grantedExpertiseBadge(char, tw.Talent.Id)
                                             </div>
                                         </div>
                                     }
@@ -145,3 +229,62 @@ templ TalentSectionsFragment(char *character.Character, path character.Path, sub
     </div>
 }
 
+templ grantedExpertiseBadge(char *character.Character, talentID string) {
+    for _, name := range grantedExpertiseNames(char, talentID) {
+        <div class="mt-1 flex items-center gap-2">
+            <span class="badge badge-sm badge-accent">Granted: { name }</span>
+            <button
+                type="button"
+                class="btn btn-xs btn-ghost"
+                hx-get={ string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/" + talentID + "/expertise-choice")) }
+                hx-target="#talent-expertise-modal"
+                hx-swap="outerHTML"
+                hx-on::after-request="document.getElementById('talent-expertise-modal').showModal()"
+            >Edit</button>
+        </div>
+    }
+}
+
+// TalentExpertiseModalPlaceholder is the empty dialog shell present once on the page;
+// GET/POST responses to /talents/{talentID}/expertise-choice swap its outerHTML.
+templ TalentExpertiseModalPlaceholder() {
+    <dialog id="talent-expertise-modal" class="modal"></dialog>
+}
+
+templ TalentExpertiseChoiceModal(char *character.Character, talent character.Talent) {
+    <dialog id="talent-expertise-modal" class="modal">
+        <div class="modal-box w-11/12 max-w-3xl">
+            <h3 class="font-bold text-lg">{ talent.Name }: Choose Expertise</h3>
+            <form
+                hx-post={ string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/" + talent.Id + "/expertise-choice")) }
+                hx-target="#talent-expertise-modal"
+                hx-swap="outerHTML"
+                hx-on::after-request="if(event.detail.successful) { document.getElementById('talent-expertise-modal').close(); document.getElementById('talent-sections').dispatchEvent(new Event('change', {bubbles: true})); }"
+            >
+                for _, grant := range pendingGrantChoices(char, talent) {
+                    <div class="mb-4">
+                        if grant.ChoiceCount > 1 {
+                            <p class="text-sm opacity-70 mb-2">Choose { strconv.Itoa(grant.ChoiceCount) }:</p>
+                        }
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            for _, opt := range grant.Options {
+                                <label class="label cursor-pointer flex justify-start gap-4">
+                                    if grant.ChoiceCount > 1 {
+                                        <input type="checkbox" name={ "grant" + strconv.Itoa(grant.GrantIndex) } value={ opt.Name } class="checkbox checkbox-primary" checked?={ grant.Selected[opt.Name] } />
+                                    } else {
+                                        <input type="radio" name={ "grant" + strconv.Itoa(grant.GrantIndex) } value={ opt.Name } class="radio radio-primary" checked?={ grant.Selected[opt.Name] } />
+                                    }
+                                    <span>{ opt.Name }</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+                }
+                <div class="modal-action">
+                    <button type="button" class="btn" onclick="document.getElementById('talent-expertise-modal').close()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Confirm</button>
+                </div>
+            </form>
+        </div>
+    </dialog>
+}

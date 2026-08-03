@@ -54,9 +54,23 @@ func (s *Store) GetCharactersByUserID(ctx context.Context, userID int) ([]*chara
 
 // UpdateCharacter fully updates the character and its relations.
 func (s *Store) UpdateCharacter(ctx context.Context, char *character.Character) error {
-	// Clears removed entries from nested relationships that would otherwise be orphaned during Save
+	// Clears removed entries from nested relationships that would otherwise be orphaned during Save.
+	// Expertise.ExpertisesID is NOT NULL, so Association.Replace's "unlink by nulling the FK"
+	// approach violates the constraint — delete the removed rows outright instead.
 	if char.Expertises != nil {
-		s.db.WithContext(ctx).Model(char.Expertises).Association("List").Replace(char.Expertises.List)
+		keepIDs := make([]int, 0, len(char.Expertises.List))
+		for _, e := range char.Expertises.List {
+			if e.ID != 0 {
+				keepIDs = append(keepIDs, e.ID)
+			}
+		}
+		del := s.db.WithContext(ctx).Where("expertises_id = ?", char.Expertises.ID)
+		if len(keepIDs) > 0 {
+			del = del.Where("id NOT IN ?", keepIDs)
+		}
+		if err := del.Delete(&character.Expertise{}).Error; err != nil {
+			return err
+		}
 	}
 	if char.Skills != nil {
 		s.db.WithContext(ctx).Model(char.Skills).Association("PlayerSkills").Replace(char.Skills.PlayerSkills)

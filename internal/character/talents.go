@@ -559,3 +559,170 @@ func meetsPrerequisites(char *Character, pendingIDs []string, prereqs []Prerequi
 	}
 	return true
 }
+
+// TalentNeedsExpertiseChoice reports whether acquiring this talent requires the
+// player to pick from a set of expertise options ("choice" or "category" grants).
+// "fixed" grants are applied automatically and need no player input.
+func TalentNeedsExpertiseChoice(t Talent) bool {
+	for _, grant := range t.ExpertiseGrants {
+		if grant.Type == "choice" || grant.Type == "category" {
+			return true
+		}
+	}
+	return false
+}
+
+func ResolveExpertiseGrantOptions(grant ExpertiseGrant) ([]Expertise, error) {
+	var options []Expertise
+	switch grant.Type {
+	case "fixed":
+		for _, name := range grant.Expertises {
+			if exp, ok := ExpertiseList[name]; ok {
+				options = append(options, exp)
+			} else {
+				return nil, fmt.Errorf("unknown expertise: %s", name)
+			}
+		}
+	case "choice":
+		for _, name := range grant.Options {
+			if exp, ok := ExpertiseList[name]; ok {
+				options = append(options, exp)
+			} else {
+				return nil, fmt.Errorf("unknown expertise: %s", name)
+			}
+		}
+	case "category":
+		// ExpertiseGroups is keyed by file-level Type (e.g. "Cultural Expertises"),
+		// not the lowercase category value used in talent JSON, so filter by Category field instead.
+		options = ExpertisesByCategory(grant.Category)
+		if len(options) == 0 {
+			return nil, fmt.Errorf("unknown expertise category: %s", grant.Category)
+		}
+	default:
+		return nil, fmt.Errorf("invalid expertise grant type: %s", grant.Type)
+	}
+	return options, nil
+}
+
+// expertiseGrantSource builds the Source tag used to identify which talent (and which
+// grant on that talent) an Expertise entry came from, so it can be edited or pruned later.
+func expertiseGrantSource(talentID string, grantIndex int) string {
+	if grantIndex < 0 {
+		return "talent:" + talentID + ":fixed"
+	}
+	return fmt.Sprintf("talent:%s:%d", talentID, grantIndex)
+}
+
+// ApplyFixedExpertiseGrants grants any "fixed" ExpertiseGrant entries on the talent.
+// Idempotent: does nothing if already applied for this talent.
+func ApplyFixedExpertiseGrants(char *Character, talent Talent) []Expertise {
+	if char.Expertises == nil {
+		return nil
+	}
+	source := expertiseGrantSource(talent.Id, -1)
+	for _, e := range char.Expertises.List {
+		if e.Source == source {
+			return nil
+		}
+	}
+
+	var granted []Expertise
+	for _, grant := range talent.ExpertiseGrants {
+		if grant.Type != "fixed" {
+			continue
+		}
+		for _, name := range grant.Expertises {
+			if _, ok := ExpertiseList[name]; !ok {
+				continue
+			}
+			granted = append(granted, Expertise{
+				CharacterID: char.ID,
+				Name:        name,
+				Source:      source,
+				Finalized:   true,
+			})
+		}
+	}
+	char.Expertises.List = append(char.Expertises.List, granted...)
+	return granted
+}
+
+// ApplyExpertiseChoice resolves a single "choice" or "category" ExpertiseGrant on the talent
+// with the player's selected expertise names. Idempotent: replaces any prior selection
+// previously made for this same grant.
+func ApplyExpertiseChoice(char *Character, talent Talent, grantIndex int, selectedNames []string) error {
+	if char.Expertises == nil {
+		return fmt.Errorf("character expertises not initialized")
+	}
+	if grantIndex < 0 || grantIndex >= len(talent.ExpertiseGrants) {
+		return fmt.Errorf("invalid grant index: %d", grantIndex)
+	}
+	grant := talent.ExpertiseGrants[grantIndex]
+	if grant.Type != "choice" && grant.Type != "category" {
+		return fmt.Errorf("grant at index %d does not require a choice", grantIndex)
+	}
+
+	options, err := ResolveExpertiseGrantOptions(grant)
+	if err != nil {
+		return err
+	}
+	valid := make(map[string]bool, len(options))
+	for _, opt := range options {
+		valid[opt.Name] = true
+	}
+
+	choiceCount := grant.ChoiceCount
+	if choiceCount <= 0 {
+		choiceCount = 1
+	}
+	if len(selectedNames) != choiceCount {
+		return fmt.Errorf("expected %d selections, got %d", choiceCount, len(selectedNames))
+	}
+
+	source := expertiseGrantSource(talent.Id, grantIndex)
+	granted := make([]Expertise, 0, len(selectedNames))
+	for _, name := range selectedNames {
+		if !valid[name] {
+			return fmt.Errorf("selected expertise %s is not in the available options", name)
+		}
+		granted = append(granted, Expertise{
+			CharacterID: char.ID,
+			Name:        name,
+			Source:      source,
+			Finalized:   true,
+		})
+	}
+
+	retained := make([]Expertise, 0, len(char.Expertises.List))
+	for _, e := range char.Expertises.List {
+		if e.Source != source {
+			retained = append(retained, e)
+		}
+	}
+	char.Expertises.List = append(retained, granted...)
+	return nil
+}
+
+// PruneOrphanedTalentExpertises removes talent-granted expertises whose source talent is not
+// in keptTalentIDs — e.g. a talent was checked, its expertise choice resolved via the modal,
+// then unchecked again before the talent purchase form was finally submitted.
+func PruneOrphanedTalentExpertises(char *Character, keptTalentIDs []string) {
+	if char.Expertises == nil {
+		return
+	}
+	kept := make(map[string]bool, len(keptTalentIDs))
+	for _, id := range keptTalentIDs {
+		kept[id] = true
+	}
+	retained := make([]Expertise, 0, len(char.Expertises.List))
+	for _, e := range char.Expertises.List {
+		if strings.HasPrefix(e.Source, "talent:") {
+			parts := strings.SplitN(e.Source, ":", 3)
+			if len(parts) >= 2 && !kept[parts[1]] {
+				continue
+			}
+		}
+		retained = append(retained, e)
+	}
+	char.Expertises.List = retained
+}

@@ -2,6 +2,9 @@ package character
 
 import (
 	"encoding/json"
+	"sort"
+	"strings"
+
 	"project-stormlight/data"
 )
 
@@ -70,6 +73,20 @@ func LoadExpertises() error {
 	return nil
 }
 
+// ExpertisesByCategory returns all known expertises whose Category matches (case-insensitive),
+// sorted by name. Used to resolve ExpertiseGrant.Type == "category" talent grants, since
+// ExpertiseGroups is keyed by file-level Type (e.g. "Cultural Expertises"), not category.
+func ExpertisesByCategory(category string) []Expertise {
+	var result []Expertise
+	for _, exp := range ExpertiseList {
+		if strings.EqualFold(exp.Category, category) {
+			result = append(result, exp)
+		}
+	}
+	sort.Slice(result, func(i, j int) bool { return result[i].Name < result[j].Name })
+	return result
+}
+
 // NewExpertises creates a new Expertises module tracker for a character.
 // TotalPoints is intentionally 0 here — it is set to the character's Intelligence
 // score at display time, since attributes are not yet assigned at creation.
@@ -84,4 +101,14 @@ func NewExpertises() *Expertises {
 			Finalized:       false,
 		},
 	}
+}
+
+func getExpertiseByCategory(category string) []Expertise {
+	expertises := []Expertise{}
+	for _, expertise := range ExpertiseList {
+		if expertise.Category == category {
+			expertises = append(expertises, expertise)
+		}
+	}
+	return expertises
 }
