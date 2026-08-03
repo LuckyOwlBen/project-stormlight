@@ -10,7 +10,7 @@ import "strings"
 //
 //	skill:    "Discipline", "Athletics", etc.
 //	resource: "focus", "investiture", "health"
-//	defense:  "Physical", "Cognitive", "Spiritual", "deflect"
+//	defense:  "Physical", "Cognitive", "Spiritual", "deflect" (deflect starts at 0, purely additive)
 //
 // Conditional bonuses (Conditional == true) default to Active == false and
 // require an explicit toggle to count toward totals. Non-conditional bonuses
@@ -99,11 +99,18 @@ func RecalculateBonuses(char *Character) []CharacterBonus {
 				cb.Value = b.Value
 			}
 
-			// Conditional handling.
+			// Conditional handling. Bonuses owned by a Stance talent (e.g. Vinestance's
+			// defense increase) are gated on that same talent's TalentHistory.Active flag,
+			// since the condition text always means "while in this stance". Other
+			// conditional bonuses have no tracked trigger yet, so they stay inactive.
 			if b.Condition != "" {
 				cb.Conditional = true
-				cb.Active = false
 				cb.Condition = b.Condition
+				if talent.ActionType == "Stance" {
+					cb.Active = isStanceActive(char, talent.Id)
+				} else {
+					cb.Active = false
+				}
 			} else {
 				cb.Conditional = false
 				cb.Active = true
@@ -179,5 +186,21 @@ func applyDefenseBonus(char *Character, bonus CharacterBonus) {
 		char.Defenses.Cognitive += bonus.Value
 	case "Spiritual":
 		char.Defenses.Spiritual += bonus.Value
+	case "deflect":
+		char.Defenses.Deflect += bonus.Value
 	}
+}
+
+// isStanceActive reports whether the Stance talent talentID is the character's currently
+// active stance (TalentHistory.Active), used to gate that stance's own conditional bonuses.
+func isStanceActive(char *Character, talentID string) bool {
+	if char.Talents == nil {
+		return false
+	}
+	for _, history := range char.Talents.List {
+		if history.TalentID == talentID {
+			return history.Active
+		}
+	}
+	return false
 }

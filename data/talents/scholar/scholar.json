@@ -15,6 +15,7 @@
             "prerequisites": [],
             "tier": 0,
             "bonuses": [],
+            "retrainable": true,
             "expertiseGrants": [
                 {
                     "type": "category",

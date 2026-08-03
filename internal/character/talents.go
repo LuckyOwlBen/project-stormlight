@@ -102,6 +102,12 @@ type Talent struct {
 
 	/** ID(s) of the base talent(s) this talent modifies/enhances (for character sheet grouping) */
 	ModifiesTalent interface{} `json:"modifiesTalent,omitempty"`
+
+	/** Whether this talent's own choice/category expertise/skill grants can be freely
+	  reassigned at will (e.g. Erudition: "Reassign these after a long rest with library
+	  access"). Most choice/category grants are a one-time pick made at acquisition (e.g.
+	  Combat Training's weapon/armor expertise) and must NOT set this. */
+	Retrainable bool `json:"retrainable,omitempty"`
 }
 
 type Prerequisite struct {

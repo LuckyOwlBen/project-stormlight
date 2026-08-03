@@ -267,10 +267,19 @@ func (s *Server) changeActiveStance(w http.ResponseWriter, r *http.Request) {
 			characterObject.Talents.List[i].Active = false
 		}
 	}
+
+	// Re-derive defenses/resources/bonuses so the newly active stance's conditional
+	// bonuses (e.g. Vinestance's defense increase) are folded in before saving.
+	character.RecalculateDefenses(characterObject)
+	character.RecalculateResources(characterObject)
+	character.RecalculateBonuses(characterObject)
+
 	if err := s.store.UpdateCharacter(r.Context(), characterObject); err != nil {
 		http.Error(w, "Failed to update character", http.StatusInternalServerError)
 		return
 	}
+	characterSheet := buildCharacterSheetData(*characterObject)
+	s.hub.UpdateBasicsComponentOnCharacterSheet(characterSheet, r)
 	if activeTalent != nil {
 		views.ActiveStanceCard(*activeTalent).Render(r.Context(), w)
 	}

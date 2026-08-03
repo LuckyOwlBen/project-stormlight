@@ -131,14 +131,16 @@ func containsString(list []string, value string) bool {
 	return false
 }
 
-// HasReassignableGrants reports whether talentID (as a base talent) has any "choice" or
-// "category" ExpertiseGrant or SkillGrant of its own - i.e. it qualifies for the generic
-// grant-management UI (a "Manage" box letting the player pick/reassign expertise and
-// skills, like Erudition). Subtree talents that only modify a base talent via
-// ModifierEffect don't need this themselves; the box lives on the base talent.
+// HasReassignableGrants reports whether talentID (as a base talent) is marked Retrainable
+// and has any "choice" or "category" ExpertiseGrant or SkillGrant of its own - i.e. it
+// qualifies for the generic grant-management UI (a "Manage" box letting the player
+// pick/reassign expertise and skills, like Erudition). Talents whose choice/category
+// grants are a one-time pick made at acquisition (e.g. Combat Training, Shard Training)
+// must not set Retrainable, so they don't get this UI. Subtree talents that only modify
+// a base talent via ModifierEffect don't need this themselves; the box lives on the base talent.
 func HasReassignableGrants(talentID string) bool {
 	talent, ok := AllTalents[talentID]
-	if !ok {
+	if !ok || !talent.Retrainable {
 		return false
 	}
 	for _, grant := range talent.ExpertiseGrants {

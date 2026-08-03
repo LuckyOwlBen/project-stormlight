@@ -292,5 +292,6 @@ func allDefenses(c character.Character) map[string]int {
 		"Physical Defense":  c.Defenses.Physical,
 		"Spiritual Defense": c.Defenses.Spiritual,
 		"Cognitive Defense": c.Defenses.Cognitive,
+		"Deflect":           c.Defenses.Deflect,
 	}
 }

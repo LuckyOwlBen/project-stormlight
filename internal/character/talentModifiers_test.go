@@ -64,6 +64,20 @@ func TestAggregateModifierGrants_AllSubtreeModifiers(t *testing.T) {
 	}
 }
 
+func TestHasReassignableGrants_OnlyRetrainableTalentsQualify(t *testing.T) {
+	setupTalentModifierTestData(t)
+
+	if !HasReassignableGrants("erudition") {
+		t.Fatalf("expected erudition (Retrainable, category grants) to qualify")
+	}
+	if HasReassignableGrants("combatTraining") {
+		t.Fatalf("expected combatTraining (one-time acquisition choice, not Retrainable) to NOT qualify")
+	}
+	if HasReassignableGrants("shardTraining") {
+		t.Fatalf("expected shardTraining (one-time acquisition choice, not Retrainable) to NOT qualify")
+	}
+}
+
 func TestResolveSkillGrantOptions_CategoryExcludesSurge(t *testing.T) {
 	setupTalentModifierTestData(t)
 
