@@ -82,7 +82,7 @@ var stepDoneFunctions = map[string]func(*character.Character) bool{
 		return c.Skills.PointsRemaining == 0
 	},
 	"Talents": func(c *character.Character) bool {
-		return c.Talents.PointsRemaining == 0
+		return c.Talents.PointsRemaining == 0 && character.SingerQuotaMet(c)
 	},
 	"Equipment": func(c *character.Character) bool {
 		return c.StartingKitID != ""

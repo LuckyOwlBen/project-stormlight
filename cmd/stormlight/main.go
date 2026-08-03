@@ -35,6 +35,9 @@ func main() {
 	if err := character.LoadTalents(); err != nil {
 		log.Fatalf("Could not load talents: %v", err)
 	}
+	if err := character.LoadSingerTalentTree(); err != nil {
+		log.Fatalf("Could not load singer talent tree: %v", err)
+	}
 	if err := character.LoadRadiantMatches(); err != nil {
 		log.Fatalf("Could not load radiant matches: %v", err)
 	}

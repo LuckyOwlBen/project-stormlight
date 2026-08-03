@@ -1,0 +1,152 @@
+[
+    {
+        "id": "singer_ancestry",
+        "name": "Singer Ancestry",
+        "description": "You possess the innate abilities of a Singer, allowing you to assume various forms during highstorms.",
+        "actionType": "Passive",
+        "prerequisites": [],
+        "tier": 0,
+        "bonuses": []
+    },
+    {
+        "id": "singer_change_form",
+        "name": "Change Form",
+        "description": "During a highstorm, you can change into dullform, mateform, or another one of your singer forms.",
+        "actionCost": 3,
+        "prerequisites": [
+            { "type": "talent", "target": "singer_ancestry" }
+        ],
+        "tier": 0,
+        "bonuses": []
+    },
+    {
+        "id": "forms_of_finesse",
+        "name": "Forms of Finesse",
+        "modifiesTalent": "singer_change_form",
+        "description": "Gain artform and nimbleform. These forms become available to you during highstorms when you use Change Form.",
+        "actionType": "Passive",
+        "prerequisites": [
+            { "type": "talent", "target": "singer_ancestry" },
+            { "type": "talent", "target": "singer_change_form" }
+        ],
+        "tier": 1,
+        "bonuses": [],
+        "otherEffects": [
+            "Unlock Artform (Awareness +1, expertise in Painting and Music, advantage on Crafting and entertainment)",
+            "Unlock Nimbleform (Speed +1, Focus +2)",
+            "Can change into these forms during highstorms"
+        ]
+    },
+    {
+        "id": "forms_of_wisdom",
+        "name": "Forms of Wisdom",
+        "modifiesTalent": "singer_change_form",
+        "description": "Gain meditationform and scholarform. These forms become available to you during highstorms when you use Change Form.",
+        "actionType": "Passive",
+        "prerequisites": [
+            { "type": "talent", "target": "singer_ancestry" },
+            { "type": "talent", "target": "singer_change_form" }
+        ],
+        "tier": 1,
+        "bonuses": [],
+        "otherEffects": [
+            "Unlock Meditationform (Presence +1, can aid without spending focus)",
+            "Unlock Scholarform (Intellect +1, temporarily gain expertise and cognitive skill rank)",
+            "Can change into these forms during highstorms"
+        ]
+    },
+    {
+        "id": "forms_of_resolve",
+        "name": "Forms of Resolve",
+        "modifiesTalent": "singer_change_form",
+        "description": "Gain warform and workform. These forms become available to you during highstorms when you use Change Form.",
+        "actionType": "Passive",
+        "prerequisites": [
+            { "type": "talent", "target": "singer_ancestry" },
+            { "type": "talent", "target": "singer_change_form" }
+        ],
+        "tier": 1,
+        "bonuses": [],
+        "otherEffects": [
+            "Unlock Warform (Strength +1, Physical Deflect +1)",
+            "Unlock Workform (Willpower +1, ignore Exhausted, disguise as parshman)",
+            "Can change into these forms during highstorms"
+        ]
+    },
+    {
+        "id": "ambitious_mind",
+        "name": "Ambitious Mind",
+        "description": "Increase Cognitive defense by 2. You can bond a Voidspren but once per day on a complication you must test Discipline (DC 15) or be Stunned.",
+        "actionType": "Passive",
+        "prerequisites": [
+            { "type": "talent", "target": "singer_ancestry" },
+            { "type": "talent", "target": "singer_change_form" },
+            { "type": "skill", "target": "discipline", "value": 3 }
+        ],
+        "tier": 3,
+        "bonuses": [
+            { "type": "BonusType.DEFENSE", "target": "cognitive", "value": 2, "scaling": false }
+        ],
+        "otherEffects": [
+            "You can bond a Voidspren",
+            "Once per day on a complication you must test Discipline (DC 15) or be Stunned"
+        ]
+    },
+    {
+        "id": "forms_of_destruction",
+        "name": "Forms of Destruction",
+        "modifiesTalent": "singer_change_form",
+        "description": "Gain direform and stormform. These powerful Voidspren-bonded forms become available to you during highstorms when you use Change Form.",
+        "actionType": "Passive",
+        "prerequisites": [
+            { "type": "talent", "target": "singer_ancestry" },
+            { "type": "talent", "target": "singer_change_form" },
+            { "type": "talent", "target": "ambitious_mind" }
+        ],
+        "tier": 4,
+        "bonuses": [],
+        "otherEffects": [
+            "Unlock Direform (Strength +2, Physical Deflect +2, can use reactive strikes to grapple)",
+            "Unlock Stormform (Strength +1, Speed +1, Physical Deflect +1, grants Unleash Lightning ability)",
+            "Can change into these forms during highstorms"
+        ]
+    },
+    {
+        "id": "forms_of_expansion",
+        "name": "Forms of Expansion",
+        "modifiesTalent": "singer_change_form",
+        "description": "Gain envoyform and relayform. These Voidspren-bonded forms become available to you during highstorms when you use Change Form.",
+        "actionType": "Passive",
+        "prerequisites": [
+            { "type": "talent", "target": "singer_ancestry" },
+            { "type": "talent", "target": "singer_change_form" },
+            { "type": "talent", "target": "ambitious_mind" }
+        ],
+        "tier": 4,
+        "bonuses": [],
+        "otherEffects": [
+            "Unlock Envoyform (Intellect +1, Presence +1, know all languages, advantage on Insight)",
+            "Unlock Relayform (Speed +2, ignore Slowed, can spend focus for advantage on agility tests)",
+            "Can change into these forms during highstorms"
+        ]
+    },
+    {
+        "id": "forms_of_mystery",
+        "name": "Forms of Mystery",
+        "modifiesTalent": "singer_change_form",
+        "description": "Gain decayform and nightform. These mysterious Voidspren-bonded forms become available to you during highstorms when you use Change Form.",
+        "actionType": "Passive",
+        "prerequisites": [
+            { "type": "talent", "target": "singer_ancestry" },
+            { "type": "talent", "target": "singer_change_form" },
+            { "type": "talent", "target": "ambitious_mind" }
+        ],
+        "tier": 4,
+        "bonuses": [],
+        "otherEffects": [
+            "Unlock Decayform (Willpower +2, can prevent healing/focus recovery)",
+            "Unlock Nightform (Awareness +1, Intellect +1, Focus +2, preroll d20s for visions)",
+            "Can change into these forms during highstorms"
+        ]
+    }
+]

@@ -11,6 +11,15 @@ import (
 
 var talentPointsPerLevel = [21]int{2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1}
 
+// SingerPointLevels are the character levels at which a Singer character must have
+// selected one more Singer Forms talent (in addition to the two inherent ancestry talents).
+var SingerPointLevels = [5]int{1, 6, 11, 16, 21}
+
+// singerInherentTalentIDs are granted automatically the moment a character's ancestry is
+// set to Singer. They are free (no talent point cost) and don't count toward the
+// SingerPointLevels quota.
+var singerInherentTalentIDs = []string{"singer_ancestry", "singer_change_form"}
+
 type TalentsTracker struct {
 	ID           int             `json:"id" gorm:"primaryKey"`
 	CharacterID  int             `json:"-" gorm:"not null;uniqueIndex"`
@@ -343,9 +352,10 @@ func LoadRadiantMatches() error {
 }
 
 var (
-	PathMap    = map[string]Path{}
-	SubPathMap = map[string]Talents{}
-	AllTalents = map[string]Talent{}
+	PathMap       = map[string]Path{}
+	SubPathMap    = map[string]Talents{}
+	AllTalents    = map[string]Talent{}
+	SingerTalents = map[string]Talent{}
 )
 
 func LoadTalents() error {
@@ -792,4 +802,190 @@ func PruneOrphanedTalentExpertises(char *Character, keptTalentIDs []string) {
 		retained = append(retained, e)
 	}
 	char.Expertises.List = retained
+}
+
+func LoadSingerTalentTree() error {
+	fileData, err := data.SingerFormFiles.ReadFile("singerForms.json")
+	if err != nil {
+		return err
+	}
+
+	var singerTalents []Talent
+	if err := json.Unmarshal(fileData, &singerTalents); err != nil {
+		return err
+	}
+
+	for _, t := range singerTalents {
+		SingerTalents[t.Id] = t
+	}
+
+	return nil
+}
+
+func isSingerInherentTalent(talentID string) bool {
+	for _, id := range singerInherentTalentIDs {
+		if id == talentID {
+			return true
+		}
+	}
+	return false
+}
+
+// GrantSingerAncestryTalents adds the two inherent Singer talents to the character's owned
+// talent list. They are free (not deducted from PointsRemaining) and idempotent - calling
+// this repeatedly (e.g. re-saving Basics with Singer already selected) has no extra effect.
+func GrantSingerAncestryTalents(char *Character) {
+	if char == nil || char.Talents == nil {
+		return
+	}
+	for _, id := range singerInherentTalentIDs {
+		owned := false
+		for _, h := range char.Talents.List {
+			if h.TalentID == id {
+				owned = true
+				break
+			}
+		}
+		if !owned {
+			char.Talents.List = append(char.Talents.List, TalentHistory{
+				TalentsTrackerID: char.Talents.ID,
+				CharacterID:      char.ID,
+				TalentID:         id,
+				Source:           "ancestry",
+			})
+		}
+	}
+}
+
+// RemoveSingerAncestryTalents strips the inherent Singer talents, along with any Singer
+// Forms talents purchased on top of them (their prerequisites are no longer met once the
+// inherent talents are gone), from the character's owned talent list. Also prunes any
+// expertises those removed talents had granted. Used when a character's ancestry reverts
+// away from Singer during character creation.
+func RemoveSingerAncestryTalents(char *Character) {
+	if char == nil || char.Talents == nil {
+		return
+	}
+	kept := char.Talents.List[:0]
+	for _, h := range char.Talents.List {
+		if isSingerInherentTalent(h.TalentID) {
+			continue
+		}
+		if _, isSingerOptional := SingerTalents[h.TalentID]; isSingerOptional {
+			continue
+		}
+		kept = append(kept, h)
+	}
+	char.Talents.List = kept
+
+	keptIDs := make([]string, 0, len(kept))
+	for _, h := range kept {
+		keptIDs = append(keptIDs, h.TalentID)
+	}
+	PruneOrphanedTalentExpertises(char, keptIDs)
+}
+
+// SingerTalentsRequiredForLevel returns how many Singer Forms talents (beyond the two
+// inherent ancestry talents) a Singer character must have selected by the given level.
+func SingerTalentsRequiredForLevel(level int) int {
+	required := 0
+	for _, threshold := range SingerPointLevels {
+		if level >= threshold {
+			required++
+		}
+	}
+	return required
+}
+
+// OwnedSingerOptionalCount counts the Singer Forms talents (tier > 0, i.e. excluding the
+// two inherent ancestry talents) the character currently owns.
+func OwnedSingerOptionalCount(char *Character) int {
+	if char == nil || char.Talents == nil {
+		return 0
+	}
+	count := 0
+	for _, h := range char.Talents.List {
+		if t, ok := SingerTalents[h.TalentID]; ok && t.Tier > 0 {
+			count++
+		}
+	}
+	return count
+}
+
+// SingerQuotaMet reports whether a Singer character has selected enough Singer Forms
+// talents for their current level. Always true for non-Singer characters.
+func SingerQuotaMet(char *Character) bool {
+	return SingerQuotaMetWithPending(char, nil)
+}
+
+// SingerQuotaMetWithPending is like SingerQuotaMet but also counts pending (not yet saved)
+// Singer Forms talent IDs from an in-progress form submission, so live UI previews (e.g. the
+// Next button and points-remaining badge) reflect checkboxes the player just checked.
+func SingerQuotaMetWithPending(char *Character, pendingIDs []string) bool {
+	if char == nil || char.Ancestry != Singer || char.Talents == nil {
+		return true
+	}
+	counted := make(map[string]bool)
+	count := 0
+	for _, h := range char.Talents.List {
+		if t, ok := SingerTalents[h.TalentID]; ok && t.Tier > 0 {
+			counted[h.TalentID] = true
+			count++
+		}
+	}
+	for _, id := range pendingIDs {
+		if counted[id] {
+			continue
+		}
+		if t, ok := SingerTalents[id]; ok && t.Tier > 0 {
+			counted[id] = true
+			count++
+		}
+	}
+	return count >= SingerTalentsRequiredForLevel(char.Level)
+}
+
+// EvaluateSingerOptionalTalents evaluates every Singer Forms talent (tier > 0) against the
+// character's owned + pending talents. Unlike EvaluateSubPathNodes, there is no tier-reveal
+// gating - a talent is Eligible as soon as its own prerequisites are met, regardless of tier.
+func EvaluateSingerOptionalTalents(char *Character, pendingIDs []string) []TalentWithState {
+	ids := make([]string, 0, len(SingerTalents))
+	for id, t := range SingerTalents {
+		if t.Tier > 0 {
+			ids = append(ids, id)
+		}
+	}
+	sort.Slice(ids, func(i, j int) bool {
+		ti, tj := SingerTalents[ids[i]], SingerTalents[ids[j]]
+		if ti.Tier != tj.Tier {
+			return ti.Tier < tj.Tier
+		}
+		return ti.Name < tj.Name
+	})
+
+	result := make([]TalentWithState, 0, len(ids))
+	for _, id := range ids {
+		t := SingerTalents[id]
+		state := singerTalentStateFor(char, pendingIDs, t)
+		var unmet []string
+		if state == StateIneligible {
+			unmet = collectUnmetPrereqs(char, pendingIDs, t.Prerequisites)
+		}
+		result = append(result, TalentWithState{Talent: t, State: state, UnmetPrereqs: unmet})
+	}
+	return result
+}
+
+func singerTalentStateFor(char *Character, pendingIDs []string, t Talent) TalentState {
+	if char != nil && char.Talents != nil {
+		for _, h := range char.Talents.List {
+			if h.TalentID == t.Id {
+				return StateEligible
+			}
+		}
+	}
+	if !meetsPrerequisites(char, pendingIDs, t.Prerequisites) {
+		return StateIneligible
+	}
+	return StateEligible
 }

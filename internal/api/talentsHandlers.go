@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -56,9 +57,13 @@ func (s *Server) handleCharacterTalentsGet(w http.ResponseWriter, r *http.Reques
 		filteredPaths["radiant"] = radiantPath
 	}
 
+	if char.Ancestry == character.Singer {
+		filteredPaths["singer"] = character.Path{ID: "singer", Name: "Singer Forms"}
+	}
+
 	// Pre-compute eligibility states for the initial render (no pending selections yet).
 	evaluations := map[string][]character.TalentWithState{}
-	if selectedPath != "" {
+	if selectedPath != "" && selectedPath != "singer" {
 		if path, ok := filteredPaths[selectedPath]; ok {
 			ownedIDs := make([]string, 0, len(char.Talents.List))
 			if char.Talents != nil {
@@ -132,7 +137,7 @@ func (s *Server) handleCharacterTalentsPointsGet(w http.ResponseWriter, r *http.
 
 	remaining := char.Talents.PointsRemaining - totalSpent
 	views.PointsRemaining(remaining).Render(r.Context(), w)
-	views.NextButtonOOB(remaining == 0).Render(r.Context(), w)
+	views.NextButtonOOB(remaining == 0 && character.SingerQuotaMetWithPending(char, selectedTalentIDs)).Render(r.Context(), w)
 }
 
 func (s *Server) handleCharacterTalentsPost(w http.ResponseWriter, r *http.Request) {
@@ -203,6 +208,13 @@ func (s *Server) handleCharacterTalentsPost(w http.ResponseWriter, r *http.Reque
 	char.Talents.List = append(char.Talents.List, newUnlocks...)
 	char.Talents.PointsRemaining -= totalSpent
 	char.Talents.PendingPoints += totalSpent
+
+	if !character.SingerQuotaMet(char) {
+		required := character.SingerTalentsRequiredForLevel(char.Level)
+		owned := character.OwnedSingerOptionalCount(char)
+		http.Error(w, fmt.Sprintf("Select %d Singer Forms talent(s) (you have %d) before continuing", required, owned), http.StatusBadRequest)
+		return
+	}
 
 	// Auto-grant any "fixed" expertise grants for newly purchased talents.
 	for _, unlock := range newUnlocks {
@@ -294,16 +306,22 @@ func (s *Server) handleCharacterTalentsSectionsGet(w http.ResponseWriter, r *htt
 		return
 	}
 
-	path, ok := character.PathMap[selectedPath]
-	if !ok {
-		// No valid path selected — return empty sections fragment.
-		views.TalentSectionsFragment(char, character.Path{}, character.SubPathMap, nil, "", nil).Render(r.Context(), w)
-		return
-	}
+	var path character.Path
+	if selectedPath == "singer" {
+		path = character.Path{ID: "singer", Name: "Singer Forms"}
+	} else {
+		var ok bool
+		path, ok = character.PathMap[selectedPath]
+		if !ok {
+			// No valid path selected — return empty sections fragment.
+			views.TalentSectionsFragment(char, character.Path{}, character.SubPathMap, nil, "", nil).Render(r.Context(), w)
+			return
+		}
 
-	if selectedPath == "radiant" {
-		radiantMatches := character.RadiantMatchTable[char.Talents.SprenBond]
-		path.SubPaths = []string{radiantMatches.RadiantPath, radiantMatches.PrimarySurge, radiantMatches.SecondarySurge}
+		if selectedPath == "radiant" {
+			radiantMatches := character.RadiantMatchTable[char.Talents.SprenBond]
+			path.SubPaths = []string{radiantMatches.RadiantPath, radiantMatches.PrimarySurge, radiantMatches.SecondarySurge}
+		}
 	}
 
 	maxTier := character.MaxVisibleTierForPath(ownedIDs, pendingIDs, path, character.SubPathMap)
@@ -331,7 +349,7 @@ func (s *Server) handleCharacterTalentsSectionsGet(w http.ResponseWriter, r *htt
 
 	views.TalentSectionsFragment(char, path, character.SubPathMap, evaluations, selectedPath, pendingIDs).Render(r.Context(), w)
 	views.PointsRemainingOOB(remaining).Render(r.Context(), w)
-	views.NextButtonOOB(remaining == 0).Render(r.Context(), w)
+	views.NextButtonOOB(remaining == 0 && character.SingerQuotaMetWithPending(char, pendingIDs)).Render(r.Context(), w)
 }
 
 // handleTalentExpertiseChoiceGet renders the modal used to resolve a talent's

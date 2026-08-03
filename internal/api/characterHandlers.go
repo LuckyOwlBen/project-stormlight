@@ -109,8 +109,10 @@ func (s *Server) handleCharacterBasicsPost(w http.ResponseWriter, r *http.Reques
 	ancestryStr := r.FormValue("ancestry")
 	if ancestryStr == "Singer" {
 		char.Ancestry = character.Singer
+		character.GrantSingerAncestryTalents(char)
 	} else {
 		char.Ancestry = character.Human
+		character.RemoveSingerAncestryTalents(char)
 	}
 
 	levelStr := r.FormValue("level")

@@ -25,3 +25,6 @@ var StartingKitFiles embed.FS
 
 //go:embed steps.json
 var StepFiles embed.FS
+
+//go:embed singerForms.json
+var SingerFormFiles embed.FS
