@@ -27,6 +27,7 @@ func (s *Store) GetCharacterByID(ctx context.Context, id int) (*character.Charac
 		Preload("Inventory").
 		Preload("Talents.List").
 		Preload("Expertises.List").
+		Preload("SkillGrants.List").
 		Preload("Resources").
 		Preload("Defenses").
 		Preload("Bonuses").
@@ -69,6 +70,21 @@ func (s *Store) UpdateCharacter(ctx context.Context, char *character.Character) 
 			del = del.Where("id NOT IN ?", keepIDs)
 		}
 		if err := del.Delete(&character.Expertise{}).Error; err != nil {
+			return err
+		}
+	}
+	if char.SkillGrants != nil {
+		keepIDs := make([]int, 0, len(char.SkillGrants.List))
+		for _, g := range char.SkillGrants.List {
+			if g.ID != 0 {
+				keepIDs = append(keepIDs, g.ID)
+			}
+		}
+		del := s.db.WithContext(ctx).Where("skill_grants_id = ?", char.SkillGrants.ID)
+		if len(keepIDs) > 0 {
+			del = del.Where("id NOT IN ?", keepIDs)
+		}
+		if err := del.Delete(&character.SkillGrantRecord{}).Error; err != nil {
 			return err
 		}
 	}

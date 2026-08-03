@@ -77,6 +77,10 @@
             ],
             "tier": 2,
             "bonuses": [],
+            "modifierEffect": {
+                "addExpertiseChoices": 1,
+                "addSkillChoices": 2
+            },
             "otherEffects": [
                 "Erudition grants +1 additional cultural or utility expertise.",
                 "Erudition grants +2 additional cognitive skills (non-surge).",

@@ -136,16 +136,19 @@ func (s *Server) handlePlayspaceWebSocket(w http.ResponseWriter, r *http.Request
 }
 
 func buildSkillDisplayStructure(char character.Character) []character.SkillDisplayStructure {
+	grantedRanks := character.GrantedSkillRanks(&char)
 	spreadMap := make(map[string][]character.DisplaySkill)
 	for _, skill := range char.Skills.PlayerSkills {
 		attributeBonus := char.Attributes.GetAttributeBonus(skill.SkillAssociation.Attribute)
+		grantedRank := grantedRanks[skill.SkillName]
 		displaySkill := character.DisplaySkill{
 			SkillName:      skill.SkillName,
 			Value:          skill.Value,
 			Bonus:          skill.Bonus,
 			AttributeBonus: attributeBonus,
 			AttributeName:  skill.SkillAssociation.Attribute,
-			Total:          skill.Value + skill.Bonus + attributeBonus,
+			GrantedRank:    grantedRank,
+			Total:          skill.Value + skill.Bonus + attributeBonus + grantedRank,
 		}
 		spreadMap[skill.SpreadName] = append(spreadMap[skill.SpreadName], displaySkill)
 	}
@@ -271,6 +274,116 @@ func (s *Server) changeActiveStance(w http.ResponseWriter, r *http.Request) {
 	if activeTalent != nil {
 		views.ActiveStanceCard(*activeTalent).Render(r.Context(), w)
 	}
+}
+
+// characterHasTalent reports whether char currently owns the talent with the given ID.
+func characterHasTalent(char *character.Character, talentID string) bool {
+	if char == nil || char.Talents == nil {
+		return false
+	}
+	for _, t := range char.Talents.List {
+		if t.TalentID == talentID {
+			return true
+		}
+	}
+	return false
+}
+
+// GET /characters/{id}/talents/{talentID}/manage-grants
+func (s *Server) handleTalentGrantsManageGet(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	charIDStr := chi.URLParam(r, "id")
+	charID, err := strconv.Atoi(charIDStr)
+	if err != nil {
+		http.Error(w, "Invalid character ID", http.StatusBadRequest)
+		return
+	}
+	talentID := chi.URLParam(r, "talentID")
+
+	char, err := s.store.GetCharacterByID(r.Context(), charID)
+	if err != nil || char.UserID != userID {
+		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+	if !characterHasTalent(char, talentID) || !character.HasReassignableGrants(talentID) {
+		http.Error(w, "Talent does not have reassignable grants", http.StatusBadRequest)
+		return
+	}
+
+	agg := character.AggregateModifierGrants(char, talentID)
+	views.TalentGrantsManageModal(char, talentID, agg).Render(r.Context(), w)
+}
+
+// POST /characters/{id}/talents/{talentID}/manage-grants
+func (s *Server) handleTalentGrantsManagePost(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	charIDStr := chi.URLParam(r, "id")
+	charID, err := strconv.Atoi(charIDStr)
+	if err != nil {
+		http.Error(w, "Invalid character ID", http.StatusBadRequest)
+		return
+	}
+	talentID := chi.URLParam(r, "talentID")
+
+	char, err := s.store.GetCharacterByID(r.Context(), charID)
+	if err != nil || char.UserID != userID {
+		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+	if !characterHasTalent(char, talentID) || !character.HasReassignableGrants(talentID) {
+		http.Error(w, "Talent does not have reassignable grants", http.StatusBadRequest)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Invalid form data", http.StatusBadRequest)
+		return
+	}
+
+	agg := character.AggregateModifierGrants(char, talentID)
+
+	baseTalent := character.Talent{Id: talentID, ExpertiseGrants: agg.ExpertiseGrants}
+	for i, grant := range agg.ExpertiseGrants {
+		if grant.Type != "choice" && grant.Type != "category" {
+			continue
+		}
+		selected := r.Form["expertiseGrant"+strconv.Itoa(i)]
+		if err := character.ApplyExpertiseChoice(char, baseTalent, i, selected); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+	}
+
+	for i, grant := range agg.SkillGrants {
+		if grant.Type != "choice" && grant.Type != "category" {
+			continue
+		}
+		selected := r.Form["skillGrant"+strconv.Itoa(i)]
+		if err := character.ApplySkillGrantChoice(char, talentID, i, selected); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+	}
+
+	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
+		http.Error(w, "Failed to update character", http.StatusInternalServerError)
+		return
+	}
+
+	characterSheet := buildCharacterSheetData(*char)
+	s.hub.UpdateTalentsComponentOnCharacterSheet(characterSheet, r)
+
+	views.TalentGrantsManageModalPlaceholder().Render(r.Context(), w)
 }
 
 func mapInventorySlice(inventory []character.Inventory) map[int]character.Inventory {

@@ -76,7 +76,10 @@ type DisplaySkill struct {
 	Bonus          int    `json:"bonus"`
 	AttributeBonus int    `json:"attribute"`
 	AttributeName  string `json:"attributeName"`
-	Total          int    `json:"total"`
+	// GrantedRank is skill rank(s) from talent grants (e.g. Erudition), shown separately since
+	// they're reassignable rather than permanently invested.
+	GrantedRank int `json:"grantedRank"`
+	Total       int `json:"total"`
 }
 
 type SkillDisplayStructure struct {

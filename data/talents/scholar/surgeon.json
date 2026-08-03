@@ -24,6 +24,12 @@
                     ]
                 }
             ],
+            "modifierEffect": {
+                "addSkillChoices": 1,
+                "addSkillCategories": [
+                    "spiritual"
+                ]
+            },
             "otherEffects": [
                 "Erudition grants +1 additional skill.",
                 "Erudition can select spiritual skills (non-surge)."

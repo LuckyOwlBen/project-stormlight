@@ -23,6 +23,12 @@
                     "category": "weapon"
                 }
             ],
+            "modifierEffect": {
+                "addSkillChoices": 1,
+                "addSkillCategories": [
+                    "physical"
+                ]
+            },
             "otherEffects": [
                 "Erudition grants +1 additional skill.",
                 "Erudition can select physical skills (non-surge)."
@@ -136,6 +142,9 @@
             ],
             "tier": 3,
             "bonuses": [],
+            "modifierEffect": {
+                "unlocksFreeReassign": true
+            },
             "otherEffects": [
                 "Reassign up to 2 skills or expertises gained from Erudition."
             ],

@@ -30,6 +30,7 @@ type Character struct {
 	Inventory          *[]Inventory      `json:"inventory,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
 	Talents            *TalentsTracker   `json:"talents,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
 	Expertises         *Expertises       `json:"expertises,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
+	SkillGrants        *SkillGrants      `json:"skillGrants,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
 	Resources          *Resources        `json:"resources,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
 	Defenses           *Defenses         `json:"defenses,omitempty" gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE;"`
 	DerivedAttributes  map[string]string `json:"derivedAttributes,omitempty" gorm:"-"`
@@ -49,6 +50,7 @@ func NewCharacter(userID int, name string, level int) *Character {
 		Attributes:        NewAttributes(0, level),
 		Talents:           NewTalents(0, level),
 		Expertises:        NewExpertises(),
+		SkillGrants:       NewSkillGrants(),
 		PathsTracker:      NewPathsTracker(0),
 		Resources:         NewResources(0, level),
 		Defenses:          NewDefenses(0),
@@ -80,6 +82,10 @@ func (c *Character) Hydrate() {
 				}
 			}
 		}
+	}
+
+	if c.SkillGrants == nil {
+		c.SkillGrants = NewSkillGrants()
 	}
 
 	if c.Expertises != nil && len(c.Expertises.List) > 0 {

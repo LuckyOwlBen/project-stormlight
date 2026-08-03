@@ -3,6 +3,7 @@ package character
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 
 	"project-stormlight/data"
@@ -74,6 +75,13 @@ type Talent struct {
 	/** Structured expertise grants - replaces text parsing */
 	ExpertiseGrants []ExpertiseGrant `json:"expertiseGrants,omitempty"`
 
+	/** Structured skill rank grants (fixed/choice/category), e.g. Erudition's temporary skills */
+	SkillGrants []SkillGrant `json:"skillGrants,omitempty"`
+
+	/** Additive effect this talent applies to whichever talent(s) ModifiesTalent references,
+	  used to aggregate subtree bonuses (e.g. Deep Study -> Erudition) generically */
+	ModifierEffect *ModifierEffect `json:"modifierEffect,omitempty"`
+
 	/** Structured trait grants to items */
 	TraitGrants []TraitGrant `json:"traitGrants,omitempty"`
 
@@ -128,6 +136,42 @@ type ExpertiseGrant struct {
 
 	/** Category to expand (for type: 'category') */
 	Category string `json:"category,omitempty"` // "weapon", "armor", "cultural", "utility", or "specialist"
+
+	/** Additional categories to expand and union with Category (for type: 'category') */
+	Categories []string `json:"categories,omitempty"`
+}
+
+// SkillGrant describes skill ranks a talent grants, mirroring ExpertiseGrant's
+// fixed/choice/category shapes but for skills (e.g. Erudition's temporary skill ranks).
+type SkillGrant struct {
+	/** Type of grant */
+	Type string `json:"type"` // "fixed", "choice", or "category"
+
+	/** Fixed skill names granted (for type: 'fixed') */
+	Skills []string `json:"skills,omitempty"`
+
+	/** Number of choices allowed (for type: 'choice' or 'category') */
+	ChoiceCount int `json:"choiceCount,omitempty"`
+
+	/** List of options to choose from (for type: 'choice') */
+	Options []string `json:"options,omitempty"`
+
+	/** Skill spreads to choose from (for type: 'category'): "physical", "cognitive", "social", "surge".
+	  Additive - modifier talents can expand this list (e.g. Mind and Body adds "physical"). */
+	Categories []string `json:"categories,omitempty"`
+
+	/** Excludes surge skills from category-based options unless "surge" is explicitly listed */
+	ExcludeSurge bool `json:"excludeSurge,omitempty"`
+}
+
+// ModifierEffect describes the additive change a "modifiesTalent" talent applies to the
+// base talent(s) it references. Lets subtree bonuses (Deep Study -> Erudition, etc.) be
+// aggregated generically instead of parsed from prose.
+type ModifierEffect struct {
+	AddExpertiseChoices int      `json:"addExpertiseChoices,omitempty"`
+	AddSkillChoices     int      `json:"addSkillChoices,omitempty"`
+	AddSkillCategories  []string `json:"addSkillCategories,omitempty"`
+	UnlocksFreeReassign bool     `json:"unlocksFreeReassign,omitempty"`
 }
 
 type TraitGrant struct {
@@ -594,10 +638,27 @@ func ResolveExpertiseGrantOptions(grant ExpertiseGrant) ([]Expertise, error) {
 	case "category":
 		// ExpertiseGroups is keyed by file-level Type (e.g. "Cultural Expertises"),
 		// not the lowercase category value used in talent JSON, so filter by Category field instead.
-		options = ExpertisesByCategory(grant.Category)
-		if len(options) == 0 {
-			return nil, fmt.Errorf("unknown expertise category: %s", grant.Category)
+		categories := grant.Categories
+		if grant.Category != "" {
+			categories = append(categories, grant.Category)
 		}
+		if len(categories) == 0 {
+			return nil, fmt.Errorf("category expertise grant has no categories")
+		}
+		seen := make(map[string]bool)
+		for _, category := range categories {
+			catOptions := ExpertisesByCategory(category)
+			if len(catOptions) == 0 {
+				return nil, fmt.Errorf("unknown expertise category: %s", category)
+			}
+			for _, exp := range catOptions {
+				if !seen[exp.Name] {
+					seen[exp.Name] = true
+					options = append(options, exp)
+				}
+			}
+		}
+		sort.Slice(options, func(i, j int) bool { return options[i].Name < options[j].Name })
 	default:
 		return nil, fmt.Errorf("invalid expertise grant type: %s", grant.Type)
 	}

@@ -36,6 +36,8 @@ func (s *Store) InitSchema(ctx context.Context) error {
 		&character.TalentHistory{},
 		&character.Expertises{},
 		&character.Expertise{},
+		&character.SkillGrants{},
+		&character.SkillGrantRecord{},
 		&character.Resources{},
 		&character.Defenses{},
 		&character.CharacterBonus{},

@@ -123,6 +123,8 @@ func (s *Server) Mount() http.Handler {
 		r.Post("/characters/{id}/talents", s.handleCharacterTalentsPost)
 		r.Get("/characters/{id}/talents/{talentID}/expertise-choice", s.handleTalentExpertiseChoiceGet)
 		r.Post("/characters/{id}/talents/{talentID}/expertise-choice", s.handleTalentExpertiseChoicePost)
+		r.Get("/characters/{id}/talents/{talentID}/manage-grants", s.handleTalentGrantsManageGet)
+		r.Post("/characters/{id}/talents/{talentID}/manage-grants", s.handleTalentGrantsManagePost)
 
 		// Inventory
 		r.Get("/characters/{id}/inventory", s.handleCharacterInventoryGet)

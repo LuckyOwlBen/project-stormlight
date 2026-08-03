@@ -2,8 +2,10 @@ package views
 
 
 import (
+	"fmt"
 	"project-stormlight/internal/models"
     "strconv"
+	"strings"
 	"project-stormlight/internal/character"
 )
 
@@ -24,6 +26,7 @@ templ CharacterSheet(characterSheet models.CharacterSheetData) {
 				<div id="eventModal" hx-swap-oob="true">
 					@EventModal("", nil)
 				</div>
+				@TalentGrantsManageModalPlaceholder()
 
 				<!-- Playspace Navigation Tabs -->
 				<div class="tabs tabs-boxed mb-6 justify-center">
@@ -52,7 +55,9 @@ templ CharacterSheet(characterSheet models.CharacterSheetData) {
 					//Talents & Expertises Tab
 					<input type="radio" name="my_tabs_5" class="tab" aria-label="Talents & Expertises" />
 					<div class="tab-content bg-base-100 border-base-300 p-6">
-						@TalentsComponent(characterSheet)
+						<div id="talentsComponent" hx-swap-oob="true">
+							@TalentsComponent(characterSheet)
+						</div>
 					</div>
 
 					<input type="radio" name="my_tabs_5" class="tab" aria-label="Equipment" />
@@ -213,6 +218,9 @@ templ SkillComponentSection(spread character.SkillDisplayStructure) {
 }
 
 templ TalentsComponent(characterSheet models.CharacterSheetData) {
+	for _, talentID := range reassignableGrantTalentIDs(characterSheet.Char) {
+		@TalentGrantsBox(characterSheet.Char, talentID)
+	}
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 		if characterSheet.ActionTypeMap != nil && len(characterSheet.ActionTypeMap) > 0 {
 			for _, actionType := range characterSheet.ActionTypeMap {
@@ -252,6 +260,175 @@ templ TalentRadioAccordian(talent character.TalentHistory) {
 			</div>
 		}
 	}
+}
+
+// skillGrantChoice pairs one resolved "choice"/"category" SkillGrant with its selectable
+// options and any skills already picked, mirroring grantChoice in talents.templ.
+type skillGrantChoice struct {
+	GrantIndex  int
+	ChoiceCount int
+	Options     []character.Skill
+	Selected    map[string]bool
+}
+
+// pendingSkillGrantChoices resolves the choice/category entries of an (already-aggregated)
+// SkillGrant list for baseTalentID, so the management modal can render selectable options
+// alongside any prior selection recorded in char.SkillGrants.
+func pendingSkillGrantChoices(char *character.Character, baseTalentID string, grants []character.SkillGrant) []skillGrantChoice {
+	var result []skillGrantChoice
+	for i, grant := range grants {
+		if grant.Type != "choice" && grant.Type != "category" {
+			continue
+		}
+		options, err := character.ResolveSkillGrantOptions(grant)
+		if err != nil {
+			continue
+		}
+		choiceCount := grant.ChoiceCount
+		if choiceCount <= 0 {
+			choiceCount = 1
+		}
+		selected := make(map[string]bool)
+		if char != nil && char.SkillGrants != nil {
+			source := fmt.Sprintf("talent:%s:skill:%d", baseTalentID, i)
+			for _, g := range char.SkillGrants.List {
+				if g.Source == source {
+					selected[g.SkillName] = true
+				}
+			}
+		}
+		result = append(result, skillGrantChoice{GrantIndex: i, ChoiceCount: choiceCount, Options: options, Selected: selected})
+	}
+	return result
+}
+
+// grantedSkillGrantNames returns the skill names currently granted to a character by
+// baseTalentID's skill grants (e.g. Erudition's temporary skills), for badge display.
+func grantedSkillGrantNames(char *character.Character, baseTalentID string) []string {
+	if char == nil || char.SkillGrants == nil {
+		return nil
+	}
+	prefix := "talent:" + baseTalentID + ":skill:"
+	var names []string
+	for _, g := range char.SkillGrants.List {
+		if strings.HasPrefix(g.Source, prefix) {
+			names = append(names, g.SkillName)
+		}
+	}
+	return names
+}
+
+// reassignableGrantTalentIDs returns the IDs of talents this character owns that qualify
+// for the generic grant-management box (own choice/category expertise or skill grants),
+// e.g. "erudition" - so any future talent built the same way gets the UI automatically.
+func reassignableGrantTalentIDs(char *character.Character) []string {
+	if char == nil || char.Talents == nil {
+		return nil
+	}
+	var ids []string
+	for _, h := range char.Talents.List {
+		if character.HasReassignableGrants(h.TalentID) {
+			ids = append(ids, h.TalentID)
+		}
+	}
+	return ids
+}
+
+// TalentGrantsBox surfaces a base talent's temporary, reassignable expertise/skill grants
+// on the live character sheet - the aggregated grant counts (from subtree talents like
+// Deep Study) are only resolved when the Manage modal is opened, so this just shows current picks.
+templ TalentGrantsBox(char *character.Character, talentID string) {
+	<div class="card bg-base-200 shadow border-t-4 border-secondary col-span-1 md:col-span-2">
+		<div class="card-body p-4">
+			<div class="flex justify-between items-center">
+				<span class="text-xs uppercase font-extrabold text-primary">{ character.AllTalents[talentID].Name }</span>
+				<button
+					type="button"
+					class="btn btn-xs btn-primary"
+					hx-get={ string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/" + talentID + "/manage-grants")) }
+					hx-target="#talent-grants-manage-modal"
+					hx-swap="outerHTML"
+					hx-on::after-request="document.getElementById('talent-grants-manage-modal').showModal()"
+				>
+					Manage
+				</button>
+			</div>
+			<p class="text-xs opacity-70 mt-1">Temporary expertise and skills granted by { character.AllTalents[talentID].Name } - reassign anytime.</p>
+			<div class="flex flex-wrap gap-2 mt-2">
+				for _, name := range grantedExpertiseNames(char, talentID) {
+					<span class="badge badge-accent badge-sm">{ name }</span>
+				}
+				for _, name := range grantedSkillGrantNames(char, talentID) {
+					<span class="badge badge-info badge-sm">{ name }</span>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+// TalentGrantsManageModalPlaceholder is the empty dialog shell present once on the character
+// sheet; GET/POST responses to /talents/{talentID}/manage-grants swap its outerHTML.
+templ TalentGrantsManageModalPlaceholder() {
+	<dialog id="talent-grants-manage-modal" class="modal"></dialog>
+}
+
+templ TalentGrantsManageModal(char *character.Character, talentID string, agg character.AggregatedGrants) {
+	<dialog id="talent-grants-manage-modal" class="modal">
+		<div class="modal-box w-11/12 max-w-3xl">
+			<h3 class="font-bold text-lg">{ character.AllTalents[talentID].Name }: Manage Expertise &amp; Skills</h3>
+			<form
+				hx-post={ string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/" + talentID + "/manage-grants")) }
+				hx-target="#talent-grants-manage-modal"
+				hx-swap="outerHTML"
+				hx-on::after-request="if(event.detail.successful) { document.getElementById('talent-grants-manage-modal').close(); }"
+			>
+				<h4 class="font-semibold mt-2">Expertise</h4>
+				for _, grant := range pendingGrantChoices(char, character.Talent{Id: talentID, ExpertiseGrants: agg.ExpertiseGrants}) {
+					<div class="mb-4">
+						if grant.ChoiceCount > 1 {
+							<p class="text-sm opacity-70 mb-2">Choose { strconv.Itoa(grant.ChoiceCount) }:</p>
+						}
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+							for _, opt := range grant.Options {
+								<label class="label cursor-pointer flex justify-start gap-4">
+									if grant.ChoiceCount > 1 {
+										<input type="checkbox" name={ "expertiseGrant" + strconv.Itoa(grant.GrantIndex) } value={ opt.Name } class="checkbox checkbox-primary" checked?={ grant.Selected[opt.Name] } />
+									} else {
+										<input type="radio" name={ "expertiseGrant" + strconv.Itoa(grant.GrantIndex) } value={ opt.Name } class="radio radio-primary" checked?={ grant.Selected[opt.Name] } />
+									}
+									<span>{ opt.Name }</span>
+								</label>
+							}
+						</div>
+					</div>
+				}
+				<h4 class="font-semibold mt-4">Skills</h4>
+				for _, grant := range pendingSkillGrantChoices(char, talentID, agg.SkillGrants) {
+					<div class="mb-4">
+						if grant.ChoiceCount > 1 {
+							<p class="text-sm opacity-70 mb-2">Choose { strconv.Itoa(grant.ChoiceCount) }:</p>
+						}
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+							for _, opt := range grant.Options {
+								<label class="label cursor-pointer flex justify-start gap-4">
+									if grant.ChoiceCount > 1 {
+										<input type="checkbox" name={ "skillGrant" + strconv.Itoa(grant.GrantIndex) } value={ opt.SkillName } class="checkbox checkbox-primary" checked?={ grant.Selected[opt.SkillName] } />
+									} else {
+										<input type="radio" name={ "skillGrant" + strconv.Itoa(grant.GrantIndex) } value={ opt.SkillName } class="radio radio-primary" checked?={ grant.Selected[opt.SkillName] } />
+									}
+									<span>{ opt.SkillName }</span>
+								</label>
+							}
+						</div>
+					</div>
+				}
+				<div class="modal-action">
+					<button type="button" class="btn" onclick="document.getElementById('talent-grants-manage-modal').close()">Cancel</button>
+					<button type="submit" class="btn btn-primary">Confirm</button>
+				</div>
+			</form>
+		</div>
+	</dialog>
 }
 
 templ TalentCard(talent character.TalentHistory) {

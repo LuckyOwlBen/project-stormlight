@@ -17,11 +17,22 @@
             "bonuses": [],
             "expertiseGrants": [
                 {
-                    "type": "choice",
-                    "options": [
+                    "type": "category",
+                    "choiceCount": 1,
+                    "categories": [
                         "cultural",
                         "utility"
                     ]
+                }
+            ],
+            "skillGrants": [
+                {
+                    "type": "category",
+                    "choiceCount": 2,
+                    "categories": [
+                        "cognitive"
+                    ],
+                    "excludeSurge": true
                 }
             ],
             "otherEffects": [
