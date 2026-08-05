@@ -45,7 +45,9 @@ templ AttributesForm(char *character.Character) {
 }
 
 templ PointsRemaining(points int) {
-	<strong id="pointsRemaining" class="inline-block text-center">{ fmt.Sprintf("%d", points) }</strong>
+	<div id="points-remaining" hx-swap-oob="true">
+		<strong id="pointsRemaining" class="inline-block text-center">{ fmt.Sprintf("%d", points) }</strong>
+	</div>
 }
 
 templ attributeInput(label string, name string, value int) {

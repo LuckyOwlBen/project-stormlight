@@ -1,0 +1,182 @@
+package views
+
+import (
+    "project-stormlight/internal/character"
+	"slices"
+)
+
+templ TalentView(character *character.Character, allPaths map[string]character.Path, subPaths map[string]character.Talent, singerQuotaMet bool) {
+    <div>
+        @CreationLayout(character, "talents", "Select Talents", NavState{BackEnabled: true, NextEnabled: character.Talents.PointTracker.PointsRemaining == 0 && singerQuotaMet}) {
+            @talentHeader(character.Talents.PointTracker.PointsRemaining)
+            @TalentExpertiseModalPlaceholder()
+            @TalentBannerEmpty()
+            @TalentBody(character, allPaths, subPaths)
+        }
+    </div>
+}
+
+templ talentHeader(pointsRemaining int) {
+    <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-3xl font-bold">Select Talents</h1>
+                <p class="text-lg opacity-70 mt-1">Select a path and purchase talents. (1 point each)</p>
+            </div>
+            <div class="text-xl font-semibold flex items-center gap-2">
+                <span class="badge badge-info badge-lg text-lg py-4 px-4 sm:inline-flex">Points Remaining:</span>
+                @PointsRemaining(pointsRemaining)
+            </div>
+        </div>
+}
+
+templ TalentBody(character *character.Character, allPaths map[string]character.Path, subPaths map[string]character.Talent) {
+    <div id="base-talent-selector" hx-swap-oob="true" class="card-body"/>
+    <div id="subpath-selector" hx-swap-oob="true" class="card-body"/>
+    @PathsList(character.ID, allPaths, "")
+}
+
+// TalentExpertiseModalPlaceholder is the empty dialog shell present once on the page;
+// GET/POST responses to /talents/{talentID}/expertise-choice swap its outerHTML.
+templ TalentExpertiseModalPlaceholder() {
+    <dialog id="talent-expertise-modal" class="modal"></dialog>
+}
+
+templ TalentBannerEmpty() {
+    <div id="card-banner"> </div>
+}
+
+templ PathsList(characterId int, allPaths map[string]character.Path, selectedPathId string) {
+    <div id="paths-list" hx-swap-oob="true" class="card-body">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            for _, path := range allPaths {
+                if path.ID == selectedPathId {
+                    @SelectedPathCard(characterId, path)
+                } else {
+                    @PathCard(characterId, path)
+                }
+            }
+        </div>
+    </div>
+}
+
+templ PathCard(characterId int, path character.Path) {
+    <form>    
+        <label 
+            class="card bg-base-100 shadow-xl cursor-pointer hover:shadow-2xl transition-shadow duration-300">  
+            <input type="hidden" name="characterId" value={characterId}/>
+            <input 
+                hx-post="/characters/talents/togglePath"
+                hx-target="this"
+                hx-swap="none"
+                type="radio" 
+                name="selectedPath" 
+                class="radio hidden peer" 
+                value={path.ID}/>
+            <div class="card-body items-center text-center">
+                <h2 class="card-title">{path.Name}</h2>
+            </div>
+        </label>
+    </form>
+}
+
+templ SelectedPathCard(characterId int, path character.Path) {
+    <form>    
+        <label 
+            class="card bg-base-100 shadow-xl cursor-not-allowed opacity-50">  
+            <input type="hidden" name="characterId" value={characterId}/>
+            <input 
+                type="radio" 
+                name="selectedPath" 
+                class="radio hidden peer" 
+                value={path.ID}
+                checked
+                disabled/>
+            <div class="card-body items-center text-center">
+                <h2 class="card-title">{path.Name}</h2>
+            </div>
+        </label>
+    </form>
+}
+
+templ BaseTalent(characterId int, talent character.Talent, selected bool) {
+    <div id="base-talent-selector" hx-swap-oob="true" class="card-body">
+        if selected {
+            @CheckedTalentPickerCard(characterId, "", talent, true)
+        } else {
+            @TalentPickerCard(characterId, "", talent)
+        }
+    </div>
+}
+
+
+
+templ TalentList(characterId int, selectedPath string, talents map[string]character.Talent, ownedTalents []string, pendingTalents []string) {
+    <div id="subpath-selector" hx-swap-oob="true" class="card-body grid grid-cols-1 md:grid-cols-3 gap-6">
+        for _, talent := range talents {
+            <div class="col-span-1">
+                if slices.Contains(ownedTalents, talent.Id) || slices.Contains(pendingTalents, talent.Id) {
+                    @LockedTalentPickerCard(characterId, talent)
+                } else if slices.Contains(pendingTalents, talent.Id) {
+                    @TalentPickerCard(characterId, selectedPath, talent)
+                } else {
+                    @TalentPickerCard(characterId, selectedPath, talent)
+                }
+            </div>
+        }
+    </div>
+}
+
+templ TalentPickerCard(characterId int, selectedPath string, talent character.Talent) {
+    <form>
+        <label class="card bg-base-100 shadow-xl cursor-pointer hover:shadow-2xl transition-shadow duration-300">  
+            <input type="hidden" name="characterId" value={characterId}/>
+            <input type="hidden" name="selectedPath" value={selectedPath}/>
+            <input 
+                hx-post="/characters/talents/toggleTalent"
+                hx-target="this"
+                hx-swap="none"
+                type="radio" 
+                name="talentId" 
+                class="radio hidden peer"
+                value={talent.Id}/>
+            <div class="card-body items-center text-center">
+                <h2 class="card-title">{talent.Name}</h2>
+                <p class="opacity-70">{talent.Description}</p>
+            </div>
+        </label>
+    </form>
+}
+
+templ LockedTalentPickerCard(characterId int, talent character.Talent) {
+    <label 
+        class="card bg-base-100 shadow-xl cursor-not-allowed opacity-50">  
+        <input type="hidden" name="characterId" value={characterId}/>
+        <input type="checkbox" name="talentId" class="checkbox hidden peer" value={talent.Id} disabled/>
+        <div class="card-body items-center text-center">
+            <h2 class="card-title">{talent.Name}</h2>
+            <p class="opacity-70">{talent.Description}</p>
+        </div>
+    </label>
+}
+
+templ CheckedTalentPickerCard(characterId int, selectedPath string, talent character.Talent, checked bool) {
+    <form>
+        <label class="card bg-base-100 shadow-xl cursor-pointer hover:shadow-2xl transition-shadow duration-300">  
+            <input type="hidden" name="characterId" value={characterId}/>
+            <input type="hidden" name="selectedPath" value={selectedPath}/>
+            <input 
+                hx-post="/characters/talents/toggleTalent"
+                hx-target="#subpath-selector"
+                hx-swap="outerHTML"
+                type="radio" 
+                name="talentId"
+                class="radio hidden peer"
+                checked={checked}
+                value={talent.Id}/>
+            <div class="card-body items-center text-center">
+                <h2 class="card-title">{talent.Name}</h2>
+                <p class="opacity-70">{talent.Description}</p>
+            </div>
+        </label>
+    </form>
+}

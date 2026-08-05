@@ -321,12 +321,6 @@ templ grantedExpertiseBadge(char *character.Character, talentID string) {
     }
 }
 
-// TalentExpertiseModalPlaceholder is the empty dialog shell present once on the page;
-// GET/POST responses to /talents/{talentID}/expertise-choice swap its outerHTML.
-templ TalentExpertiseModalPlaceholder() {
-    <dialog id="talent-expertise-modal" class="modal"></dialog>
-}
-
 templ TalentExpertiseChoiceModal(char *character.Character, talent character.Talent) {
     <dialog id="talent-expertise-modal" class="modal">
         <div class="modal-box w-11/12 max-w-3xl">
