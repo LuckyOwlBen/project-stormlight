@@ -64,7 +64,7 @@ templ PathCard(characterId int, path character.Path) {
         <label 
             class="card bg-base-100 shadow-xl cursor-pointer hover:shadow-2xl transition-shadow duration-300">  
             <input type="hidden" name="characterId" value={characterId}/>
-            <input 
+            <input  
                 hx-post="/characters/talents/togglePath"
                 hx-target="this"
                 hx-swap="none"
@@ -98,17 +98,11 @@ templ SelectedPathCard(characterId int, path character.Path) {
     </form>
 }
 
-templ BaseTalent(characterId int, talent character.Talent, selected bool) {
+templ BaseTalent(characterId int, selectedPath string, talent character.Talent, selected bool) {
     <div id="base-talent-selector" hx-swap-oob="true" class="card-body">
-        if selected {
-            @CheckedTalentPickerCard(characterId, "", talent, true)
-        } else {
-            @TalentPickerCard(characterId, "", talent)
-        }
+        @TalentPickerCard(characterId, selectedPath, talent, selected)
     </div>
 }
-
-
 
 templ TalentList(characterId int, selectedPath string, talents map[string]character.Talent, ownedTalents []string, pendingTalents []string) {
     <div id="subpath-selector" hx-swap-oob="true" class="card-body grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -117,28 +111,28 @@ templ TalentList(characterId int, selectedPath string, talents map[string]charac
                 if slices.Contains(ownedTalents, talent.Id) || slices.Contains(pendingTalents, talent.Id) {
                     @LockedTalentPickerCard(characterId, talent)
                 } else if slices.Contains(pendingTalents, talent.Id) {
-                    @TalentPickerCard(characterId, selectedPath, talent)
+                    @TalentPickerCard(characterId, selectedPath, talent, true)
                 } else {
-                    @TalentPickerCard(characterId, selectedPath, talent)
+                    @TalentPickerCard(characterId, selectedPath, talent, false)
                 }
             </div>
         }
     </div>
 }
 
-templ TalentPickerCard(characterId int, selectedPath string, talent character.Talent) {
+templ TalentPickerCard(characterId int, selectedPath string, talent character.Talent, selected bool) {
     <form>
         <label class="card bg-base-100 shadow-xl cursor-pointer hover:shadow-2xl transition-shadow duration-300">  
             <input type="hidden" name="characterId" value={characterId}/>
             <input type="hidden" name="selectedPath" value={selectedPath}/>
+            <input type="hidden" name="talentId" value={talent.Id}/>
             <input 
                 hx-post="/characters/talents/toggleTalent"
                 hx-target="this"
                 hx-swap="none"
-                type="radio" 
-                name="talentId" 
-                class="radio hidden peer"
-                value={talent.Id}/>
+                type="checkbox"
+                checked={selected}
+                class="checkbox hidden peer"/>
             <div class="card-body items-center text-center">
                 <h2 class="card-title">{talent.Name}</h2>
                 <p class="opacity-70">{talent.Description}</p>
@@ -157,26 +151,4 @@ templ LockedTalentPickerCard(characterId int, talent character.Talent) {
             <p class="opacity-70">{talent.Description}</p>
         </div>
     </label>
-}
-
-templ CheckedTalentPickerCard(characterId int, selectedPath string, talent character.Talent, checked bool) {
-    <form>
-        <label class="card bg-base-100 shadow-xl cursor-pointer hover:shadow-2xl transition-shadow duration-300">  
-            <input type="hidden" name="characterId" value={characterId}/>
-            <input type="hidden" name="selectedPath" value={selectedPath}/>
-            <input 
-                hx-post="/characters/talents/toggleTalent"
-                hx-target="#subpath-selector"
-                hx-swap="outerHTML"
-                type="radio" 
-                name="talentId"
-                class="radio hidden peer"
-                checked={checked}
-                value={talent.Id}/>
-            <div class="card-body items-center text-center">
-                <h2 class="card-title">{talent.Name}</h2>
-                <p class="opacity-70">{talent.Description}</p>
-            </div>
-        </label>
-    </form>
 }

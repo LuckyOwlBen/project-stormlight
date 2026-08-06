@@ -75,7 +75,7 @@ func (s *Server) handleTalentsTogglePath(w http.ResponseWriter, r *http.Request)
 	pendingTalents, ownedTalents := buildTalentLists(characterObject)
 	baseTalentSelected := slices.Contains(pendingTalents, selectedPath.TalentNodes[0].Id) || slices.Contains(ownedTalents, selectedPath.TalentNodes[0].Id)
 	talent := selectedPath.TalentNodes[0]
-	views.BaseTalent(characterObject.ID, talent, baseTalentSelected).Render(r.Context(), w)
+	views.BaseTalent(characterObject.ID, req.PathName, talent, baseTalentSelected).Render(r.Context(), w)
 	views.PathsList(characterObject.ID, character.PathMap, req.PathName).Render(r.Context(), w)
 
 }
@@ -93,10 +93,12 @@ func BindTalentToggle(r *http.Request, req *TalentToggleRequest) error {
 	}
 
 	req.CharacterID, _ = strconv.Atoi(r.FormValue("characterId"))
+	req.SelectedPath = r.FormValue("selectedPath")
 	req.TalentID = r.FormValue("talentId")
-	if req.CharacterID == 0 || req.TalentID == "" {
+	if req.CharacterID == 0 || req.TalentID == "" || req.SelectedPath == "" {
 		return http.ErrMissingFile
 	}
+
 	return nil
 }
 
@@ -120,19 +122,29 @@ func (s *Server) handleTalentsToggleTalent(w http.ResponseWriter, r *http.Reques
 	}
 
 	var talent = character.TalentHistory{
-		Talent:    character.AllTalents[req.TalentID],
-		Finalized: false,
+		CharacterID: characterObject.ID,
+		TalentID:    req.TalentID,
+		Source:      "character_creation",
+		Finalized:   false,
+	}
+
+	pathTalents := make(map[string]character.Talent)
+	for _, talentName := range character.PathMap[req.SelectedPath].SubPaths {
+		pathTalents[talentName] = character.AllTalents[talentName]
 	}
 
 	for i, t := range characterObject.Talents.List {
 		if t.Id == req.TalentID && !t.Finalized {
 			// Remove the talent from the list
 			characterObject.Talents.List = append(characterObject.Talents.List[:i], characterObject.Talents.List[i+1:]...)
+			s.store.RemoveTalentFromTalentHistory(r.Context(), characterObject.ID, req.TalentID)
 			characterObject.Talents.PointsRemaining++
 			characterObject.Talents.PendingPoints--
 			s.store.UpdateCharacter(r.Context(), characterObject)
 			ownedTalents, pendingTalents := buildTalentLists(characterObject)
-			views.TalentList(req.CharacterID, req.SelectedPath, character.AllTalents, ownedTalents, pendingTalents).Render(r.Context(), w)
+			views.TalentList(req.CharacterID, req.SelectedPath, pathTalents, ownedTalents, pendingTalents).Render(r.Context(), w)
+			views.PointsRemaining(characterObject.Talents.PointsRemaining).Render(r.Context(), w)
+			views.PathsList(req.CharacterID, character.PathMap, req.SelectedPath).Render(r.Context(), w)
 			return
 		}
 
@@ -147,11 +159,6 @@ func (s *Server) handleTalentsToggleTalent(w http.ResponseWriter, r *http.Reques
 	s.store.UpdateCharacter(r.Context(), characterObject)
 
 	ownedTalents, pendingTalents := buildTalentLists(characterObject)
-
-	pathTalents := make(map[string]character.Talent)
-	for _, talentName := range character.PathMap[req.SelectedPath].SubPaths {
-		pathTalents[talentName] = character.AllTalents[talentName]
-	}
 
 	views.TalentList(req.CharacterID, req.SelectedPath, pathTalents, ownedTalents, pendingTalents).Render(r.Context(), w)
 	views.PointsRemaining(characterObject.Talents.PointsRemaining).Render(r.Context(), w)
