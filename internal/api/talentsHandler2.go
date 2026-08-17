@@ -26,6 +26,7 @@ func (s *Server) handleTalentsPageGet(w http.ResponseWriter, r *http.Request) {
 
 	singerQuotaMet := character.SingerQuotaMet(characterObject)
 	views.TalentView(characterObject, character.PathMap, character.AllTalents, singerQuotaMet).Render(r.Context(), w)
+	views.PointsRemaining(characterObject.Talents.PointsRemaining).Render(r.Context(), w)
 
 }
 
@@ -67,9 +68,9 @@ func (s *Server) handleTalentsTogglePath(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	subPaths := make(map[string]character.Talent)
+	subPaths := make(map[string]character.Talents)
 	for _, talentName := range selectedPath.SubPaths {
-		subPaths[talentName] = character.AllTalents[talentName]
+		subPaths[talentName] = character.SubPathMap[talentName]
 	}
 
 	pendingTalents, ownedTalents := buildTalentLists(characterObject)
@@ -78,6 +79,7 @@ func (s *Server) handleTalentsTogglePath(w http.ResponseWriter, r *http.Request)
 	views.BaseTalent(characterObject.ID, req.PathName, talent, baseTalentSelected).Render(r.Context(), w)
 	views.PathsList(characterObject.ID, character.PathMap, req.PathName).Render(r.Context(), w)
 
+	views.TalentList(characterObject.ID, req.PathName, subPaths, ownedTalents, pendingTalents, baseTalentSelected).Render(r.Context(), w)
 }
 
 type TalentToggleRequest struct {
@@ -128,11 +130,19 @@ func (s *Server) handleTalentsToggleTalent(w http.ResponseWriter, r *http.Reques
 		Finalized:   false,
 	}
 
-	pathTalents := make(map[string]character.Talent)
-	for _, talentName := range character.PathMap[req.SelectedPath].SubPaths {
-		pathTalents[talentName] = character.AllTalents[talentName]
+	pathTalents := make(map[string]character.Talents)
+	for _, subPathName := range character.PathMap[req.SelectedPath].SubPaths {
+		for _, talentNode := range character.PathMap[req.SelectedPath].TalentNodes {
+			if talentNode.Id == req.TalentID {
+				pathTalents[subPathName] = character.SubPathMap[subPathName]
+				break
+			}
+		}
 	}
 
+	selectedPath := character.PathMap[req.SelectedPath]
+	ownedTalents, pendingTalents := buildTalentLists(characterObject)
+	baseTalentSelected := slices.Contains(pendingTalents, selectedPath.TalentNodes[0].Id) || slices.Contains(ownedTalents, selectedPath.TalentNodes[0].Id)
 	for i, t := range characterObject.Talents.List {
 		if t.Id == req.TalentID && !t.Finalized {
 			// Remove the talent from the list
@@ -142,7 +152,7 @@ func (s *Server) handleTalentsToggleTalent(w http.ResponseWriter, r *http.Reques
 			characterObject.Talents.PendingPoints--
 			s.store.UpdateCharacter(r.Context(), characterObject)
 			ownedTalents, pendingTalents := buildTalentLists(characterObject)
-			views.TalentList(req.CharacterID, req.SelectedPath, pathTalents, ownedTalents, pendingTalents).Render(r.Context(), w)
+			views.TalentList(req.CharacterID, req.SelectedPath, pathTalents, ownedTalents, pendingTalents, !baseTalentSelected).Render(r.Context(), w)
 			views.PointsRemaining(characterObject.Talents.PointsRemaining).Render(r.Context(), w)
 			views.PathsList(req.CharacterID, character.PathMap, req.SelectedPath).Render(r.Context(), w)
 			return
@@ -158,9 +168,7 @@ func (s *Server) handleTalentsToggleTalent(w http.ResponseWriter, r *http.Reques
 	characterObject.Talents.PendingPoints++
 	s.store.UpdateCharacter(r.Context(), characterObject)
 
-	ownedTalents, pendingTalents := buildTalentLists(characterObject)
-
-	views.TalentList(req.CharacterID, req.SelectedPath, pathTalents, ownedTalents, pendingTalents).Render(r.Context(), w)
+	views.TalentList(req.CharacterID, req.SelectedPath, pathTalents, ownedTalents, pendingTalents, !baseTalentSelected).Render(r.Context(), w)
 	views.PointsRemaining(characterObject.Talents.PointsRemaining).Render(r.Context(), w)
 	views.PathsList(req.CharacterID, character.PathMap, req.SelectedPath).Render(r.Context(), w)
 
