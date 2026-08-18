@@ -113,11 +113,16 @@ templ TalentList(characterId int, selectedPath string, talents map[string]charac
         <div id="subpath-selector" hx-swap-oob="true" class="card-body grid grid-cols-1 md:grid-cols-3 gap-6">
             for _, talent := range talents {
                 <div class="col-span-1">
-                    for _, node := range talent.Nodes {
-                        <div class="card-body grid grid-cols-1 md:grid-cols-2 gap-6">
-                            @TalentPicker(characterId, selectedPath, node, ownedTalents, pendingTalents)
+                    <div class="card-body items-center text-center">
+                        <h3 class="card-title">{talent.PathName}</h3>
+                        <div class="card-body grid grid-cols-2 md:grid-cols-1 gap-6">
+                            for _, node := range talent.Nodes {    
+                                <div class="col-span-1">
+                                    @TalentPicker(characterId, selectedPath, node, ownedTalents, pendingTalents)
+                                </div>
+                            }
                         </div>
-                    }
+                    </div>
                 </div>
             }
         </div>   
@@ -127,15 +132,14 @@ templ TalentList(characterId int, selectedPath string, talents map[string]charac
 }
 
 templ TalentPicker(characterId int, selectedPath string, talent character.Talent, ownedTalents []string, pendingTalents []string) {
-    <div class="col-span-1">
-        if slices.Contains(ownedTalents, talent.Id) {
-            @LockedTalentPickerCard(characterId, talent)
-        } else if slices.Contains(pendingTalents, talent.Id) {
-            @SelectedTalentPickerCard(characterId, selectedPath, talent)
-        } else {
-            @TalentPickerCard(characterId, selectedPath, talent)
-        }
-    </div>
+    if slices.Contains(ownedTalents, talent.Id) {
+        @LockedTalentPickerCard(characterId, talent)
+    } else if slices.Contains(pendingTalents, talent.Id) {
+        @SelectedTalentPickerCard(characterId, selectedPath, talent)
+    } else {
+        @TalentPickerCard(characterId, selectedPath, talent)
+    }
+ 
 }
 
 templ TalentPickerCard(characterId int, selectedPath string, talent character.Talent) {
@@ -150,7 +154,7 @@ templ TalentPickerCard(characterId int, selectedPath string, talent character.Ta
                 hx-swap="none"
                 type="checkbox"
                 class="checkbox hidden peer"/>
-            <div class="card-body items-center text-center">
+            <div class="card-body w-full items-center text-center">
                 <h2 class="card-title">{talent.Name}</h2>
                 <p class="opacity-70">{talent.Description}</p>
             </div>
