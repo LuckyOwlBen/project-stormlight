@@ -537,7 +537,7 @@ func TalentPicker(characterId int, selectedPath string, talent character.Talent,
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if slices.Contains(ownedTalents, talent.Id) || slices.Contains(pendingTalents, talent.Id) {
+		if slices.Contains(ownedTalents, talent.Id) {
 			templ_7745c5c3_Err = LockedTalentPickerCard(characterId, talent).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
