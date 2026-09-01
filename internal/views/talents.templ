@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"slices"
 	"project-stormlight/internal/character"
 )
 
@@ -13,15 +14,6 @@ func hasTalent(char *character.Character, talentID string) bool {
     }
     for _, history := range char.Talents.List {
         if history.TalentID == talentID {
-            return true
-        }
-    }
-    return false
-}
-
-func isTalentPending(pendingIDs []string, talentID string) bool {
-    for _, id := range pendingIDs {
-        if id == talentID {
             return true
         }
     }
@@ -86,237 +78,30 @@ func grantedExpertiseNames(char *character.Character, talentID string) []string 
     return names
 }
 
-templ TalentSelection(char *character.Character, allPaths map[string]character.Path, subPaths map[string]character.Talents, selectedPath string, evaluations map[string][]character.TalentWithState) {
-    @CreationLayout(char, "talents", "Select Talents", NavState{BackEnabled: true, NextEnabled: char.Talents.PointsRemaining == 0 && character.SingerQuotaMet(char)}) {
-        <div class="flex justify-between items-center mb-6">
-            <div>
-                <h1 class="text-3xl font-bold">Select Talents</h1>
-                <p class="text-lg opacity-70 mt-1">Select a path and purchase talents. (1 point each)</p>
-            </div>
-            <div class="text-xl font-semibold flex items-center gap-2">
-                <span class="badge badge-info badge-lg text-lg py-4 px-4 sm:inline-flex">Points Remaining:</span>
-                @PointsRemaining(char.Talents.PointsRemaining)
-            </div>
-        </div>
-
-        if char.Ancestry == character.Singer && !character.SingerQuotaMet(char) {
-            <div role="alert" class="alert alert-warning mb-6">
-                <span>
-                    Select { strconv.Itoa(character.SingerTalentsRequiredForLevel(char.Level) - character.OwnedSingerOptionalCount(char)) } more Singer Forms talent(s) — { strconv.Itoa(character.OwnedSingerOptionalCount(char)) } of { strconv.Itoa(character.SingerTalentsRequiredForLevel(char.Level)) } selected for your level. Pick them from the Singer Forms card below.
-                </span>
-            </div>
-        }
-
-        @TalentExpertiseModalPlaceholder()
-
-        <form id="creation-form" action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents") } 
-            method="POST"
-        >
-            if selectedPath != "" {
-                <input type="hidden" name="selectedPath" value={ selectedPath } />
-            }
-
-            @TalentSectionsFragment(char, allPaths[selectedPath], subPaths, evaluations, selectedPath, nil)
-
-            <div class="mb-8">
-                <h2 class="text-2xl font-semibold mb-4 capitalize">Primary Paths</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    for pathID, path := range allPaths {
-                        <div class={ "card w-full shadow-xl cursor-pointer hover:bg-base-300 transition", templ.KV("bg-primary text-primary-content", pathID == selectedPath), templ.KV("bg-base-200", pathID != selectedPath) } onclick={ templ.ComponentScript{ Call: "window.location.search = '?path=" + pathID + "'" } }>
-                            <div class="card-body p-4">
-                                <h2 class="card-title text-lg">{ path.Name }</h2>
-                                if len(path.TalentNodes) > 0 {
-                                    <p class="text-xs opacity-80">Grants: { path.TalentNodes[0].Name }</p>
-                                }
-                            </div>
-                        </div>
-                    }
-                </div>
-            </div>
-        </form>
-    }
-}
-
-templ TalentSectionsFragment(char *character.Character, path character.Path, subPaths map[string]character.Talents, evaluations map[string][]character.TalentWithState, selectedPath string, pendingIDs []string) {
-    <div id="talent-sections"
-        hx-get={ string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/sections")) }
-        hx-trigger="change"
-        hx-swap="outerHTML"
-        hx-include="closest form"
-    >
-        if selectedPath != "" {
-            <div class="mb-8">
-                if selectedPath == "singer" {
-                    @SingerFormsSection(char, pendingIDs)
-                } else {
-                    <h2 class="text-2xl font-semibold mb-4 capitalize">{ path.Name } Path</h2>
-
-                    <!-- Base Path Talent (Tier 0) -->
-                    if len(path.TalentNodes) > 0 {
-                        <div class="card w-full bg-base-200 shadow-xl mb-6 border-2 border-primary">
-                            <div class="card-body">
-                                <label class="label cursor-pointer flex justify-start gap-4">
-                                    <input
-                                        type="checkbox"
-                                        name="talents"
-                                        value={ path.TalentNodes[0].Id }
-                                        class="checkbox checkbox-primary"
-                                        checked?={ hasTalent(char, path.TalentNodes[0].Id) || isTalentPending(pendingIDs, path.TalentNodes[0].Id) }
-                                        if character.TalentNeedsExpertiseChoice(path.TalentNodes[0]) {
-                                            hx-get={ string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/" + path.TalentNodes[0].Id + "/expertise-choice")) }
-                                            hx-target="#talent-expertise-modal"
-                                            hx-swap="outerHTML"
-                                            hx-trigger="change[target.checked]"
-                                            hx-on::after-request="document.getElementById('talent-expertise-modal').showModal()"
-                                        }
-                                    />
-                                    <div>
-                                        <h2 class="card-title m-0 inline-block">{ path.TalentNodes[0].Name } (Base Path Talent)</h2>
-                                        <span class="badge badge-secondary ml-2">Tier 0</span>
-                                    </div>
-                                </label>
-                                <p class="text-sm mt-2">{ path.TalentNodes[0].Description }</p>
-                                @grantedExpertiseBadge(char, path.TalentNodes[0].Id)
-                            </div>
-                        </div>
-                    }
-
-                    <!-- Sub-path columns -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        for _, subPathID := range path.SubPaths {
-                            <div class="col-span-1">
-                                <h3 class="text-xl font-bold mb-4 border-b pb-2">{ subPaths[subPathID].PathName }</h3>
-                                <div class="space-y-4">
-                                    for _, tw := range evaluations[subPathID] {
-                                        if tw.State != character.StateHidden {
-                                            <div class={ "card w-full shadow-md border border-base-300", templ.KV("bg-base-100", tw.State == character.StateEligible), templ.KV("bg-base-100 opacity-50", tw.State == character.StateIneligible) }>
-                                                <div class="card-body p-4">
-                                                    <label class={ "label flex justify-start gap-4", templ.KV("cursor-pointer", tw.State == character.StateEligible), templ.KV("cursor-not-allowed", tw.State == character.StateIneligible) }>
-                                                        <input
-                                                            type="checkbox"
-                                                            name="talents"
-                                                            value={ tw.Talent.Id }
-                                                            class="checkbox checkbox-primary checkbox-sm"
-                                                            checked?={ hasTalent(char, tw.Talent.Id) || isTalentPending(pendingIDs, tw.Talent.Id) }
-                                                            disabled?={ tw.State == character.StateIneligible }
-                                                            if character.TalentNeedsExpertiseChoice(tw.Talent) {
-                                                                hx-get={ string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/" + tw.Talent.Id + "/expertise-choice")) }
-                                                                hx-target="#talent-expertise-modal"
-                                                                hx-swap="outerHTML"
-                                                                hx-trigger="change[target.checked]"
-                                                                hx-on::after-request="document.getElementById('talent-expertise-modal').showModal()"
-                                                            }
-                                                        />
-                                                        <div>
-                                                            <h4 class="font-bold m-0">{ tw.Talent.Name }</h4>
-                                                            <span class="badge badge-sm badge-secondary">Tier { strconv.Itoa(tw.Talent.Tier) }</span>
-                                                            if tw.Talent.ActionType != "" {
-                                                                <span class="badge badge-sm badge-ghost ml-1">{ tw.Talent.ActionType }</span>
-                                                            }
-                                                        </div>
-                                                    </label>
-                                                    <p class="text-xs mt-2 opacity-80">{ tw.Talent.Description }</p>
-                                                    if tw.State == character.StateIneligible {
-                                                        <div class="mt-1">
-                                                            <p class="text-xs text-warning font-semibold">Prerequisites not met:</p>
-                                                            <ul class="text-xs text-warning opacity-80 list-disc list-inside">
-                                                                for _, req := range tw.UnmetPrereqs {
-                                                                    <li>{ req }</li>
-                                                                }
-                                                            </ul>
-                                                        </div>
-                                                    }
-                                                    @grantedExpertiseBadge(char, tw.Talent.Id)
-                                                </div>
-                                            </div>
-                                        }
-                                    }
-                                </div>
-                            </div>
-                        }
-                    </div>
-                }
-            </div>
-        }
-    </div>
-}
-
-// SingerFormsSection renders the Singer Forms talent tree: the two inherent ancestry
-// talents (auto-granted, not purchasable) plus the optional forms pool, gated only by
-// each talent's own prerequisites (no tier-reveal) and by the shared talent point pool.
-templ SingerFormsSection(char *character.Character, pendingIDs []string) {
-    <h2 class="text-2xl font-semibold mb-4">Singer Forms</h2>
-
-    <div class="card w-full bg-base-200 shadow-xl mb-6 border-2 border-primary">
-        <div class="card-body">
-            <h2 class="card-title m-0">Inherent Forms</h2>
-            <p class="text-xs opacity-70 mb-2">Granted automatically to every Singer — free, no points spent.</p>
-            for _, id := range []string{"singer_ancestry", "singer_change_form"} {
-                if t, ok := character.SingerTalents[id]; ok {
-                    <div class="mb-2">
-                        <span class="badge badge-accent">{ t.Name }</span>
-                        <p class="text-xs mt-1 opacity-80">{ t.Description }</p>
-                    </div>
-                }
-            }
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        for _, tw := range character.EvaluateSingerOptionalTalents(char, pendingIDs) {
-            <div class={ "card w-full shadow-md border border-base-300", templ.KV("bg-base-100", tw.State == character.StateEligible), templ.KV("bg-base-100 opacity-50", tw.State == character.StateIneligible) }>
-                <div class="card-body p-4">
-                    <label class={ "label flex justify-start gap-4", templ.KV("cursor-pointer", tw.State == character.StateEligible), templ.KV("cursor-not-allowed", tw.State == character.StateIneligible) }>
-                        <input
-                            type="checkbox"
-                            name="talents"
-                            value={ tw.Talent.Id }
-                            class="checkbox checkbox-primary checkbox-sm"
-                            checked?={ hasTalent(char, tw.Talent.Id) || isTalentPending(pendingIDs, tw.Talent.Id) }
-                            disabled?={ tw.State == character.StateIneligible }
-                            if character.TalentNeedsExpertiseChoice(tw.Talent) {
-                                hx-get={ string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/" + tw.Talent.Id + "/expertise-choice")) }
-                                hx-target="#talent-expertise-modal"
-                                hx-swap="outerHTML"
-                                hx-trigger="change[target.checked]"
-                                hx-on::after-request="document.getElementById('talent-expertise-modal').showModal()"
-                            }
-                        />
-                        <div>
-                            <h4 class="font-bold m-0">{ tw.Talent.Name }</h4>
-                            <span class="badge badge-sm badge-secondary">Tier { strconv.Itoa(tw.Talent.Tier) }</span>
-                        </div>
-                    </label>
-                    <p class="text-xs mt-2 opacity-80">{ tw.Talent.Description }</p>
-                    if tw.State == character.StateIneligible {
-                        <div class="mt-1">
-                            <p class="text-xs text-warning font-semibold">Prerequisites not met:</p>
-                            <ul class="text-xs text-warning opacity-80 list-disc list-inside">
-                                for _, req := range tw.UnmetPrereqs {
-                                    <li>{ req }</li>
-                                }
-                            </ul>
-                        </div>
-                    }
-                    @grantedExpertiseBadge(char, tw.Talent.Id)
-                </div>
-            </div>
-        }
-    </div>
-}
-
-templ grantedExpertiseBadge(char *character.Character, talentID string) {
-    for _, name := range grantedExpertiseNames(char, talentID) {
+templ expertiseGrantStatus(char *character.Character, talent character.Talent) {
+    for _, name := range grantedExpertiseNames(char, talent.Id) {
         <div class="mt-1 flex items-center gap-2">
             <span class="badge badge-sm badge-accent">Granted: { name }</span>
             <button
                 type="button"
                 class="btn btn-xs btn-ghost"
-                hx-get={ string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/" + talentID + "/expertise-choice")) }
+                hx-get={ string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/" + talent.Id + "/expertise-choice")) }
                 hx-target="#talent-expertise-modal"
                 hx-swap="outerHTML"
                 hx-on::after-request="document.getElementById('talent-expertise-modal').showModal()"
             >Edit</button>
+        </div>
+    }
+    if hasTalent(char, talent.Id) && character.TalentNeedsExpertiseChoice(talent) && len(grantedExpertiseNames(char, talent.Id)) == 0 {
+        <div class="mt-1">
+            <button
+                type="button"
+                class="btn btn-xs btn-warning"
+                hx-get={ string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/" + talent.Id + "/expertise-choice")) }
+                hx-target="#talent-expertise-modal"
+                hx-swap="outerHTML"
+                hx-on::after-request="document.getElementById('talent-expertise-modal').showModal()"
+            >Choose Expertise</button>
         </div>
     }
 }
@@ -329,7 +114,7 @@ templ TalentExpertiseChoiceModal(char *character.Character, talent character.Tal
                 hx-post={ string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/" + talent.Id + "/expertise-choice")) }
                 hx-target="#talent-expertise-modal"
                 hx-swap="outerHTML"
-                hx-on::after-request="if(event.detail.successful) { document.getElementById('talent-expertise-modal').close(); document.getElementById('talent-sections').dispatchEvent(new Event('change', {bubbles: true})); }"
+                hx-on::after-request="if(event.detail.successful) { document.getElementById('talent-expertise-modal').close(); }"
             >
                 for _, grant := range pendingGrantChoices(char, talent) {
                     <div class="mb-4">
@@ -357,4 +142,248 @@ templ TalentExpertiseChoiceModal(char *character.Character, talent character.Tal
             </form>
         </div>
     </dialog>
+}
+
+// isTalentFinalized reports whether an owned talent is locked (can't be removed) -
+// e.g. Singer inherent talents, or any talent locked in at final character review.
+func isTalentFinalized(char *character.Character, talentID string) bool {
+    if char == nil || char.Talents == nil {
+        return false
+    }
+    for _, h := range char.Talents.List {
+        if h.TalentID == talentID {
+            return h.Finalized
+        }
+    }
+    return false
+}
+
+templ TalentView(char *character.Character, filteredPaths map[string]character.Path, orderedPathIDs []string, ownedPathIDs []string, activePathID string, singerQuotaMet bool) {
+    <div>
+        @CreationLayout(char, "talents", "Select Talents", NavState{BackEnabled: true, NextEnabled: char.Talents.PointsRemaining == 0 && singerQuotaMet}) {
+            <form id="creation-form" action={ templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents") } method="POST"></form>
+            @talentHeader(char.Talents.PointsRemaining)
+            @TalentExpertiseModalPlaceholder()
+            @SingerQuotaAlert(char)
+            @PathTabs(char, filteredPaths, orderedPathIDs, ownedPathIDs, activePathID)
+            <div id="active-path-panel" class="card bg-base-100 shadow-xl">
+                @ActivePathPanelContent(char, filteredPaths[activePathID])
+            </div>
+        }
+    </div>
+}
+
+templ talentHeader(pointsRemaining int) {
+    <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-3xl font-bold">Select Talents</h1>
+                <p class="text-lg opacity-70 mt-1">Pick a path tab below, then purchase talents. (1 point each)</p>
+            </div>
+            <div class="text-xl font-semibold flex items-center gap-2">
+                <span class="badge badge-info badge-lg text-lg py-4 px-4 sm:inline-flex">Points Remaining:</span>
+                @PointsRemaining(pointsRemaining)
+            </div>
+        </div>
+}
+
+// TalentExpertiseModalPlaceholder is the empty dialog shell present once on the page;
+// GET/POST responses to /talents/{talentID}/expertise-choice swap its outerHTML.
+templ TalentExpertiseModalPlaceholder() {
+    <dialog id="talent-expertise-modal" class="modal"></dialog>
+}
+
+templ SingerQuotaAlert(char *character.Character) {
+    <div id="singer-quota-alert">
+        @singerQuotaAlertContent(char)
+    </div>
+}
+
+templ SingerQuotaAlertOOB(char *character.Character) {
+    <div id="singer-quota-alert" hx-swap-oob="true">
+        @singerQuotaAlertContent(char)
+    </div>
+}
+
+templ singerQuotaAlertContent(char *character.Character) {
+    if char.Ancestry == character.Singer && !character.SingerQuotaMet(char) {
+        <div role="alert" class="alert alert-warning mb-6">
+            <span>
+                Select { strconv.Itoa(character.SingerTalentsRequiredForLevel(char.Level) - character.OwnedSingerOptionalCount(char)) } more Singer Forms talent(s) — { strconv.Itoa(character.OwnedSingerOptionalCount(char)) } of { strconv.Itoa(character.SingerTalentsRequiredForLevel(char.Level)) } selected for your level.
+            </span>
+        </div>
+    }
+}
+
+// PathTabs renders a compact, single-row (wrapping) strip of every selectable path as a
+// small tab button - a checkmark badge marks paths the character has already invested in
+// (per PathsTracker), and the currently viewed path is highlighted. Only ONE path's talent
+// tree is ever shown in detail at a time (in #active-path-panel below), which is what keeps
+// the layout readable while still allowing talents to be picked from any number of paths.
+templ PathTabs(char *character.Character, filteredPaths map[string]character.Path, orderedPathIDs []string, ownedPathIDs []string, activePathID string) {
+    <div id="path-tabs" hx-swap-oob="true" class="tabs tabs-boxed mb-4 flex-wrap gap-1">
+        for _, pathID := range orderedPathIDs {
+            @pathTab(char.ID, filteredPaths[pathID], slices.Contains(ownedPathIDs, pathID), pathID == activePathID)
+        }
+    </div>
+}
+
+templ pathTab(characterId int, path character.Path, owned bool, active bool) {
+    <form class="inline-block">
+        <input type="hidden" name="characterId" value={ strconv.Itoa(characterId) }/>
+        <input type="hidden" name="selectedPath" value={ path.ID }/>
+        <button
+            type="submit"
+            hx-post="/characters/talents/togglePath"
+            hx-include="closest form"
+            hx-target="#active-path-panel"
+            hx-swap="innerHTML"
+            class={ "tab tab-sm sm:tab-md gap-1", templ.KV("tab-active", active) }
+        >
+            { path.Name }
+            if owned {
+                <span class="badge badge-xs badge-success" title="Talents purchased in this path"></span>
+            }
+        </button>
+    </form>
+}
+
+// ActivePathPanelOOB re-renders the active path panel out-of-band, for responses whose
+// primary hx-target is something else (e.g. the expertise-choice modal).
+templ ActivePathPanelOOB(char *character.Character, path character.Path) {
+    <div id="active-path-panel" hx-swap-oob="true" class="card bg-base-100 shadow-xl">
+        @ActivePathPanelContent(char, path)
+    </div>
+}
+
+// ActivePathPanelContent renders the single path currently being viewed - its base talent
+// (if any) plus a 3-column sub-path grid, or the Singer Forms tree for "singer".
+templ ActivePathPanelContent(char *character.Character, path character.Path) {
+    <div class="card-body">
+        if path.ID == "" {
+            <p class="opacity-70">Select a path above to view its talents.</p>
+        } else {
+            <h2 class="card-title capitalize">{ path.Name }</h2>
+            if path.ID == "singer" {
+                @SingerFormsPanel(char)
+            } else {
+                if len(path.TalentNodes) > 0 {
+                    @BaseTalentCard(char, path.ID, path.TalentNodes[0])
+                }
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    for _, subPathID := range path.SubPaths {
+                        <div class="col-span-1 min-w-0">
+                            <h3 class="text-lg font-bold mb-2 border-b pb-1">{ character.SubPathMap[subPathID].PathName }</h3>
+                            <div class="space-y-3">
+                                for _, tw := range character.EvaluatePathTalents(char, path)[subPathID] {
+                                    if tw.State != character.StateHidden {
+                                        @TalentPathCard(char, path.ID, tw)
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        }
+    </div>
+}
+
+templ BaseTalentCard(char *character.Character, pathID string, baseTalent character.Talent) {
+    <div class="card w-full bg-base-200 shadow-xl mb-6 border-2 border-primary">
+        <form>
+            <input type="hidden" name="characterId" value={ strconv.Itoa(char.ID) }/>
+            <input type="hidden" name="selectedPath" value={ pathID }/>
+            <input type="hidden" name="talentId" value={ baseTalent.Id }/>
+            <div class="card-body">
+                <label class="label cursor-pointer flex justify-start gap-4">
+                    <input
+                        type="checkbox"
+                        class="checkbox checkbox-primary"
+                        checked?={ hasTalent(char, baseTalent.Id) }
+                        disabled?={ isTalentFinalized(char, baseTalent.Id) }
+                        if !isTalentFinalized(char, baseTalent.Id) {
+                            hx-post="/characters/talents/toggleTalent"
+                            hx-include="closest form"
+                            hx-target="#active-path-panel"
+                            hx-swap="innerHTML"
+                        }
+                    />
+                    <div>
+                        <h2 class="card-title m-0 inline-block">{ baseTalent.Name } (Base Path Talent)</h2>
+                        <span class="badge badge-secondary ml-2">Tier 0</span>
+                    </div>
+                </label>
+                <p class="text-sm mt-2">{ baseTalent.Description }</p>
+                @expertiseGrantStatus(char, baseTalent)
+            </div>
+        </form>
+    </div>
+}
+
+templ TalentPathCard(char *character.Character, pathID string, tw character.TalentWithState) {
+    <div class={ "card shadow-md border border-base-300 bg-base-100 min-w-0", templ.KV("opacity-50", tw.State == character.StateIneligible && !hasTalent(char, tw.Talent.Id)) }>
+        <form>
+            <input type="hidden" name="characterId" value={ strconv.Itoa(char.ID) }/>
+            <input type="hidden" name="selectedPath" value={ pathID }/>
+            <input type="hidden" name="talentId" value={ tw.Talent.Id }/>
+            <label class="label flex justify-start gap-4 p-4 cursor-pointer">
+                <input
+                    type="checkbox"
+                    class="checkbox checkbox-primary checkbox-sm"
+                    checked?={ hasTalent(char, tw.Talent.Id) }
+                    disabled?={ isTalentFinalized(char, tw.Talent.Id) || (tw.State == character.StateIneligible && !hasTalent(char, tw.Talent.Id)) }
+                    if !isTalentFinalized(char, tw.Talent.Id) {
+                        hx-post="/characters/talents/toggleTalent"
+                        hx-include="closest form"
+                        hx-target="#active-path-panel"
+                        hx-swap="innerHTML"
+                    }
+                />
+                <div>
+                    <h4 class="font-bold m-0">{ tw.Talent.Name }</h4>
+                    <span class="badge badge-sm badge-secondary">Tier { strconv.Itoa(tw.Talent.Tier) }</span>
+                    if tw.Talent.ActionType != "" {
+                        <span class="badge badge-sm badge-ghost ml-1">{ tw.Talent.ActionType }</span>
+                    }
+                </div>
+            </label>
+            <p class="text-xs px-4 pb-2 opacity-80">{ tw.Talent.Description }</p>
+            if tw.State == character.StateIneligible && !hasTalent(char, tw.Talent.Id) {
+                <div class="px-4 pb-3">
+                    <p class="text-xs text-warning font-semibold">Prerequisites not met:</p>
+                    <ul class="text-xs text-warning opacity-80 list-disc list-inside">
+                        for _, req := range tw.UnmetPrereqs {
+                            <li>{ req }</li>
+                        }
+                    </ul>
+                </div>
+            }
+            @expertiseGrantStatus(char, tw.Talent)
+        </form>
+    </div>
+}
+
+// SingerFormsPanel renders the Singer Forms talent tree for the "singer" pseudo-path: the
+// two inherent ancestry talents (auto-granted, not purchasable) plus the optional forms
+// pool, gated only by each talent's own prerequisites (no tier-reveal).
+templ SingerFormsPanel(char *character.Character) {
+    <div class="card w-full bg-base-200 shadow-xl mb-6 border-2 border-primary">
+        <div class="card-body">
+            <h2 class="card-title m-0">Inherent Forms</h2>
+            <p class="text-xs opacity-70 mb-2">Granted automatically to every Singer — free, no points spent.</p>
+            for _, id := range []string{"singer_ancestry", "singer_change_form"} {
+                if t, ok := character.SingerTalents[id]; ok {
+                    <div class="mb-2">
+                        <span class="badge badge-accent">{ t.Name }</span>
+                        <p class="text-xs mt-1 opacity-80">{ t.Description }</p>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        for _, tw := range character.EvaluateSingerOptionalTalents(char, nil) {
+            @TalentPathCard(char, "singer", tw)
+        }
+    </div>
 }

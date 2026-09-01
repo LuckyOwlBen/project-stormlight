@@ -128,6 +128,10 @@ func (c *Character) Hydrate() {
 		}
 	}
 
+	// Self-heals characters saved before PathsTracker was wired up as the source of
+	// truth for "which paths has this character invested in".
+	SyncOwnedPaths(c)
+
 	if c.DerivedAttributes == nil && c.Attributes != nil {
 		c.DerivedAttributes = BuildDisplayObject(*c.Attributes)
 	}

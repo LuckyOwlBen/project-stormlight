@@ -91,11 +91,47 @@ func (s *Store) UpdateCharacter(ctx context.Context, char *character.Character) 
 	if char.Skills != nil {
 		s.db.WithContext(ctx).Model(char.Skills).Association("PlayerSkills").Replace(char.Skills.PlayerSkills)
 	}
+	// PathHistory.PathsTrackerID and TalentHistory.TalentsTrackerID are also NOT NULL, so
+	// removed rows must be deleted outright (same reasoning as Expertise/SkillGrantRecord
+	// above) rather than relying on Association.Replace's default "unlink by nulling the FK"
+	// behavior, which silently fails the constraint and leaves the "removed" row untouched -
+	// this was the cause of unchecking an owned talent appearing to work in the response but
+	// reverting/reappearing on the next load.
 	if char.PathsTracker != nil {
-		s.db.WithContext(ctx).Model(char.PathsTracker).Association("List").Replace(char.PathsTracker.List)
+		keepIDs := make([]int, 0, len(char.PathsTracker.List))
+		for _, p := range char.PathsTracker.List {
+			if p.ID != 0 {
+				keepIDs = append(keepIDs, p.ID)
+			}
+		}
+		del := s.db.WithContext(ctx).Where("paths_tracker_id = ?", char.PathsTracker.ID)
+		if len(keepIDs) > 0 {
+			del = del.Where("id NOT IN ?", keepIDs)
+		}
+		if err := del.Delete(&character.PathHistory{}).Error; err != nil {
+			return err
+		}
+		if err := s.db.WithContext(ctx).Model(char.PathsTracker).Association("List").Replace(char.PathsTracker.List); err != nil {
+			return err
+		}
 	}
 	if char.Talents != nil {
-		s.db.WithContext(ctx).Model(char.Talents).Association("List").Replace(char.Talents.List)
+		keepIDs := make([]int, 0, len(char.Talents.List))
+		for _, t := range char.Talents.List {
+			if t.ID != 0 {
+				keepIDs = append(keepIDs, t.ID)
+			}
+		}
+		del := s.db.WithContext(ctx).Where("talents_tracker_id = ?", char.Talents.ID)
+		if len(keepIDs) > 0 {
+			del = del.Where("id NOT IN ?", keepIDs)
+		}
+		if err := del.Delete(&character.TalentHistory{}).Error; err != nil {
+			return err
+		}
+		if err := s.db.WithContext(ctx).Model(char.Talents).Association("List").Replace(char.Talents.List); err != nil {
+			return err
+		}
 	}
 
 	// Session uses Save which will update all fields, including nested relationships.

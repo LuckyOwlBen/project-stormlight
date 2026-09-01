@@ -118,18 +118,14 @@ func (s *Server) Mount() http.Handler {
 
 		// Talents
 		r.Get("/characters/{id}/talents", s.handleTalentsPageGet)
-		//r.Get("/characters/{id}/talents", s.handleCharacterTalentsGet)
-		r.Get("/characters/{id}/talents/points", s.handleCharacterTalentsPointsGet)
-		r.Get("/characters/{id}/talents/sections", s.handleCharacterTalentsSectionsGet)
 		r.Post("/characters/{id}/talents", s.handleCharacterTalentsPost)
 		r.Get("/characters/{id}/talents/{talentID}/expertise-choice", s.handleTalentExpertiseChoiceGet)
 		r.Post("/characters/{id}/talents/{talentID}/expertise-choice", s.handleTalentExpertiseChoicePost)
 		r.Get("/characters/{id}/talents/{talentID}/manage-grants", s.handleTalentGrantsManageGet)
 		r.Post("/characters/{id}/talents/{talentID}/manage-grants", s.handleTalentGrantsManagePost)
-
-		//Talents2
 		r.Post("/characters/talents/togglePath", s.handleTalentsTogglePath)
 		r.Post("/characters/talents/toggleTalent", s.handleTalentsToggleTalent)
+
 		// Inventory
 		r.Get("/characters/{id}/inventory", s.handleCharacterInventoryGet)
 		r.Post("/characters/{id}/inventory", s.handleCharacterInventoryPost)

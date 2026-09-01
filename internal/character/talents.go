@@ -356,12 +356,17 @@ var (
 	SubPathMap    = map[string]Talents{}
 	AllTalents    = map[string]Talent{}
 	SingerTalents = map[string]Talent{}
+
+	// talentToPathID reverse-maps a talent ID to the top-level Path it belongs to,
+	// used to drive PathsTracker (which paths a character has invested in).
+	talentToPathID = map[string]string{}
 )
 
 func LoadTalents() error {
 	PathMap = make(map[string]Path)
 	SubPathMap = make(map[string]Talents)
 	AllTalents = make(map[string]Talent)
+	talentToPathID = make(map[string]string)
 
 	entries, err := data.TalentFiles.ReadDir("talents")
 	if err != nil {
@@ -398,6 +403,7 @@ func LoadTalents() error {
 				PathMap[path.ID] = path
 				for _, t := range path.TalentNodes {
 					AllTalents[t.Id] = t
+					talentToPathID[t.Id] = path.ID
 				}
 			} else {
 				var subPath Talents
@@ -407,12 +413,99 @@ func LoadTalents() error {
 				SubPathMap[subPath.ID] = subPath
 				for _, t := range subPath.Nodes {
 					AllTalents[t.Id] = t
+					talentToPathID[t.Id] = subPath.ParentID
 				}
 			}
 		}
 	}
 
 	return nil
+}
+
+// OwnedTalentIDs returns the talent IDs a character currently owns (both finalized and
+// pending), i.e. every entry in Talents.List.
+func OwnedTalentIDs(char *Character) []string {
+	if char == nil || char.Talents == nil {
+		return nil
+	}
+	ids := make([]string, 0, len(char.Talents.List))
+	for _, h := range char.Talents.List {
+		ids = append(ids, h.TalentID)
+	}
+	return ids
+}
+
+// ResolveOwnedPathID reports which top-level Path a talent ID belongs to, for driving
+// PathsTracker. Singer Forms are their own pseudo-path ("singer"), and surge-tree talents
+// (parentId "surges") resolve to the "radiant" pseudo-path since "surges" is never itself
+// an ownable Path (it's excluded from PathMap display, folded into Radiant's sub-paths).
+func ResolveOwnedPathID(talentID string) (string, bool) {
+	if _, ok := SingerTalents[talentID]; ok {
+		return "singer", true
+	}
+	pathID, ok := talentToPathID[talentID]
+	if !ok {
+		return "", false
+	}
+	if pathID == "surges" {
+		return "radiant", true
+	}
+	return pathID, true
+}
+
+// SyncOwnedPaths ensures PathsTracker.List has one PathHistory entry for every distinct
+// top-level path referenced by the character's owned talents. Idempotent - only adds
+// entries that are missing, so it's safe to call on every hydration/talent change and
+// self-heals characters saved before PathsTracker was wired up.
+func SyncOwnedPaths(char *Character) {
+	if char == nil || char.Talents == nil {
+		return
+	}
+	if char.PathsTracker == nil {
+		char.PathsTracker = NewPathsTracker(char.ID)
+	}
+	owned := make(map[string]bool, len(char.PathsTracker.List))
+	for _, h := range char.PathsTracker.List {
+		owned[h.PathID] = true
+	}
+	for _, id := range OwnedTalentIDs(char) {
+		pathID, ok := ResolveOwnedPathID(id)
+		if !ok || owned[pathID] {
+			continue
+		}
+		owned[pathID] = true
+		char.PathsTracker.List = append(char.PathsTracker.List, PathHistory{
+			CharacterID: char.ID,
+			PathID:      pathID,
+			Source:      "character_creation",
+		})
+	}
+}
+
+// OwnedPathIDs returns the top-level path IDs a character has invested in, per PathsTracker.
+func OwnedPathIDs(char *Character) []string {
+	if char == nil || char.PathsTracker == nil {
+		return nil
+	}
+	ids := make([]string, 0, len(char.PathsTracker.List))
+	for _, h := range char.PathsTracker.List {
+		ids = append(ids, h.PathID)
+	}
+	return ids
+}
+
+// EvaluatePathTalents computes eligibility states for every sub-path node of a Path,
+// keyed by sub-path ID. Multi-class-safe: only considers tiers/prereqs within this path's
+// own nodes even though the owned-IDs list passed to MaxVisibleTierForPath is global.
+func EvaluatePathTalents(char *Character, path Path) map[string][]TalentWithState {
+	ownedIDs := OwnedTalentIDs(char)
+	maxTier := MaxVisibleTierForPath(ownedIDs, nil, path, SubPathMap)
+	evaluations := make(map[string][]TalentWithState, len(path.SubPaths))
+	for _, subPathID := range path.SubPaths {
+		sp := SubPathMap[subPathID]
+		evaluations[subPathID] = EvaluateSubPathNodes(char, nil, maxTier, sp.Nodes)
+	}
+	return evaluations
 }
 
 func calculateTalentPoints(level int) int {

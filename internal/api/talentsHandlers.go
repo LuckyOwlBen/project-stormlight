@@ -1,8 +1,11 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"slices"
+	"sort"
 	"strconv"
 
 	"project-stormlight/internal/character"
@@ -12,33 +15,73 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func (s *Server) handleCharacterTalentsGet(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleTalentsPageGet(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(int)
 	if !ok {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
-	charIDStr := chi.URLParam(r, "id")
-	charID, err := strconv.Atoi(charIDStr)
-	if err != nil {
-		http.Error(w, "Invalid character ID", http.StatusBadRequest)
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id == 0 {
+		http.Error(w, "id is required", http.StatusBadRequest)
 		return
 	}
-
-	char, err := s.store.GetCharacterByID(r.Context(), charID)
+	char, err := s.store.GetCharacterByID(r.Context(), id)
 	if err != nil || char.UserID != userID {
 		http.Error(w, "Character not found", http.StatusNotFound)
 		return
 	}
-
 	if s.redirectIfFinalized(w, r, char.Talents != nil && char.Talents.Finalized) {
 		return
 	}
 
-	selectedPath := r.URL.Query().Get("path")
+	filteredPaths := buildFilteredPaths(char)
+	orderedPathIDs := sortedPathIDs(filteredPaths)
+	ownedPathIDs := character.OwnedPathIDs(char)
+	activePathID := resolveActivePathID(r.URL.Query().Get("path"), filteredPaths, orderedPathIDs, ownedPathIDs)
+	singerQuotaMet := character.SingerQuotaMet(char)
+	views.TalentView(char, filteredPaths, orderedPathIDs, ownedPathIDs, activePathID, singerQuotaMet).Render(r.Context(), w)
+}
 
-	// If a primary path is already known but not in URL, we could default it, but URL drives UI purely.
+// sortedPathIDs returns every path ID from filteredPaths in a stable, human-friendly
+// (alphabetical by display name) order, so the path tab strip doesn't reshuffle between
+// requests (map iteration order is otherwise random).
+func sortedPathIDs(filteredPaths map[string]character.Path) []string {
+	ids := make([]string, 0, len(filteredPaths))
+	for id := range filteredPaths {
+		ids = append(ids, id)
+	}
+	sort.Slice(ids, func(i, j int) bool {
+		return filteredPaths[ids[i]].Name < filteredPaths[ids[j]].Name
+	})
+	return ids
+}
+
+// resolveActivePathID picks which single path's talent tree should be shown: the
+// requested one if valid, else the character's first owned path, else just the first
+// path in the ordered list.
+func resolveActivePathID(requested string, filteredPaths map[string]character.Path, orderedPathIDs []string, ownedPathIDs []string) string {
+	if _, ok := filteredPaths[requested]; ok {
+		return requested
+	}
+	for _, id := range orderedPathIDs {
+		if slices.Contains(ownedPathIDs, id) {
+			return id
+		}
+	}
+	if len(orderedPathIDs) > 0 {
+		return orderedPathIDs[0]
+	}
+	return ""
+}
+
+// buildFilteredPaths returns every path selectable in the talents UI: the static
+// PathMap minus the "radiant"/"surges" placeholders, plus a dynamic "radiant" pseudo-path
+// (class + two surges) resolved from the character's SprenBond, plus a "singer" pseudo-path
+// if the character's ancestry is Singer.
+func buildFilteredPaths(char *character.Character) map[string]character.Path {
 	filteredPaths := make(map[string]character.Path)
 	for id, path := range character.PathMap {
 		if id == "radiant" || id == "surges" {
@@ -47,97 +90,237 @@ func (s *Server) handleCharacterTalentsGet(w http.ResponseWriter, r *http.Reques
 		filteredPaths[id] = path
 	}
 
-	if char.Talents.SprenBond != "" {
+	if char.Talents != nil && char.Talents.SprenBond != "" {
 		radiantMatches := character.RadiantMatchTable[char.Talents.SprenBond]
-		radiantPath := character.Path{}
-		newSubPaths := []string{radiantMatches.RadiantPath, radiantMatches.PrimarySurge, radiantMatches.SecondarySurge}
-		radiantPath.SubPaths = newSubPaths
-		radiantPath.ID = "radiant"
-		radiantPath.Name = radiantMatches.RadiantPath
-		filteredPaths["radiant"] = radiantPath
+		filteredPaths["radiant"] = character.Path{
+			ID:       "radiant",
+			Name:     radiantMatches.RadiantPath,
+			SubPaths: []string{radiantMatches.RadiantPath, radiantMatches.PrimarySurge, radiantMatches.SecondarySurge},
+		}
 	}
 
 	if char.Ancestry == character.Singer {
 		filteredPaths["singer"] = character.Path{ID: "singer", Name: "Singer Forms"}
 	}
 
-	// Pre-compute eligibility states for the initial render (no pending selections yet).
-	evaluations := map[string][]character.TalentWithState{}
-	if selectedPath != "" && selectedPath != "singer" {
-		if path, ok := filteredPaths[selectedPath]; ok {
-			ownedIDs := make([]string, 0, len(char.Talents.List))
-			if char.Talents != nil {
-				for _, h := range char.Talents.List {
-					ownedIDs = append(ownedIDs, h.TalentID)
-				}
+	return filteredPaths
+}
+
+// isTalentEligible re-validates server-side whether a talent can be purchased right now,
+// mirroring the same rules the UI used to decide whether to render it as pickable - closes
+// the hole where a client could POST an arbitrary (hidden/ineligible) talent ID directly.
+func isTalentEligible(char *character.Character, path character.Path, talent character.Talent) bool {
+	if path.ID == "singer" {
+		for _, tw := range character.EvaluateSingerOptionalTalents(char, nil) {
+			if tw.Talent.Id == talent.Id {
+				return tw.State == character.StateEligible
 			}
-			maxTier := character.MaxVisibleTierForPath(ownedIDs, []string{}, path, character.SubPathMap)
-			for _, subPathID := range path.SubPaths {
-				sp := character.SubPathMap[subPathID]
-				evaluations[subPathID] = character.EvaluateSubPathNodes(char, []string{}, maxTier, sp.Nodes)
+		}
+		return false
+	}
+	if len(path.TalentNodes) > 0 && path.TalentNodes[0].Id == talent.Id {
+		return true
+	}
+	for _, states := range character.EvaluatePathTalents(char, path) {
+		for _, tw := range states {
+			if tw.Talent.Id == talent.Id {
+				return tw.State == character.StateEligible
 			}
 		}
 	}
-
-	component := views.TalentSelection(char, filteredPaths, character.SubPathMap, selectedPath, evaluations)
-	component.Render(r.Context(), w)
+	return false
 }
 
-func (s *Server) handleCharacterTalentsPointsGet(w http.ResponseWriter, r *http.Request) {
+type PathsToggleRequest struct {
+	CharacterID int    `form:"characterId"`
+	PathName    string `form:"selectedPath"`
+}
+
+func BindPathToggle(r *http.Request, req *PathsToggleRequest) error {
+	err := r.ParseForm()
+	if err != nil {
+		return err
+	}
+	req.CharacterID, _ = strconv.Atoi(r.FormValue("characterId"))
+	req.PathName = r.FormValue("selectedPath")
+	if req.CharacterID == 0 || req.PathName == "" {
+		return http.ErrMissingFile
+	}
+	return nil
+}
+
+// handleTalentsTogglePath switches which single path's talent tree is currently being
+// viewed - it does NOT purchase anything or touch PathsTracker; a path only becomes
+// "owned" once a talent is actually bought in it (see handleTalentsToggleTalent ->
+// character.SyncOwnedPaths).
+func (s *Server) handleTalentsTogglePath(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(int)
 	if !ok {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
-	charIDStr := chi.URLParam(r, "id")
-	charID, err := strconv.Atoi(charIDStr)
-	if err != nil {
-		http.Error(w, "Invalid character ID", http.StatusBadRequest)
+	var req PathsToggleRequest
+	if err := BindPathToggle(r, &req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
 
-	char, err := s.store.GetCharacterByID(r.Context(), charID)
+	char, err := s.store.GetCharacterByID(r.Context(), req.CharacterID)
 	if err != nil || char.UserID != userID {
 		http.Error(w, "Character not found", http.StatusNotFound)
 		return
 	}
-
 	if char.Talents != nil && char.Talents.Finalized {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
 
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Unable to parse form", http.StatusBadRequest)
+	filteredPaths := buildFilteredPaths(char)
+	path, ok := filteredPaths[req.PathName]
+	if !ok {
+		http.Error(w, "Invalid path name", http.StatusBadRequest)
 		return
 	}
 
-	if char.Talents == nil {
-		http.Error(w, "Character talents not initialized", http.StatusBadRequest)
+	orderedPathIDs := sortedPathIDs(filteredPaths)
+	ownedPathIDs := character.OwnedPathIDs(char)
+	views.ActivePathPanelContent(char, path).Render(r.Context(), w)
+	views.PathTabs(char, filteredPaths, orderedPathIDs, ownedPathIDs, path.ID).Render(r.Context(), w)
+}
+
+type TalentToggleRequest struct {
+	CharacterID  int    `form:"characterId"`
+	SelectedPath string `form:"selectedPath"`
+	TalentID     string `form:"talentId"`
+}
+
+func BindTalentToggle(r *http.Request, req *TalentToggleRequest) error {
+	err := r.ParseForm()
+	if err != nil {
+		return err
+	}
+
+	req.CharacterID, _ = strconv.Atoi(r.FormValue("characterId"))
+	req.SelectedPath = r.FormValue("selectedPath")
+	req.TalentID = r.FormValue("talentId")
+	if req.CharacterID == 0 || req.TalentID == "" || req.SelectedPath == "" {
+		return http.ErrMissingFile
+	}
+
+	return nil
+}
+
+func (s *Server) handleTalentsToggleTalent(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(int)
+	if !ok {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
-	selectedTalentIDs := r.Form["talents"]
-
-	// Calculate how many new points are being spent based on current selections vs form selections
-	totalSpent := 0
-	for _, potentialBuy := range selectedTalentIDs {
-		alreadyHas := false
-		for _, existing := range char.Talents.List {
-			if existing.TalentID == potentialBuy {
-				alreadyHas = true
-				break
-			}
-		}
-		if !alreadyHas {
-			totalSpent++
-		}
+	var req TalentToggleRequest
+	if err := BindTalentToggle(r, &req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
 	}
 
-	remaining := char.Talents.PointsRemaining - totalSpent
-	views.PointsRemaining(remaining).Render(r.Context(), w)
-	views.NextButtonOOB(remaining == 0 && character.SingerQuotaMetWithPending(char, selectedTalentIDs)).Render(r.Context(), w)
+	char, err := s.store.GetCharacterByID(r.Context(), req.CharacterID)
+	if err != nil || char.UserID != userID {
+		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+	if char.Talents != nil && char.Talents.Finalized {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	talent, exists := character.AllTalents[req.TalentID]
+	if !exists {
+		talent, exists = character.SingerTalents[req.TalentID]
+	}
+	if !exists {
+		http.Error(w, "Invalid talent ID", http.StatusBadRequest)
+		return
+	}
+
+	path, pathOk := buildFilteredPaths(char)[req.SelectedPath]
+
+	// Removal: already owned -> uncheck.
+	for i, h := range char.Talents.List {
+		if h.TalentID != req.TalentID {
+			continue
+		}
+		if h.Finalized {
+			http.Error(w, "Cannot remove a finalized talent", http.StatusBadRequest)
+			return
+		}
+		char.Talents.List = append(char.Talents.List[:i], char.Talents.List[i+1:]...)
+		char.Talents.PointsRemaining++
+		char.Talents.PendingPoints--
+		character.PruneOrphanedTalentExpertises(char, character.OwnedTalentIDs(char))
+		if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
+			http.Error(w, "Failed to update talents", http.StatusInternalServerError)
+			return
+		}
+		s.resyncTalentBonuses(r.Context(), char)
+		s.renderTalentPanelUpdate(w, r, char, path, pathOk)
+		return
+	}
+
+	// Addition: server-side re-validation before accepting.
+	if char.Talents.PointsRemaining <= 0 {
+		http.Error(w, "No points remaining", http.StatusBadRequest)
+		return
+	}
+	if !pathOk {
+		http.Error(w, "Invalid path name", http.StatusBadRequest)
+		return
+	}
+	if !isTalentEligible(char, path, talent) {
+		http.Error(w, "Talent is not eligible", http.StatusBadRequest)
+		return
+	}
+
+	char.Talents.List = append(char.Talents.List, character.TalentHistory{
+		CharacterID: char.ID,
+		TalentID:    req.TalentID,
+		Source:      "character_creation",
+	})
+	char.Talents.PointsRemaining--
+	char.Talents.PendingPoints++
+	character.ApplyFixedExpertiseGrants(char, talent)
+	character.SyncOwnedPaths(char)
+	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
+		http.Error(w, "Failed to update talents", http.StatusInternalServerError)
+		return
+	}
+	s.resyncTalentBonuses(r.Context(), char)
+	s.renderTalentPanelUpdate(w, r, char, path, pathOk)
+}
+
+// renderTalentPanelUpdate re-renders the active path panel (targeted, in place) plus the
+// path tabs (ownership badges may have changed) and the global OOB fragments (points
+// remaining, Next button, Singer quota alert) that every toggle can affect.
+func (s *Server) renderTalentPanelUpdate(w http.ResponseWriter, r *http.Request, char *character.Character, path character.Path, pathOk bool) {
+	if pathOk {
+		views.ActivePathPanelContent(char, path).Render(r.Context(), w)
+	}
+	filteredPaths := buildFilteredPaths(char)
+	orderedPathIDs := sortedPathIDs(filteredPaths)
+	ownedPathIDs := character.OwnedPathIDs(char)
+	views.PathTabs(char, filteredPaths, orderedPathIDs, ownedPathIDs, path.ID).Render(r.Context(), w)
+	views.PointsRemaining(char.Talents.PointsRemaining).Render(r.Context(), w)
+	views.NextButtonOOB(char.Talents.PointsRemaining == 0 && character.SingerQuotaMet(char)).Render(r.Context(), w)
+	if char.Ancestry == character.Singer {
+		views.SingerQuotaAlertOOB(char).Render(r.Context(), w)
+	}
+}
+
+func (s *Server) resyncTalentBonuses(ctx context.Context, char *character.Character) {
+	bonuses := character.RecalculateBonuses(char)
+	if err := s.store.UpsertBonuses(ctx, char.ID, bonuses); err != nil {
+		_ = err
+	}
 }
 
 func (s *Server) handleCharacterTalentsPost(w http.ResponseWriter, r *http.Request) {
@@ -252,106 +435,6 @@ func (s *Server) handleCharacterTalentsPost(w http.ResponseWriter, r *http.Reque
 	http.Redirect(w, r, models.DetermineNextStepURL(char, "Talents"), http.StatusSeeOther)
 }
 
-func (s *Server) handleCharacterTalentsSectionsGet(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value("userID").(int)
-	if !ok {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	charIDStr := chi.URLParam(r, "id")
-	charID, err := strconv.Atoi(charIDStr)
-	if err != nil {
-		http.Error(w, "Invalid character ID", http.StatusBadRequest)
-		return
-	}
-
-	char, err := s.store.GetCharacterByID(r.Context(), charID)
-	if err != nil || char.UserID != userID {
-		http.Error(w, "Character not found", http.StatusNotFound)
-		return
-	}
-
-	if char.Talents != nil && char.Talents.Finalized {
-		http.Error(w, "Forbidden", http.StatusForbidden)
-		return
-	}
-
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Unable to parse form", http.StatusBadRequest)
-		return
-	}
-
-	if char.Talents == nil {
-		http.Error(w, "Character talents not initialized", http.StatusBadRequest)
-		return
-	}
-
-	selectedPath := r.FormValue("selectedPath")
-	pendingIDs := r.Form["talents"]
-
-	ownedIDs := make([]string, 0, len(char.Talents.List))
-	for _, h := range char.Talents.List {
-		ownedIDs = append(ownedIDs, h.TalentID)
-	}
-
-	// A talent's expertise choice is persisted immediately when the modal is submitted, before
-	// the talent purchase itself is finalized. If the box is unchecked afterward, prune the
-	// now-orphaned expertise here too, so it doesn't linger as a "ghost" grant. Only checkboxes
-	// for the currently viewed path are present in the form, so keep already-owned talents from
-	// other paths (e.g. prior level-ups) untouched by unioning them with the pending selection.
-	character.PruneOrphanedTalentExpertises(char, append(append([]string{}, ownedIDs...), pendingIDs...))
-	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
-		http.Error(w, "Failed to update expertises", http.StatusInternalServerError)
-		return
-	}
-
-	var path character.Path
-	if selectedPath == "singer" {
-		path = character.Path{ID: "singer", Name: "Singer Forms"}
-	} else {
-		var ok bool
-		path, ok = character.PathMap[selectedPath]
-		if !ok {
-			// No valid path selected — return empty sections fragment.
-			views.TalentSectionsFragment(char, character.Path{}, character.SubPathMap, nil, "", nil).Render(r.Context(), w)
-			return
-		}
-
-		if selectedPath == "radiant" {
-			radiantMatches := character.RadiantMatchTable[char.Talents.SprenBond]
-			path.SubPaths = []string{radiantMatches.RadiantPath, radiantMatches.PrimarySurge, radiantMatches.SecondarySurge}
-		}
-	}
-
-	maxTier := character.MaxVisibleTierForPath(ownedIDs, pendingIDs, path, character.SubPathMap)
-	evaluations := make(map[string][]character.TalentWithState, len(path.SubPaths))
-	for _, subPathID := range path.SubPaths {
-		sp := character.SubPathMap[subPathID]
-		evaluations[subPathID] = character.EvaluateSubPathNodes(char, pendingIDs, maxTier, sp.Nodes)
-	}
-
-	// Calculate remaining points for OOB updates.
-	totalSpent := 0
-	for _, pid := range pendingIDs {
-		alreadyHas := false
-		for _, existing := range char.Talents.List {
-			if existing.TalentID == pid {
-				alreadyHas = true
-				break
-			}
-		}
-		if !alreadyHas {
-			totalSpent++
-		}
-	}
-	remaining := char.Talents.PointsRemaining - totalSpent
-
-	views.TalentSectionsFragment(char, path, character.SubPathMap, evaluations, selectedPath, pendingIDs).Render(r.Context(), w)
-	views.PointsRemainingOOB(remaining).Render(r.Context(), w)
-	views.NextButtonOOB(remaining == 0 && character.SingerQuotaMetWithPending(char, pendingIDs)).Render(r.Context(), w)
-}
-
 // handleTalentExpertiseChoiceGet renders the modal used to resolve a talent's
 // "choice"/"category" expertise grants (e.g. Cover Story -> pick a cultural expertise).
 func (s *Server) handleTalentExpertiseChoiceGet(w http.ResponseWriter, r *http.Request) {
@@ -453,4 +536,12 @@ func (s *Server) handleTalentExpertiseChoicePost(w http.ResponseWriter, r *http.
 	}
 
 	views.TalentExpertiseModalPlaceholder().Render(r.Context(), w)
+
+	// Also refresh the talent's owning path panel (out-of-band, since the modal is the
+	// primary target here) so its granted-expertise badge shows immediately.
+	if pathID, ok := character.ResolveOwnedPathID(talentID); ok {
+		if path, ok := buildFilteredPaths(char)[pathID]; ok {
+			views.ActivePathPanelOOB(char, path).Render(r.Context(), w)
+		}
+	}
 }
