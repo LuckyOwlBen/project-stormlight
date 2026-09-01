@@ -227,6 +227,11 @@ func (s *Server) handleCharacterFinalizePost(w http.ResponseWriter, r *http.Requ
 	if char.Talents != nil {
 		char.Talents.Finalized = true
 		char.Talents.PendingPoints = 0
+		// Lock in every talent owned at finalization so post-finalize purchases
+		// (e.g. from a level up) remain the only ones the player can later remove.
+		for i := range char.Talents.List {
+			char.Talents.List[i].Finalized = true
+		}
 	}
 	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
 		http.Error(w, "Failed to finalize character", http.StatusInternalServerError)

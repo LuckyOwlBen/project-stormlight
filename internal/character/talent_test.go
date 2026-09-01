@@ -17,8 +17,8 @@ func TestRemoveRadiantTalents_WipesOrderAndSurgesAndRefundsPoints(t *testing.T) 
 			SprenBond: "ashspren",
 			List: []TalentHistory{
 				{TalentID: "dustbringer_key_talent"}, // Order (radiant) talent
-				{TalentID: "abrasion_base"},           // primary surge talent
-				{TalentID: "erudition"},               // unrelated talent, must survive
+				{TalentID: "abrasion_base"},          // primary surge talent
+				{TalentID: "erudition"},              // unrelated talent, must survive
 			},
 			PointTracker: PointTracker{PointsRemaining: 1, PendingPoints: 3},
 		},
@@ -48,4 +48,3 @@ func TestRemoveRadiantTalents_WipesOrderAndSurgesAndRefundsPoints(t *testing.T) 
 		t.Fatalf("expected only scholar PathHistory to remain, got %+v", char.PathsTracker.List)
 	}
 }
-
