@@ -90,7 +90,7 @@
             "actionType": "Stance"
         },
         {
-            "id": "mighty",
+            "id": "shardbearer_mighty",
             "name": "Mighty",
             "description": "When you hit with a weapon or unarmed attack, for each action you used on that attack's action, increase the damage you deal by 1 + your tier.",
             "prerequisites": [
@@ -124,7 +124,7 @@
                 },
                 {
                     "type": "talent",
-                    "target": "mighty",
+                    "target": "shardbearer_mighty",
                     "operator": "OR"
                 },
                 {

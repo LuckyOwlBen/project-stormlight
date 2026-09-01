@@ -65,7 +65,7 @@
             "actionType": "Special"
         },
         {
-            "id": "composed",
+            "id": "strategist_composed",
             "name": "Composed",
             "description": "When you acquire this talent, your maximum and current focus increase by a number equal to your tier. When your tier increases by 1, your maximum and current focus do as well.",
             "prerequisites": [
@@ -137,7 +137,7 @@
                 },
                 {
                     "type": "talent",
-                    "target": "composed"
+                    "target": "strategist_composed"
                 }
             ],
             "tier": 3,
@@ -179,7 +179,7 @@
                 },
                 {
                     "type": "talent",
-                    "target": "composed"
+                    "target": "strategist_composed"
                 }
             ],
             "tier": 4,

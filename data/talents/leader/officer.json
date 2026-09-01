@@ -4,7 +4,7 @@
     "pathName": "Officer",
     "nodes": [
         {
-            "id": "composed",
+            "id": "officer_composed",
             "name": "Composed",
             "description": "When you acquire this talent, your maximum and current focus increase by a number equal to your tier. When your tier increases by 1, your maximum and current focus do as well.",
             "prerequisites": [
@@ -49,7 +49,7 @@
             "actionType": "Action"
         },
         {
-            "id": "customaryGarb",
+            "id": "officer_customaryGarb",
             "name": "Customary Garb",
             "description": "While you're visibly wearing Presentable armor or clothing appropriate for your station, your Physical and Spiritual defenses increase by 2.",
             "prerequisites": [
@@ -88,7 +88,7 @@
                 },
                 {
                     "type": "talent",
-                    "target": "composed"
+                    "target": "officer_composed"
                 }
             ],
             "tier": 2,
@@ -125,7 +125,7 @@
                 },
                 {
                     "type": "talent",
-                    "target": "customaryGarb"
+                    "target": "officer_customaryGarb"
                 }
             ],
             "tier": 3,

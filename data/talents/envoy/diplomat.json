@@ -150,7 +150,7 @@
             "actionType": "Action"
         },
         {
-            "id": "collected",
+            "id": "diplomat_collected",
             "name": "Collected",
             "description": "Increase your Cognitive and Spiritual defenses by 2.",
             "actionCost": 0,
@@ -171,7 +171,7 @@
             "actionType": "Action"
         },
         {
-            "id": "wellDressed",
+            "id": "diplomat_wellDressed",
             "name": "Well Dressed",
             "description": "Gain Fashion expertise. While wearing Presentable armor or fashionable clothing, gain an advantage on your first Deception, Leadership, or Persuasion test.",
             "actionCost": 0,
@@ -199,7 +199,7 @@
             "actionType": "Action"
         },
         {
-            "id": "highSocietyContacts",
+            "id": "diplomat_highSocietyContacts",
             "name": "High Society Contacts",
             "description": "Gain High Society expertise. Spend 2 focus to add an opportunity to a test to interact in high society.",
             "actionCost": 0,
@@ -207,7 +207,7 @@
             "prerequisites": [
                 {
                     "type": "talent",
-                    "target": "wellDressed"
+                    "target": "diplomat_wellDressed"
                 }
             ],
             "tier": 2,
@@ -249,7 +249,7 @@
                 },
                 {
                     "type": "talent",
-                    "target": "highSocietyContacts"
+                    "target": "diplomat_highSocietyContacts"
                 }
             ],
             "tier": 3,

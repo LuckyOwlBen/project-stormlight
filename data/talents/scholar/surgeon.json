@@ -72,7 +72,7 @@
             "actionType": "Action"
         },
         {
-            "id": "collected",
+            "id": "surgeon_collected",
             "name": "Collected",
             "description": "When you acquire this talent, increase your Cognitive and Spiritual defenses by 2.",
             "prerequisites": [
@@ -169,7 +169,7 @@
                 },
                 {
                     "type": "talent",
-                    "target": "collected"
+                    "target": "surgeon_collected"
                 }
             ],
             "tier": 3,

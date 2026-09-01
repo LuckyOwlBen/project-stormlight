@@ -198,7 +198,7 @@
             "actionType": "Action"
         },
         {
-            "id": "mighty",
+            "id": "assassin_mighty",
             "name": "Mighty",
             "description": "When you hit with a weapon or unarmed attack, for each action you used on that attack, increase the damage you deal by 1 + your tier.",
             "prerequisites": [
@@ -258,7 +258,7 @@
             "actionType": "Passive"
         },
         {
-            "id": "swiftStrikes",
+            "id": "assassin_swiftStrikes",
             "name": "Swift Strikes",
             "description": "Spend 1 focus to make a second Strike action with a hand you already used for a Strike this turn.",
             "actionCost": 1,

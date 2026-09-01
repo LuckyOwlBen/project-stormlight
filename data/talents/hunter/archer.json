@@ -4,7 +4,7 @@
     "pathName": "Archer",
     "nodes": [
         {
-            "id": "combatTraining",
+            "id": "archer_combatTraining",
             "name": "Combat Training",
             "description": "Once per round, when you miss on a weapon attack, you can graze one target without spending focus. Additionally, when you acquire this talent, gain a weapon expertise and an armor expertise of your choice, and gain a cultural expertise in Military Life.",
             "specialActivation": "Once per round when you miss on a weapon attack, graze one target without spending focus.",
@@ -52,7 +52,7 @@
                 },
                 {
                     "type": "talent",
-                    "target": "combatTraining"
+                    "target": "archer_combatTraining"
                 }
             ],
             "tier": 2,
@@ -146,7 +146,7 @@
             "actionType": "Free"
         },
         {
-            "id": "hardy",
+            "id": "archer_hardy",
             "name": "Hardy",
             "description": "When you acquire this talent, your maximum and current health increase by 1 per level. This applies to all previous and future levels.",
             "prerequisites": [
@@ -230,7 +230,7 @@
                 },
                 {
                     "type": "talent",
-                    "target": "hardy"
+                    "target": "archer_hardy"
                 }
             ],
             "tier": 4,

@@ -100,7 +100,7 @@
             "actionType": "Action"
         },
         {
-            "id": "hardy",
+            "id": "champion_hardy",
             "name": "Hardy",
             "description": "When you acquire this talent, your maximum and current health increase by 1 per level. This applies to all previous and future levels.",
             "prerequisites": [
@@ -162,7 +162,7 @@
                 },
                 {
                     "type": "talent",
-                    "target": "hardy"
+                    "target": "champion_hardy"
                 }
             ],
             "tier": 3,
@@ -189,7 +189,7 @@
             "actionType": "Special"
         },
         {
-            "id": "mighty",
+            "id": "champion_mighty",
             "name": "Mighty",
             "description": "When you hit with a weapon or unarmed attack, for each action you used on that attack, increase the damage you deal by 1 + your tier.",
             "prerequisites": [

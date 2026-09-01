@@ -178,6 +178,7 @@ func (s *Server) Mount() http.Handler {
 		r.Post("/gm/store/grant-item", s.handleGMStoreGrantItemPost)
 		r.Get("/gm/spren-grant-modal", s.handleSprenGrantGet)
 		r.Post("/gm/grant-spren", s.handleSprenGrantPost)
+		r.Post("/gm/unbond-spren", s.handleSprenUnbondPost)
 
 		// Combat endpoints
 		r.Get("/combat/tracker", s.handleCombatTrackerGet)

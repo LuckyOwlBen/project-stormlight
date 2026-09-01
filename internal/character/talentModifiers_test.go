@@ -70,7 +70,7 @@ func TestHasReassignableGrants_OnlyRetrainableTalentsQualify(t *testing.T) {
 	if !HasReassignableGrants("erudition") {
 		t.Fatalf("expected erudition (Retrainable, category grants) to qualify")
 	}
-	if HasReassignableGrants("combatTraining") {
+	if HasReassignableGrants("archer_combatTraining") {
 		t.Fatalf("expected combatTraining (one-time acquisition choice, not Retrainable) to NOT qualify")
 	}
 	if HasReassignableGrants("shardTraining") {

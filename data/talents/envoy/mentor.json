@@ -102,7 +102,7 @@
             "actionType": "Passive"
         },
         {
-            "id": "mighty",
+            "id": "mentor_mighty",
             "name": "Mighty",
             "description": "When you hit with a weapon or unarmed attack, for each action you used on that attack, increase the damage you deal by 1 + your tier.",
             "prerequisites": [
@@ -161,7 +161,7 @@
                 },
                 {
                     "type": "talent",
-                    "target": "mighty"
+                    "target": "mentor_mighty"
                 }
             ],
             "tier": 3,

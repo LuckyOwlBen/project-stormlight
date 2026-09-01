@@ -225,7 +225,7 @@
             "actionType": "Reaction"
         },
         {
-            "id": "surefooted",
+            "id": "tracker_surefooted",
             "name": "Surefooted",
             "description": "Increase your movement rate by 10. Before taking damage from dangerous terrain or falling, reduce that damage by 2 times your tier.",
             "prerequisites": [

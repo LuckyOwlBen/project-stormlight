@@ -147,7 +147,7 @@
             "actionType": "Action"
         },
         {
-            "id": "surefooted",
+            "id": "duelist_surefooted",
             "name": "Surefooted",
             "description": "When you acquire this talent, increase your movement rate by 10. Additionally, before you take damage from dangerous terrain or falling, reduce that damage by 2 \u00c3\u2014 your tier.",
             "prerequisites": [

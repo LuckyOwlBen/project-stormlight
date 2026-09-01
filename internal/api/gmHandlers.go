@@ -95,7 +95,7 @@ func (s *Server) handleSprenGrantGet(w http.ResponseWriter, r *http.Request) {
 		sprenList = character.SprenList
 	}
 
-	views.SprenGrantForm(charId, sprenList).Render(r.Context(), w)
+	views.SprenGrantForm(charId, sprenList, char.Talents.SprenBond).Render(r.Context(), w)
 
 }
 
@@ -148,5 +148,76 @@ func (s *Server) handleSprenGrantPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.hub.SendEventToCharacterSheet(char.ID, "You have bonded with a spren", views.ModalCloseButton("Commence the Friendship!"))
-	views.SprenGrantForm(charId, []string{}).Render(r.Context(), w)
+	views.SprenGrantForm(charId, []string{}, spren).Render(r.Context(), w)
+}
+
+// handleSprenUnbondPost is a GM-only correction tool for a mistakenly granted spren: it
+// fully wipes the Radiant/Surge talents and the surge skills granted at bond time,
+// refunds the spent points, and clears SprenBond so the GM can grant the correct spren
+// fresh. Not a narrative "lose your bond" mechanic - assumes no meaningful progress has
+// been made yet in the mistaken bond.
+func (s *Server) handleSprenUnbondPost(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	user, err := s.store.GetUserByID(r.Context(), userID)
+	if err != nil || !user.IsGM {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	charIdStr := r.FormValue("playerId")
+	charId, _ := strconv.Atoi(charIdStr)
+	char, err := s.store.GetCharacterByID(r.Context(), charId)
+	if err != nil {
+		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+	if char.Talents == nil || char.Talents.SprenBond == "" {
+		http.Error(w, "Character has no bond to remove", http.StatusBadRequest)
+		return
+	}
+
+	oldBond := char.Talents.SprenBond
+	character.RemoveRadiantTalents(char)
+
+	// Revert the surge skills + bonus skill points granted at bond time.
+	if char.Skills != nil {
+		grantedSkills := character.SurgeSkillsForBond(oldBond)
+		keptSkills := char.Skills.PlayerSkills[:0]
+		for _, sk := range char.Skills.PlayerSkills {
+			granted := false
+			for _, gs := range grantedSkills {
+				if sk.SkillName == gs.SkillName && sk.SkillAssociation == gs.SkillAssociation {
+					granted = true
+					break
+				}
+			}
+			if !granted {
+				keptSkills = append(keptSkills, sk)
+			}
+		}
+		char.Skills.PlayerSkills = keptSkills
+		char.Skills.TotalPoints -= 2
+		char.Skills.PointsRemaining -= 2
+		if char.Skills.TotalPoints < 0 {
+			char.Skills.TotalPoints = 0
+		}
+		if char.Skills.PointsRemaining < 0 {
+			char.Skills.PointsRemaining = 0
+		}
+	}
+
+	char.Talents.SprenBond = ""
+
+	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
+		http.Error(w, "Failed to update character", http.StatusInternalServerError)
+		return
+	}
+	s.resyncTalentBonuses(r.Context(), char)
+	s.hub.SendEventToCharacterSheet(char.ID, "Your GM has undone your spren bond", views.ModalCloseButton("Understood"))
+	views.SprenGrantForm(charId, character.SprenList, "").Render(r.Context(), w)
 }

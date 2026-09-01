@@ -87,7 +87,7 @@
             "actionType": "Free"
         },
         {
-            "id": "baleful",
+            "id": "investigator_baleful",
             "name": "Baleful",
             "description": "To resist your influence, a character must spend additional focus equal to your tier.",
             "prerequisites": [
@@ -146,13 +146,13 @@
             "actionType": "Passive"
         },
         {
-            "id": "hardy",
+            "id": "investigator_hardy",
             "name": "Hardy",
             "description": "Gain +1 max health per level (including previous levels).",
             "prerequisites": [
                 {
                     "type": "talent",
-                    "target": "baleful"
+                    "target": "investigator_baleful"
                 }
             ],
             "tier": 3,
@@ -178,7 +178,7 @@
                 },
                 {
                     "type": "talent",
-                    "target": "hardy"
+                    "target": "investigator_hardy"
                 }
             ],
             "tier": 4,
@@ -199,7 +199,7 @@
             "prerequisites": [
                 {
                     "type": "talent",
-                    "target": "hardy"
+                    "target": "investigator_hardy"
                 },
                 {
                     "type": "skill",

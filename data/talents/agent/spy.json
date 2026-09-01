@@ -70,7 +70,7 @@
             "actionType": "Reaction"
         },
         {
-            "id": "collected",
+            "id": "spy_collected",
             "name": "Collected",
             "description": "Increase your Cognitive and Spiritual defenses by 2.",
             "prerequisites": [
@@ -157,7 +157,7 @@
             "actionType": "Action"
         },
         {
-            "id": "mighty",
+            "id": "spy_mighty",
             "name": "Mighty",
             "description": "When you hit with a weapon or unarmed attack, for each action point spent deal extra damage equal to 1 + your tier.",
             "prerequisites": [
@@ -179,7 +179,7 @@
             "actionType": "Passive"
         },
         {
-            "id": "highSocietyContacts",
+            "id": "spy_highSocietyContacts",
             "name": "High Society Contacts",
             "description": "Gain High Society expertise. Spend 2 focus to add an opportunity to a test to interact in high society.",
             "specialActivation": "Spend 2 focus to add an opportunity to a test to interact in high society.",

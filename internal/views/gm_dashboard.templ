@@ -512,13 +512,20 @@ templ GrantItemModal(playerId int, itemMap map[string][]store.Item) {
     </dialog>
 }
 
-templ SprenGrantForm(playerId int, sprenList []string) {
+templ SprenGrantForm(playerId int, sprenList []string, currentBond string) {
     <dialog id="grant-spren-modal" class="modal">
         <div class="modal-box relative max-w-2xl">
             if (len(sprenList) == 0) {
-                <div class="text-center py-10">
+                <div class="text-center py-10 space-y-4">
                     <h2 class="text-lg font-bold text-primary">No Spren Available</h2>
-                    <p class="opacity-70">This player already has a bond.</p>
+                    <p class="opacity-70">This player already has a bond with { currentBond }.</p>
+                    <form hx-post="/gm/unbond-spren" hx-swap="none">
+                        <input type="hidden" name="playerId" value={ strconv.Itoa(playerId) } />
+                        <button type="submit" class="btn btn-error btn-sm"
+                            hx-confirm="This removes all Radiant/Surge talents and the surge skills, refunds the points, and clears the bond. Use only for a mistaken grant. Continue?">
+                            Undo Bond (mistaken grant)
+                        </button>
+                    </form>
                 </div>
             } else {
                 <form hx-post="/gm/grant-spren" hx-swap="none" class="space-y-4">

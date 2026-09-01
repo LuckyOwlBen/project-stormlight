@@ -57,7 +57,7 @@
             "actionType": "Passive"
         },
         {
-            "id": "composed",
+            "id": "faithful_composed",
             "name": "Composed",
             "description": "When you acquire this talent, your maximum and current focus increase by a number equal to your tier. When your tier increases by 1, your maximum and current focus do as well.",
             "prerequisites": [
@@ -78,7 +78,7 @@
             "actionType": "Passive"
         },
         {
-            "id": "customaryGarb",
+            "id": "faithful_customaryGarb",
             "name": "Customary Garb",
             "description": "While you're visibly wearing Presentable armor or clothing appropriate for your station, your Physical and Spiritual defenses increase by 2.",
             "prerequisites": [
@@ -118,7 +118,7 @@
                 },
                 {
                     "type": "talent",
-                    "target": "customaryGarb"
+                    "target": "faithful_customaryGarb"
                 }
             ],
             "tier": 2,

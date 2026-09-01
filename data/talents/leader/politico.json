@@ -93,7 +93,7 @@
             "actionType": "Special"
         },
         {
-            "id": "wellDressed",
+            "id": "politico_wellDressed",
             "name": "Well Dressed",
             "description": "While visibly wearing Presentable armor or fashionable clothing, you gain an advantage on the first Deception, Leadership, or Persuasion test you make during each scene. Additionally, when you acquire this talent, gain a cultural expertise in Fashion.",
             "specialActivation": "While visibly wearing Presentable armor or fashionable clothing, gain advantage on the first Deception, Leadership, or Persuasion test you make each scene.",
@@ -117,7 +117,7 @@
             "actionType": "Special"
         },
         {
-            "id": "baleful",
+            "id": "politico_baleful",
             "name": "Baleful",
             "description": "To resist your influence, a character must spend additional focus equal to your tier.",
             "prerequisites": [
@@ -146,7 +146,7 @@
                 },
                 {
                     "type": "talent",
-                    "target": "baleful"
+                    "target": "politico_baleful"
                 }
             ],
             "tier": 3,

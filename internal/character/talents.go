@@ -482,6 +482,44 @@ func SyncOwnedPaths(char *Character) {
 	}
 }
 
+// RemoveRadiantTalents strips every owned talent whose path resolves to "radiant" (the
+// Order tree plus both surge trees) and the "radiant" PathHistory entry, refunding one
+// point per removed talent. Used by the GM "undo bond" correction tool for a mistakenly
+// granted spren - a full wipe rather than a partial rollback, since it's meant to be used
+// before any meaningful progress has been made in the new bond.
+func RemoveRadiantTalents(char *Character) (removedCount int) {
+	if char == nil || char.Talents == nil {
+		return 0
+	}
+	kept := char.Talents.List[:0]
+	for _, h := range char.Talents.List {
+		if pathID, ok := ResolveOwnedPathID(h.TalentID); ok && pathID == "radiant" {
+			removedCount++
+			continue
+		}
+		kept = append(kept, h)
+	}
+	char.Talents.List = kept
+	char.Talents.PointsRemaining += removedCount
+	char.Talents.PendingPoints -= removedCount
+	if char.Talents.PendingPoints < 0 {
+		char.Talents.PendingPoints = 0
+	}
+
+	if char.PathsTracker != nil {
+		keptPaths := char.PathsTracker.List[:0]
+		for _, p := range char.PathsTracker.List {
+			if p.PathID != "radiant" {
+				keptPaths = append(keptPaths, p)
+			}
+		}
+		char.PathsTracker.List = keptPaths
+	}
+
+	PruneOrphanedTalentExpertises(char, OwnedTalentIDs(char))
+	return removedCount
+}
+
 // OwnedPathIDs returns the top-level path IDs a character has invested in, per PathsTracker.
 func OwnedPathIDs(char *Character) []string {
 	if char == nil || char.PathsTracker == nil {
