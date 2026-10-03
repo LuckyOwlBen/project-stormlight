@@ -114,7 +114,7 @@ func DashboardOverview() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"text-center py-10\"><h2 class=\"text-2xl font-bold text-primary\">Welcome to the GM Dashboard</h2><p class=\"opacity-70\">Select a tab above to manage your sessions and world info.</p></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"text-center py-10\"><h2 class=\"text-2xl font-bold text-primary\">Welcome to the GM Dashboard</h2><p class=\"opacity-70\">Select a tab above to manage your sessions and world info.</p></div><div class=\"card bg-base-200 shadow-xl max-w-md mx-auto\"><div class=\"card-body\"><div id=\"highstorm-control\" hx-get=\"/gm/highstorm/controls\" hx-trigger=\"load\" hx-swap=\"innerHTML\"><p class=\"text-base-content/50 text-sm italic\">Loading highstorm control...</p></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -156,7 +156,7 @@ func ActiveSessionsComponent(p []models.PlayerInfo) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(player.CharName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 74, Col: 49}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 81, Col: 49}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -169,7 +169,7 @@ func ActiveSessionsComponent(p []models.PlayerInfo) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(player.CurrentHp))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 77, Col: 115}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 84, Col: 115}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 				if templ_7745c5c3_Err != nil {
@@ -182,7 +182,7 @@ func ActiveSessionsComponent(p []models.PlayerInfo) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(player.MaxHp))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 77, Col: 150}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 84, Col: 150}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 				if templ_7745c5c3_Err != nil {
@@ -195,7 +195,7 @@ func ActiveSessionsComponent(p []models.PlayerInfo) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(player.CurrentHp)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 78, Col: 126}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 85, Col: 126}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -208,7 +208,7 @@ func ActiveSessionsComponent(p []models.PlayerInfo) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(player.MaxHp)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 78, Col: 145}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 85, Col: 145}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -221,7 +221,7 @@ func ActiveSessionsComponent(p []models.PlayerInfo) templ.Component {
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(player.CurrentFocus))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 82, Col: 117}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 89, Col: 117}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
 				if templ_7745c5c3_Err != nil {
@@ -234,7 +234,7 @@ func ActiveSessionsComponent(p []models.PlayerInfo) templ.Component {
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(player.MaxFocus))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 82, Col: 155}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 89, Col: 155}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
 				if templ_7745c5c3_Err != nil {
@@ -247,7 +247,7 @@ func ActiveSessionsComponent(p []models.PlayerInfo) templ.Component {
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(player.CurrentFocus)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 83, Col: 127}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 90, Col: 127}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -260,7 +260,7 @@ func ActiveSessionsComponent(p []models.PlayerInfo) templ.Component {
 				var templ_7745c5c3_Var13 string
 				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(player.MaxFocus)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 83, Col: 149}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 90, Col: 149}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
@@ -273,7 +273,7 @@ func ActiveSessionsComponent(p []models.PlayerInfo) templ.Component {
 				var templ_7745c5c3_Var14 string
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.ResolveAttributeValue(!player.IsInvested)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 85, Col: 56}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 92, Col: 56}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var14)
 				if templ_7745c5c3_Err != nil {
@@ -286,7 +286,7 @@ func ActiveSessionsComponent(p []models.PlayerInfo) templ.Component {
 				var templ_7745c5c3_Var15 string
 				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(player.CurrentInvest))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 87, Col: 121}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 94, Col: 121}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15)
 				if templ_7745c5c3_Err != nil {
@@ -299,7 +299,7 @@ func ActiveSessionsComponent(p []models.PlayerInfo) templ.Component {
 				var templ_7745c5c3_Var16 string
 				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(player.MaxInvest))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 87, Col: 160}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 94, Col: 160}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var16)
 				if templ_7745c5c3_Err != nil {
@@ -312,7 +312,7 @@ func ActiveSessionsComponent(p []models.PlayerInfo) templ.Component {
 				var templ_7745c5c3_Var17 string
 				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(player.CurrentInvest)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 88, Col: 134}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 95, Col: 134}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {
@@ -325,7 +325,7 @@ func ActiveSessionsComponent(p []models.PlayerInfo) templ.Component {
 				var templ_7745c5c3_Var18 string
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(player.MaxInvest)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 88, Col: 157}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 95, Col: 157}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
@@ -338,7 +338,7 @@ func ActiveSessionsComponent(p []models.PlayerInfo) templ.Component {
 				var templ_7745c5c3_Var19 string
 				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(player.Level)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 90, Col: 106}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 97, Col: 106}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
@@ -351,7 +351,7 @@ func ActiveSessionsComponent(p []models.PlayerInfo) templ.Component {
 				var templ_7745c5c3_Var20 string
 				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.ResolveAttributeValue("/gm/store/grant-item-modal?playerId=" + strconv.Itoa(player.CharID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 93, Col: 101}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 100, Col: 101}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var20)
 				if templ_7745c5c3_Err != nil {
@@ -364,7 +364,7 @@ func ActiveSessionsComponent(p []models.PlayerInfo) templ.Component {
 				var templ_7745c5c3_Var21 string
 				templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.ResolveAttributeValue("/gm/spren-grant-modal?charId=" + strconv.Itoa(player.CharID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 94, Col: 94}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 101, Col: 94}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var21)
 				if templ_7745c5c3_Err != nil {
@@ -377,7 +377,7 @@ func ActiveSessionsComponent(p []models.PlayerInfo) templ.Component {
 				var templ_7745c5c3_Var22 string
 				templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.ResolveAttributeValue("/characters/" + strconv.Itoa(player.CharID) + "/level-up")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 97, Col: 129}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 104, Col: 129}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var22)
 				if templ_7745c5c3_Err != nil {
@@ -480,7 +480,7 @@ func PlanMode(data models.CombatTrackerData) templ.Component {
 				var templ_7745c5c3_Var25 string
 				templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(session.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 138, Col: 102}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 145, Col: 102}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 				if templ_7745c5c3_Err != nil {
@@ -493,7 +493,7 @@ func PlanMode(data models.CombatTrackerData) templ.Component {
 				var templ_7745c5c3_Var26 string
 				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(len(session.Participants)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 139, Col: 109}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 146, Col: 109}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 				if templ_7745c5c3_Err != nil {
@@ -506,7 +506,7 @@ func PlanMode(data models.CombatTrackerData) templ.Component {
 				var templ_7745c5c3_Var27 string
 				templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(len(session.SessionEnemies)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 139, Col: 166}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 146, Col: 166}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 				if templ_7745c5c3_Err != nil {
@@ -519,7 +519,7 @@ func PlanMode(data models.CombatTrackerData) templ.Component {
 				var templ_7745c5c3_Var28 string
 				templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.ResolveAttributeValue("/combat/session/" + strconv.Itoa(session.ID) + "/start")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 143, Col: 106}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 150, Col: 106}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var28)
 				if templ_7745c5c3_Err != nil {
@@ -532,7 +532,7 @@ func PlanMode(data models.CombatTrackerData) templ.Component {
 				var templ_7745c5c3_Var29 string
 				templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(session.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 148, Col: 110}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 155, Col: 110}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var29)
 				if templ_7745c5c3_Err != nil {
@@ -647,7 +647,7 @@ func ActiveCombat(data models.CombatTrackerData) templ.Component {
 		var templ_7745c5c3_Var31 string
 		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(data.ActiveSession.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 196, Col: 108}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 203, Col: 108}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 		if templ_7745c5c3_Err != nil {
@@ -660,7 +660,7 @@ func ActiveCombat(data models.CombatTrackerData) templ.Component {
 		var templ_7745c5c3_Var32 string
 		templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.ResolveAttributeValue("/combat/session/" + strconv.Itoa(data.ActiveSession.ID) + "/next-turn")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 199, Col: 97}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 206, Col: 97}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var32)
 		if templ_7745c5c3_Err != nil {
@@ -673,7 +673,7 @@ func ActiveCombat(data models.CombatTrackerData) templ.Component {
 		var templ_7745c5c3_Var33 string
 		templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.ResolveAttributeValue("/combat/session/" + strconv.Itoa(data.ActiveSession.ID) + "/end-combat")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 204, Col: 98}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 211, Col: 98}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var33)
 		if templ_7745c5c3_Err != nil {
@@ -750,7 +750,7 @@ func TurnGroupPanel(title string, entries []models.TurnEntry, sessionID int, isE
 		var templ_7745c5c3_Var35 string
 		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 228, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 235, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 		if templ_7745c5c3_Err != nil {
@@ -796,7 +796,7 @@ func TurnGroupPanel(title string, entries []models.TurnEntry, sessionID int, isE
 			var templ_7745c5c3_Var38 string
 			templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(entry.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 236, Col: 74}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 243, Col: 74}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 			if templ_7745c5c3_Err != nil {
@@ -809,7 +809,7 @@ func TurnGroupPanel(title string, entries []models.TurnEntry, sessionID int, isE
 			var templ_7745c5c3_Var39 string
 			templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(entry.CurrentHP))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 237, Col: 92}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 244, Col: 92}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 			if templ_7745c5c3_Err != nil {
@@ -822,7 +822,7 @@ func TurnGroupPanel(title string, entries []models.TurnEntry, sessionID int, isE
 			var templ_7745c5c3_Var40 string
 			templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(entry.MaxHP))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 237, Col: 122}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 244, Col: 122}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 			if templ_7745c5c3_Err != nil {
@@ -840,7 +840,7 @@ func TurnGroupPanel(title string, entries []models.TurnEntry, sessionID int, isE
 				var templ_7745c5c3_Var41 string
 				templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.ResolveAttributeValue("/combat/session-enemy/" + strconv.Itoa(entry.EnemyID) + "/hp/increment")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 242, Col: 118}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 249, Col: 118}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var41)
 				if templ_7745c5c3_Err != nil {
@@ -853,7 +853,7 @@ func TurnGroupPanel(title string, entries []models.TurnEntry, sessionID int, isE
 				var templ_7745c5c3_Var42 string
 				templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.ResolveAttributeValue("/combat/session-enemy/" + strconv.Itoa(entry.EnemyID) + "/hp/decrement")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 245, Col: 118}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 252, Col: 118}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var42)
 				if templ_7745c5c3_Err != nil {
@@ -866,7 +866,7 @@ func TurnGroupPanel(title string, entries []models.TurnEntry, sessionID int, isE
 				var templ_7745c5c3_Var43 string
 				templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.ResolveAttributeValue("/combat/session-enemy/" + strconv.Itoa(entry.EnemyID) + "/remove")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 248, Col: 112}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 255, Col: 112}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var43)
 				if templ_7745c5c3_Err != nil {
@@ -929,7 +929,7 @@ func EnemyArchiveList(enemies []models.Enemy, planningSession *models.CombatSess
 			var templ_7745c5c3_Var45 string
 			templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs(enemy.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 267, Col: 63}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 274, Col: 63}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
 			if templ_7745c5c3_Err != nil {
@@ -942,7 +942,7 @@ func EnemyArchiveList(enemies []models.Enemy, planningSession *models.CombatSess
 			var templ_7745c5c3_Var46 string
 			templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(enemy.HP))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 268, Col: 80}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 275, Col: 80}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
 			if templ_7745c5c3_Err != nil {
@@ -955,7 +955,7 @@ func EnemyArchiveList(enemies []models.Enemy, planningSession *models.CombatSess
 			var templ_7745c5c3_Var47 string
 			templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(enemy.Mode)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 268, Col: 98}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 275, Col: 98}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
 			if templ_7745c5c3_Err != nil {
@@ -973,7 +973,7 @@ func EnemyArchiveList(enemies []models.Enemy, planningSession *models.CombatSess
 				var templ_7745c5c3_Var48 string
 				templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.ResolveAttributeValue("/combat/session/" + strconv.Itoa(planningSession.ID) + "/enemy/add")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 273, Col: 106}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 280, Col: 106}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var48)
 				if templ_7745c5c3_Err != nil {
@@ -986,7 +986,7 @@ func EnemyArchiveList(enemies []models.Enemy, planningSession *models.CombatSess
 				var templ_7745c5c3_Var49 string
 				templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.ResolveAttributeValue(`{"templateId":"` + strconv.Itoa(enemy.ID) + `"}`)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 274, Col: 87}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 281, Col: 87}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var49)
 				if templ_7745c5c3_Err != nil {
@@ -1004,7 +1004,7 @@ func EnemyArchiveList(enemies []models.Enemy, planningSession *models.CombatSess
 			var templ_7745c5c3_Var50 string
 			templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(enemy.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 280, Col: 90}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 287, Col: 90}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var50)
 			if templ_7745c5c3_Err != nil {
@@ -1062,7 +1062,7 @@ func SessionEnemyList(enemies []models.CombatSessionEnemy, sessionID int) templ.
 			var templ_7745c5c3_Var52 string
 			templ_7745c5c3_Var52, templ_7745c5c3_Err = templ.JoinStringErrs(se.EnemyName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 297, Col: 65}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 304, Col: 65}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var52))
 			if templ_7745c5c3_Err != nil {
@@ -1075,7 +1075,7 @@ func SessionEnemyList(enemies []models.CombatSessionEnemy, sessionID int) templ.
 			var templ_7745c5c3_Var53 string
 			templ_7745c5c3_Var53, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(se.CurrentHP))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 298, Col: 84}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 305, Col: 84}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var53))
 			if templ_7745c5c3_Err != nil {
@@ -1088,7 +1088,7 @@ func SessionEnemyList(enemies []models.CombatSessionEnemy, sessionID int) templ.
 			var templ_7745c5c3_Var54 string
 			templ_7745c5c3_Var54, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(se.MaxHP))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 298, Col: 111}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 305, Col: 111}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var54))
 			if templ_7745c5c3_Err != nil {
@@ -1123,7 +1123,7 @@ func SessionEnemyList(enemies []models.CombatSessionEnemy, sessionID int) templ.
 			var templ_7745c5c3_Var57 string
 			templ_7745c5c3_Var57, templ_7745c5c3_Err = templ.ResolveAttributeValue("/combat/session-enemy/" + strconv.Itoa(se.ID) + "/pace/fast")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 302, Col: 95}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 309, Col: 95}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var57)
 			if templ_7745c5c3_Err != nil {
@@ -1158,7 +1158,7 @@ func SessionEnemyList(enemies []models.CombatSessionEnemy, sessionID int) templ.
 			var templ_7745c5c3_Var60 string
 			templ_7745c5c3_Var60, templ_7745c5c3_Err = templ.ResolveAttributeValue("/combat/session-enemy/" + strconv.Itoa(se.ID) + "/pace/slow")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 305, Col: 95}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 312, Col: 95}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var60)
 			if templ_7745c5c3_Err != nil {
@@ -1171,7 +1171,7 @@ func SessionEnemyList(enemies []models.CombatSessionEnemy, sessionID int) templ.
 			var templ_7745c5c3_Var61 string
 			templ_7745c5c3_Var61, templ_7745c5c3_Err = templ.ResolveAttributeValue("/combat/session-enemy/" + strconv.Itoa(se.ID) + "/remove")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 308, Col: 92}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 315, Col: 92}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var61)
 			if templ_7745c5c3_Err != nil {
@@ -1258,7 +1258,7 @@ func PlayerList(players []models.PlayerInfo) templ.Component {
 			var templ_7745c5c3_Var64 string
 			templ_7745c5c3_Var64, templ_7745c5c3_Err = templ.JoinStringErrs(player.CharName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 338, Col: 68}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 345, Col: 68}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var64))
 			if templ_7745c5c3_Err != nil {
@@ -1271,7 +1271,7 @@ func PlayerList(players []models.PlayerInfo) templ.Component {
 			var templ_7745c5c3_Var65 string
 			templ_7745c5c3_Var65, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(player.CurrentHp))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 339, Col: 88}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 346, Col: 88}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var65))
 			if templ_7745c5c3_Err != nil {
@@ -1284,7 +1284,7 @@ func PlayerList(players []models.PlayerInfo) templ.Component {
 			var templ_7745c5c3_Var66 string
 			templ_7745c5c3_Var66, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(player.MaxHp))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 339, Col: 121}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 346, Col: 121}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var66))
 			if templ_7745c5c3_Err != nil {
@@ -1342,7 +1342,7 @@ func PaceRollCall(entries []models.PaceRollCallEntry) templ.Component {
 			var templ_7745c5c3_Var68 string
 			templ_7745c5c3_Var68, templ_7745c5c3_Err = templ.JoinStringErrs(entry.CharName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 353, Col: 63}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 360, Col: 63}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var68))
 			if templ_7745c5c3_Err != nil {
@@ -1415,7 +1415,7 @@ func CombatPaceChoiceButtons(characterID int) templ.Component {
 		var templ_7745c5c3_Var70 string
 		templ_7745c5c3_Var70, templ_7745c5c3_Err = templ.ResolveAttributeValue("/characters/" + strconv.Itoa(characterID) + "/combat/pace/fast")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 373, Col: 86}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 380, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var70)
 		if templ_7745c5c3_Err != nil {
@@ -1428,7 +1428,7 @@ func CombatPaceChoiceButtons(characterID int) templ.Component {
 		var templ_7745c5c3_Var71 string
 		templ_7745c5c3_Var71, templ_7745c5c3_Err = templ.ResolveAttributeValue("/characters/" + strconv.Itoa(characterID) + "/combat/pace/slow")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 380, Col: 86}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 387, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var71)
 		if templ_7745c5c3_Err != nil {
@@ -1509,7 +1509,7 @@ func GMStoreControls(storeState *models.StoreState) templ.Component {
 		var templ_7745c5c3_Var74 string
 		templ_7745c5c3_Var74, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(storeState.SellPercentage))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 424, Col: 130}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 431, Col: 130}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var74))
 		if templ_7745c5c3_Err != nil {
@@ -1522,7 +1522,7 @@ func GMStoreControls(storeState *models.StoreState) templ.Component {
 		var templ_7745c5c3_Var75 string
 		templ_7745c5c3_Var75, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(storeState.SellPercentage))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 432, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 439, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var75)
 		if templ_7745c5c3_Err != nil {
@@ -1540,7 +1540,7 @@ func GMStoreControls(storeState *models.StoreState) templ.Component {
 			var templ_7745c5c3_Var76 string
 			templ_7745c5c3_Var76, templ_7745c5c3_Err = templ.JoinStringErrs(sec.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 447, Col: 48}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 454, Col: 48}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var76))
 			if templ_7745c5c3_Err != nil {
@@ -1553,7 +1553,7 @@ func GMStoreControls(storeState *models.StoreState) templ.Component {
 			var templ_7745c5c3_Var77 string
 			templ_7745c5c3_Var77, templ_7745c5c3_Err = templ.JoinStringErrs(sec.Code)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 448, Col: 72}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 455, Col: 72}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var77))
 			if templ_7745c5c3_Err != nil {
@@ -1571,7 +1571,7 @@ func GMStoreControls(storeState *models.StoreState) templ.Component {
 				var templ_7745c5c3_Var78 string
 				templ_7745c5c3_Var78, templ_7745c5c3_Err = templ.ResolveAttributeValue(sec.Code)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 454, Col: 58}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 461, Col: 58}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var78)
 				if templ_7745c5c3_Err != nil {
@@ -1589,7 +1589,7 @@ func GMStoreControls(storeState *models.StoreState) templ.Component {
 				var templ_7745c5c3_Var79 string
 				templ_7745c5c3_Var79, templ_7745c5c3_Err = templ.ResolveAttributeValue(sec.Code)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 463, Col: 58}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 470, Col: 58}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var79)
 				if templ_7745c5c3_Err != nil {
@@ -1641,7 +1641,7 @@ func GrantItemModal(playerId int, itemMap map[string][]store.Item) templ.Compone
 		var templ_7745c5c3_Var81 string
 		templ_7745c5c3_Var81, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(playerId))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 481, Col: 79}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 488, Col: 79}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var81)
 		if templ_7745c5c3_Err != nil {
@@ -1659,7 +1659,7 @@ func GrantItemModal(playerId int, itemMap map[string][]store.Item) templ.Compone
 			var templ_7745c5c3_Var82 string
 			templ_7745c5c3_Var82, templ_7745c5c3_Err = templ.ResolveAttributeValue(category)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 487, Col: 93}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 494, Col: 93}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var82)
 			if templ_7745c5c3_Err != nil {
@@ -1672,7 +1672,7 @@ func GrantItemModal(playerId int, itemMap map[string][]store.Item) templ.Compone
 			var templ_7745c5c3_Var83 string
 			templ_7745c5c3_Var83, templ_7745c5c3_Err = templ.ResolveAttributeValue(category == "armorItems")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 487, Col: 130}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 494, Col: 130}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var83)
 			if templ_7745c5c3_Err != nil {
@@ -1690,7 +1690,7 @@ func GrantItemModal(playerId int, itemMap map[string][]store.Item) templ.Compone
 				var templ_7745c5c3_Var84 string
 				templ_7745c5c3_Var84, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(playerId))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 492, Col: 107}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 499, Col: 107}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var84)
 				if templ_7745c5c3_Err != nil {
@@ -1703,7 +1703,7 @@ func GrantItemModal(playerId int, itemMap map[string][]store.Item) templ.Compone
 				var templ_7745c5c3_Var85 string
 				templ_7745c5c3_Var85, templ_7745c5c3_Err = templ.ResolveAttributeValue(item.Id)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 493, Col: 90}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 500, Col: 90}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var85)
 				if templ_7745c5c3_Err != nil {
@@ -1716,7 +1716,7 @@ func GrantItemModal(playerId int, itemMap map[string][]store.Item) templ.Compone
 				var templ_7745c5c3_Var86 string
 				templ_7745c5c3_Var86, templ_7745c5c3_Err = templ.JoinStringErrs(item.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 495, Col: 81}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 502, Col: 81}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var86))
 				if templ_7745c5c3_Err != nil {
@@ -1773,7 +1773,7 @@ func SprenGrantForm(playerId int, sprenList []string, currentBond string) templ.
 			var templ_7745c5c3_Var88 string
 			templ_7745c5c3_Var88, templ_7745c5c3_Err = templ.JoinStringErrs(currentBond)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 521, Col: 91}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 528, Col: 91}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var88))
 			if templ_7745c5c3_Err != nil {
@@ -1786,7 +1786,7 @@ func SprenGrantForm(playerId int, sprenList []string, currentBond string) templ.
 			var templ_7745c5c3_Var89 string
 			templ_7745c5c3_Var89, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(playerId))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 523, Col: 91}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 530, Col: 91}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var89)
 			if templ_7745c5c3_Err != nil {
@@ -1804,7 +1804,7 @@ func SprenGrantForm(playerId int, sprenList []string, currentBond string) templ.
 			var templ_7745c5c3_Var90 string
 			templ_7745c5c3_Var90, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(playerId))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 532, Col: 87}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 539, Col: 87}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var90)
 			if templ_7745c5c3_Err != nil {
@@ -1817,7 +1817,7 @@ func SprenGrantForm(playerId int, sprenList []string, currentBond string) templ.
 			var templ_7745c5c3_Var91 string
 			templ_7745c5c3_Var91, templ_7745c5c3_Err = templ.JoinStringErrs(playerId)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 533, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 540, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var91))
 			if templ_7745c5c3_Err != nil {
@@ -1835,7 +1835,7 @@ func SprenGrantForm(playerId int, sprenList []string, currentBond string) templ.
 				var templ_7745c5c3_Var92 string
 				templ_7745c5c3_Var92, templ_7745c5c3_Err = templ.ResolveAttributeValue(spren)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 540, Col: 53}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 547, Col: 53}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var92)
 				if templ_7745c5c3_Err != nil {
@@ -1848,7 +1848,7 @@ func SprenGrantForm(playerId int, sprenList []string, currentBond string) templ.
 				var templ_7745c5c3_Var93 string
 				templ_7745c5c3_Var93, templ_7745c5c3_Err = templ.JoinStringErrs(spren)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 540, Col: 63}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/gm_dashboard.templ`, Line: 547, Col: 63}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var93))
 				if templ_7745c5c3_Err != nil {

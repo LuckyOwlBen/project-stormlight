@@ -276,7 +276,7 @@ func CreationLayout(c *character.Character, currentStep, title string, nav NavSt
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"flex flex-row w-full min-h-screen\"><!-- Sidebar (Left 1/3) -->")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"flex flex-row w-full min-h-screen\"><!-- Sidebar (Left 1/4) --><div class=\"w-1/4 bg-base-200 border-r border-base-300 p-4 shrink-0 flex flex-col\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -284,7 +284,7 @@ func CreationLayout(c *character.Character, currentStep, title string, nav NavSt
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<!-- Main Content Area (Right Full) --><div class=\"w-full p-4 md:p-8 flex flex-col flex-grow\"><main class=\"w-full max-w-4xl mx-auto flex-grow pb-24\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div><!-- Main Content Area (Right Full) --><div class=\"w-full p-4 md:p-8 flex flex-col flex-grow\"><main class=\"w-full max-w-4xl mx-auto flex-grow pb-24\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

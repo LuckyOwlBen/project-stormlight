@@ -28,16 +28,17 @@ func NewDefenses(characterID int) *Defenses {
 	}
 }
 
-// RecalculateDefenses derives the defense values from the character's attributes and
+// RecalculateDefenses derives the defense values from the character's effective attributes (including Singer form bonuses) and
 // equipment. Deflect bonuses from talents (e.g. Stonestance) are layered on afterward
 // by RecalculateBonuses/applyDefenseBonus.
 func RecalculateDefenses(char *Character) {
 	if char.Defenses == nil {
 		char.Defenses = &Defenses{}
 	}
-	char.Defenses.Physical = char.Attributes.Strength + char.Attributes.Speed
-	char.Defenses.Cognitive = char.Attributes.Intelligence + char.Attributes.Willpower
-	char.Defenses.Spiritual = char.Attributes.Awareness + char.Attributes.Presence
+	attrs := EffectiveAttributes(char)
+	char.Defenses.Physical = attrs.Strength + attrs.Speed
+	char.Defenses.Cognitive = attrs.Intelligence + attrs.Willpower
+	char.Defenses.Spiritual = attrs.Awareness + attrs.Presence
 	char.Defenses.Deflect = equippedArmorDeflectValue(char)
 }
 

@@ -76,7 +76,7 @@ func (c *Character) Hydrate() {
 		}
 		if len(c.Talents.List) > 0 {
 			for i, history := range c.Talents.List {
-				if t, exists := AllTalents[history.TalentID]; exists {
+				if t, exists := LookupTalent(history.TalentID); exists {
 					c.Talents.List[i].Talent = t
 					c.Talents.TalentMap[history.TalentID] = t
 				}

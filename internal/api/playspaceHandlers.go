@@ -53,7 +53,7 @@ func (s *Server) handlePlayspaceGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	characterSheet := buildCharacterSheetData(*char)
+	characterSheet := s.buildSheetData(*char)
 
 	if petName, hasPet := equippedPetName(char); hasPet {
 		if petRes, petErr := s.store.GetOrCreatePetResources(r.Context(), charID, petName); petErr == nil {
@@ -137,9 +137,10 @@ func (s *Server) handlePlayspaceWebSocket(w http.ResponseWriter, r *http.Request
 
 func buildSkillDisplayStructure(char character.Character) []character.SkillDisplayStructure {
 	grantedRanks := character.GrantedSkillRanks(&char)
+	effectiveAttributes := character.EffectiveAttributes(&char)
 	spreadMap := make(map[string][]character.DisplaySkill)
 	for _, skill := range char.Skills.PlayerSkills {
-		attributeBonus := char.Attributes.GetAttributeBonus(skill.SkillAssociation.Attribute)
+		attributeBonus := effectiveAttributes.GetAttributeBonus(skill.SkillAssociation.Attribute)
 		grantedRank := grantedRanks[skill.SkillName]
 		displaySkill := character.DisplaySkill{
 			SkillName:      skill.SkillName,
@@ -285,19 +286,6 @@ func (s *Server) changeActiveStance(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// characterHasTalent reports whether char currently owns the talent with the given ID.
-func characterHasTalent(char *character.Character, talentID string) bool {
-	if char == nil || char.Talents == nil {
-		return false
-	}
-	for _, t := range char.Talents.List {
-		if t.TalentID == talentID {
-			return true
-		}
-	}
-	return false
-}
-
 // GET /characters/{id}/talents/{talentID}/manage-grants
 func (s *Server) handleTalentGrantsManageGet(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(int)
@@ -319,7 +307,7 @@ func (s *Server) handleTalentGrantsManageGet(w http.ResponseWriter, r *http.Requ
 		http.Error(w, "Character not found", http.StatusNotFound)
 		return
 	}
-	if !characterHasTalent(char, talentID) || !character.HasReassignableGrants(talentID) {
+	if !character.IsActiveGrantSource(char, talentID) || !character.HasReassignableGrants(talentID) {
 		http.Error(w, "Talent does not have reassignable grants", http.StatusBadRequest)
 		return
 	}
@@ -349,7 +337,7 @@ func (s *Server) handleTalentGrantsManagePost(w http.ResponseWriter, r *http.Req
 		http.Error(w, "Character not found", http.StatusNotFound)
 		return
 	}
-	if !characterHasTalent(char, talentID) || !character.HasReassignableGrants(talentID) {
+	if !character.IsActiveGrantSource(char, talentID) || !character.HasReassignableGrants(talentID) {
 		http.Error(w, "Talent does not have reassignable grants", http.StatusBadRequest)
 		return
 	}
@@ -363,7 +351,7 @@ func (s *Server) handleTalentGrantsManagePost(w http.ResponseWriter, r *http.Req
 
 	baseTalent := character.Talent{Id: talentID, ExpertiseGrants: agg.ExpertiseGrants}
 	for i, grant := range agg.ExpertiseGrants {
-		if grant.Type != "choice" && grant.Type != "category" {
+		if grant.Type != "choice" && grant.Type != "category" && grant.Type != "custom" {
 			continue
 		}
 		selected := r.Form["expertiseGrant"+strconv.Itoa(i)]
@@ -389,7 +377,7 @@ func (s *Server) handleTalentGrantsManagePost(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	characterSheet := buildCharacterSheetData(*char)
+	characterSheet := s.buildSheetData(*char)
 	s.hub.UpdateTalentsComponentOnCharacterSheet(characterSheet, r)
 
 	views.TalentGrantsManageModalPlaceholder().Render(r.Context(), w)
@@ -401,6 +389,13 @@ func mapInventorySlice(inventory []character.Inventory) map[int]character.Invent
 		result[item.ID] = item
 	}
 	return result
+}
+
+// buildSheetData is buildCharacterSheetData plus live server state (the highstorm flag).
+func (s *Server) buildSheetData(char character.Character) models.CharacterSheetData {
+	sheet := buildCharacterSheetData(char)
+	sheet.HighstormActive = s.hub.HighstormActive()
+	return sheet
 }
 
 func buildCharacterSheetData(char character.Character) models.CharacterSheetData {
@@ -419,6 +414,10 @@ func buildActionTypeMap(char character.Character) []character.TalentDisplayStruc
 	// 1. Bucket by action type
 	groupedMap := make(map[string][]character.TalentHistory)
 	for _, t := range char.Talents.List {
+		// Singer form talents are presented through the Singer Forms card instead.
+		if t.TalentID == "singer_change_form" || len(t.Forms) > 0 {
+			continue
+		}
 		groupedMap[t.ActionType] = append(groupedMap[t.ActionType], t)
 	}
 

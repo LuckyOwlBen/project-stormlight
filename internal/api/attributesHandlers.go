@@ -181,13 +181,16 @@ func (s *Server) handleCharacterAttributesPost(w http.ResponseWriter, r *http.Re
 	http.Redirect(w, r, models.DetermineNextStepURL(char, "Attributes"), http.StatusSeeOther)
 }
 
+// allAttributes returns the attribute values shown on the character sheet, including any
+// Singer form bonuses.
 func allAttributes(c character.Character) map[string]int {
+	attrs := character.EffectiveAttributes(&c)
 	return map[string]int{
-		"Strength":     c.Attributes.Strength,
-		"Speed":        c.Attributes.Speed,
-		"Willpower":    c.Attributes.Willpower,
-		"Intelligence": c.Attributes.Intelligence,
-		"Awareness":    c.Attributes.Awareness,
-		"Presence":     c.Attributes.Presence,
+		"Strength":     attrs.Strength,
+		"Speed":        attrs.Speed,
+		"Willpower":    attrs.Willpower,
+		"Intelligence": attrs.Intelligence,
+		"Awareness":    attrs.Awareness,
+		"Presence":     attrs.Presence,
 	}
 }

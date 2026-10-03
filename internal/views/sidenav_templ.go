@@ -31,12 +31,12 @@ func Sidenav(steps []models.SidenavStep) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"w-1/3 bg-base-200 border-r border-base-300 p-4 shrink-0 flex flex-col\" id=\"sidebar-container\" hx-trigger=\"load, update-sidenav from:body\"><ul class=\"menu bg-base-100 w-full rounded-box flex-1\"><li class=\"menu-title\"><span>Character Creation</span></li>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"sidebar-container\" hx-trigger=\"load, update-sidenav from:body\"><ul class=\"menu bg-base-100 w-full rounded-box flex-1\"><li class=\"menu-title text-xl\"><span>Character Creation</span></li>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, step := range steps {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<li>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<li class=\"text-xl\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -52,7 +52,7 @@ func Sidenav(steps []models.SidenavStep) templ.Component {
 			var templ_7745c5c3_Var3 templ.SafeURL
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(step.URL))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/sidenav.templ`, Line: 15, Col: 53}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/sidenav.templ`, Line: 14, Col: 53}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -78,7 +78,7 @@ func Sidenav(steps []models.SidenavStep) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(step.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/sidenav.templ`, Line: 17, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/sidenav.templ`, Line: 16, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {

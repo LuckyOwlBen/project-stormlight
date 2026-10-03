@@ -10,4 +10,5 @@ type CharacterSheetData struct {
 	DerivedAttributes      map[string]string
 	ActionTypeMap          []character.TalentDisplayStructure
 	PetResources           *character.PetResources
+	HighstormActive        bool
 }

@@ -51,74 +51,30 @@ func RecalculateBonuses(char *Character) []CharacterBonus {
 	var result []CharacterBonus
 
 	for _, history := range char.Talents.List {
-		talent, ok := AllTalents[history.TalentID]
+		talent, ok := LookupTalent(history.TalentID)
 		if !ok {
 			continue
 		}
 
 		for _, b := range talent.Bonuses {
-			cb := CharacterBonus{
-				CharacterID: char.ID,
-				SourceID:    talent.Id,
-				SourceType:  "talent",
-				SourceName:  talent.Name,
+			if cb, ok := ledgerEntryForBonus(char, talent, b, "talent"); ok {
+				result = append(result, cb)
 			}
-
-			// Normalise type to uppercase for consistent matching.
-			switch strings.ToUpper(b.Type) {
-			case "SKILL":
-				cb.TargetModule = "skill"
-				cb.TargetField = b.Target
-			case "RESOURCE":
-				cb.TargetModule = "resource"
-				cb.TargetField = strings.ToLower(b.Target)
-			case "DEFENSE":
-				cb.TargetModule = "defense"
-				cb.TargetField = b.Target
-			case "DEFLECT":
-				// deflect is a defence sub-field
-				cb.TargetModule = "defense"
-				cb.TargetField = "deflect"
-			default:
-				// Unknown bonus type — skip rather than store garbage.
-				continue
-			}
-
-			// Resolve the integer value.
-			switch {
-			case b.Formula == "tier" && b.Scaling:
-				cb.Value = talent.Tier
-			case b.ValueFormula != "":
-				cb.FormulaRef = b.ValueFormula
-				cb.Value = 0
-			case b.Formula != "" && !b.Scaling:
-				// Static formula we can't resolve yet — store as FormulaRef.
-				cb.FormulaRef = b.Formula
-				cb.Value = 0
-			default:
-				cb.Value = b.Value
-			}
-
-			// Conditional handling. Bonuses owned by a Stance talent (e.g. Vinestance's
-			// defense increase) are gated on that same talent's TalentHistory.Active flag,
-			// since the condition text always means "while in this stance". Other
-			// conditional bonuses have no tracked trigger yet, so they stay inactive.
-			if b.Condition != "" {
-				cb.Conditional = true
-				cb.Condition = b.Condition
-				if talent.ActionType == "Stance" {
-					cb.Active = isStanceActive(char, talent.Id)
-				} else {
-					cb.Active = false
-				}
-			} else {
-				cb.Conditional = false
-				cb.Active = true
-			}
-
-			result = append(result, cb)
 		}
 	}
+
+	// The character's current Singer form contributes bonuses just like a talent does,
+	// but only the selected form counts (dullform has none).
+	if char.Ancestry == Singer {
+		form := CurrentSingerForm(char)
+		formSource := Talent{Id: form.ID, Name: form.Name}
+		for _, b := range form.Bonuses {
+			if cb, ok := ledgerEntryForBonus(char, formSource, b, "singer_form"); ok {
+				result = append(result, cb)
+			}
+		}
+	}
+
 	ApplyBonusesToCharacter(char, result)
 	return result
 }
@@ -159,18 +115,20 @@ func applyResourceBonus(char *Character, bonus CharacterBonus) {
 	if char.Resources == nil {
 		char.Resources = &Resources{CharacterID: char.ID}
 	}
+	// Targets arrive lower-cased from the ledger; bare "health"/"focus"/"max-investiture"
+	// (the form used in talent JSON) mean the maximum.
 	switch bonus.TargetField {
-	case "healthCurrent":
+	case "healthcurrent":
 		char.Resources.HealthCurrent += bonus.Value
-	case "healthMax":
+	case "healthmax", "health":
 		char.Resources.HealthMax += bonus.Value
-	case "focusCurrent":
+	case "focuscurrent":
 		char.Resources.FocusCurrent += bonus.Value
-	case "focusMax":
+	case "focusmax", "focus":
 		char.Resources.FocusMax += bonus.Value
-	case "investitureCurrent":
+	case "investiturecurrent":
 		char.Resources.InvestitureCurrent += bonus.Value
-	case "investitureMax":
+	case "investituremax", "max-investiture", "investiture":
 		char.Resources.InvestitureMax += bonus.Value
 	}
 }
@@ -179,12 +137,12 @@ func applyDefenseBonus(char *Character, bonus CharacterBonus) {
 	if char.Defenses == nil {
 		char.Defenses = &Defenses{CharacterID: char.ID}
 	}
-	switch bonus.TargetField {
-	case "Physical":
+	switch strings.ToLower(bonus.TargetField) {
+	case "physical":
 		char.Defenses.Physical += bonus.Value
-	case "Cognitive":
+	case "cognitive":
 		char.Defenses.Cognitive += bonus.Value
-	case "Spiritual":
+	case "spiritual":
 		char.Defenses.Spiritual += bonus.Value
 	case "deflect":
 		char.Defenses.Deflect += bonus.Value
@@ -203,4 +161,74 @@ func isStanceActive(char *Character, talentID string) bool {
 		}
 	}
 	return false
+}
+
+// ledgerEntryForBonus converts one Bonus declared by a talent (or Singer form) into a
+// ledger row. Returns false for unrecognised bonus types.
+func ledgerEntryForBonus(char *Character, talent Talent, b Bonus, sourceType string) (CharacterBonus, bool) {
+	cb := CharacterBonus{
+		CharacterID: char.ID,
+		SourceID:    talent.Id,
+		SourceType:  sourceType,
+		SourceName:  talent.Name,
+	}
+
+	// Normalise type to uppercase (and drop the legacy "BonusType." prefix) for consistent matching.
+	switch strings.TrimPrefix(strings.ToUpper(b.Type), "BONUSTYPE.") {
+	case "SKILL":
+		cb.TargetModule = "skill"
+		cb.TargetField = b.Target
+	case "RESOURCE":
+		cb.TargetModule = "resource"
+		cb.TargetField = strings.ToLower(b.Target)
+	case "DEFENSE":
+		cb.TargetModule = "defense"
+		cb.TargetField = b.Target
+	case "DEFLECT":
+		// deflect is a defence sub-field
+		cb.TargetModule = "defense"
+		cb.TargetField = "deflect"
+	case "ATTRIBUTE":
+		// Listed in the ledger for display, but applied via EffectiveAttributes rather than
+		// ApplyBonusesToCharacter, since stored attributes must stay base values.
+		cb.TargetModule = "attribute"
+		cb.TargetField = b.Target
+	default:
+		// Unknown bonus type — skip rather than store garbage.
+		return cb, false
+	}
+
+	// Resolve the integer value.
+	switch {
+	case b.Formula == "tier" && b.Scaling:
+		cb.Value = talent.Tier
+	case b.ValueFormula != "":
+		cb.FormulaRef = b.ValueFormula
+		cb.Value = 0
+	case b.Formula != "" && !b.Scaling:
+		// Static formula we can't resolve yet — store as FormulaRef.
+		cb.FormulaRef = b.Formula
+		cb.Value = 0
+	default:
+		cb.Value = b.Value
+	}
+
+	// Conditional handling. Bonuses owned by a Stance talent (e.g. Vinestance's
+	// defense increase) are gated on that same talent's TalentHistory.Active flag,
+	// since the condition text always means "while in this stance". Other
+	// conditional bonuses have no tracked trigger yet, so they stay inactive.
+	if b.Condition != "" {
+		cb.Conditional = true
+		cb.Condition = b.Condition
+		if talent.ActionType == "Stance" {
+			cb.Active = isStanceActive(char, talent.Id)
+		} else {
+			cb.Active = false
+		}
+	} else {
+		cb.Conditional = false
+		cb.Active = true
+	}
+
+	return cb, true
 }

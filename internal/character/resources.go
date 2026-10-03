@@ -57,15 +57,16 @@ func NewResources(characterID int, level int) *Resources {
 
 func RecalculateResources(char *Character) {
 	r := char.Resources
-	r.HealthMax = getHealthForLevel(char.Level, char.Attributes.Strength)
+	attrs := EffectiveAttributes(char)
+	r.HealthMax = getHealthForLevel(char.Level, attrs.Strength)
 	if r.HealthCurrent > r.HealthMax {
 		r.HealthCurrent = r.HealthMax
 	}
-	r.FocusMax = 2 + char.Attributes.Intelligence/2 // Example: Focus max is 2 + half of Intelligence
+	r.FocusMax = 2 + attrs.Intelligence/2 // Example: Focus max is 2 + half of Intelligence
 	if r.FocusCurrent > r.FocusMax {
 		r.FocusCurrent = r.FocusMax
 	}
-	r.InvestitureMax = char.Attributes.Willpower * 2 // Example: Investiture max is double the Willpower
+	r.InvestitureMax = attrs.Willpower * 2 // Example: Investiture max is double the Willpower
 	if r.InvestitureCurrent > r.InvestitureMax {
 		r.InvestitureCurrent = r.InvestitureMax
 	}

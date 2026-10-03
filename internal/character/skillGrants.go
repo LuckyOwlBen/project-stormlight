@@ -216,7 +216,7 @@ func PruneOrphanedTalentSkillGrants(char *Character, keptTalentIDs []string) {
 	for _, g := range char.SkillGrants.List {
 		if strings.HasPrefix(g.Source, "talent:") {
 			parts := strings.SplitN(g.Source, ":", 4)
-			if len(parts) >= 2 && !kept[parts[1]] {
+			if len(parts) >= 2 && !kept[parts[1]] && !isSingerFormID(parts[1]) {
 				continue // orphaned - base talent no longer owned
 			}
 		}

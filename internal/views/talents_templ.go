@@ -35,36 +35,55 @@ type grantChoice struct {
 	ChoiceCount int
 	Options     []character.Expertise
 	Selected    map[string]bool
+	// Custom grants take free-text names instead of picking from Options.
+	Custom       bool
+	SelectedList []string
+}
+
+// SelectedAt returns the i-th previously chosen name for a custom grant, or "".
+func (g grantChoice) SelectedAt(i int) string {
+	if i < len(g.SelectedList) {
+		return g.SelectedList[i]
+	}
+	return ""
 }
 
 func pendingGrantChoices(char *character.Character, talent character.Talent) []grantChoice {
 	var result []grantChoice
 	for i, grant := range talent.ExpertiseGrants {
-		if grant.Type != "choice" && grant.Type != "category" {
+		if grant.Type != "choice" && grant.Type != "category" && grant.Type != "custom" {
 			continue
 		}
-		options, err := character.ResolveExpertiseGrantOptions(grant)
-		if err != nil {
-			continue
+		var options []character.Expertise
+		if grant.Type != "custom" {
+			var err error
+			options, err = character.ResolveExpertiseGrantOptions(grant)
+			if err != nil {
+				continue
+			}
 		}
 		choiceCount := grant.ChoiceCount
 		if choiceCount <= 0 {
 			choiceCount = 1
 		}
 		selected := make(map[string]bool)
+		var selectedList []string
 		if char != nil && char.Expertises != nil {
 			source := fmt.Sprintf("talent:%s:%d", talent.Id, i)
 			for _, e := range char.Expertises.List {
 				if e.Source == source {
 					selected[e.Name] = true
+					selectedList = append(selectedList, e.Name)
 				}
 			}
 		}
 		result = append(result, grantChoice{
-			GrantIndex:  i,
-			ChoiceCount: choiceCount,
-			Options:     options,
-			Selected:    selected,
+			GrantIndex:   i,
+			ChoiceCount:  choiceCount,
+			Options:      options,
+			Selected:     selected,
+			Custom:       grant.Type == "custom",
+			SelectedList: selectedList,
 		})
 	}
 	return result
@@ -115,7 +134,7 @@ func expertiseGrantStatus(char *character.Character, talent character.Talent) te
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 84, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 103, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -128,7 +147,7 @@ func expertiseGrantStatus(char *character.Character, talent character.Talent) te
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/" + talent.Id + "/expertise-choice")))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 88, Col: 134}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 107, Col: 134}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 			if templ_7745c5c3_Err != nil {
@@ -147,7 +166,7 @@ func expertiseGrantStatus(char *character.Character, talent character.Talent) te
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/" + talent.Id + "/expertise-choice")))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 100, Col: 134}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 119, Col: 134}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 			if templ_7745c5c3_Err != nil {
@@ -190,7 +209,7 @@ func TalentExpertiseChoiceModal(char *character.Character, talent character.Tale
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(talent.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 112, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 131, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -203,7 +222,7 @@ func TalentExpertiseChoiceModal(char *character.Character, talent character.Tale
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/" + talent.Id + "/expertise-choice")))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 114, Col: 135}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 133, Col: 135}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 		if templ_7745c5c3_Err != nil {
@@ -226,7 +245,7 @@ func TalentExpertiseChoiceModal(char *character.Character, talent character.Tale
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(grant.ChoiceCount))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 122, Col: 103}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 141, Col: 103}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -254,7 +273,7 @@ func TalentExpertiseChoiceModal(char *character.Character, talent character.Tale
 					var templ_7745c5c3_Var9 string
 					templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue("grant" + strconv.Itoa(grant.GrantIndex))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 128, Col: 110}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 147, Col: 110}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 					if templ_7745c5c3_Err != nil {
@@ -267,7 +286,7 @@ func TalentExpertiseChoiceModal(char *character.Character, talent character.Tale
 					var templ_7745c5c3_Var10 string
 					templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue(opt.Name)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 128, Col: 129}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 147, Col: 129}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
 					if templ_7745c5c3_Err != nil {
@@ -295,7 +314,7 @@ func TalentExpertiseChoiceModal(char *character.Character, talent character.Tale
 					var templ_7745c5c3_Var11 string
 					templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.ResolveAttributeValue("grant" + strconv.Itoa(grant.GrantIndex))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 130, Col: 107}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 149, Col: 107}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
 					if templ_7745c5c3_Err != nil {
@@ -308,7 +327,7 @@ func TalentExpertiseChoiceModal(char *character.Character, talent character.Tale
 					var templ_7745c5c3_Var12 string
 					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.ResolveAttributeValue(opt.Name)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 130, Col: 126}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 149, Col: 126}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12)
 					if templ_7745c5c3_Err != nil {
@@ -336,7 +355,7 @@ func TalentExpertiseChoiceModal(char *character.Character, talent character.Tale
 				var templ_7745c5c3_Var13 string
 				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(opt.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 132, Col: 52}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 151, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
@@ -418,7 +437,7 @@ func TalentView(char *character.Character, filteredPaths map[string]character.Pa
 			var templ_7745c5c3_Var16 templ.SafeURL
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 164, Col: 112}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 183, Col: 112}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -653,7 +672,7 @@ func singerQuotaAlertContent(char *character.Character) templ.Component {
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(character.SingerTalentsRequiredForLevel(char.Level) - character.OwnedSingerOptionalCount(char)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 211, Col: 133}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 230, Col: 133}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {
@@ -666,7 +685,7 @@ func singerQuotaAlertContent(char *character.Character) templ.Component {
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(character.OwnedSingerOptionalCount(char)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 211, Col: 224}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 230, Col: 224}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 			if templ_7745c5c3_Err != nil {
@@ -679,7 +698,7 @@ func singerQuotaAlertContent(char *character.Character) templ.Component {
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(character.SingerTalentsRequiredForLevel(char.Level)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 211, Col: 297}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 230, Col: 297}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
@@ -766,7 +785,7 @@ func pathTab(characterId int, path character.Path, owned bool, active bool) temp
 		var templ_7745c5c3_Var27 string
 		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(characterId))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 232, Col: 81}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 251, Col: 81}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var27)
 		if templ_7745c5c3_Err != nil {
@@ -779,7 +798,7 @@ func pathTab(characterId int, path character.Path, owned bool, active bool) temp
 		var templ_7745c5c3_Var28 string
 		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.ResolveAttributeValue(path.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 233, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 252, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var28)
 		if templ_7745c5c3_Err != nil {
@@ -814,7 +833,7 @@ func pathTab(characterId int, path character.Path, owned bool, active bool) temp
 		var templ_7745c5c3_Var31 string
 		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(path.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 242, Col: 23}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 261, Col: 23}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 		if templ_7745c5c3_Err != nil {
@@ -917,7 +936,7 @@ func ActivePathPanelContent(char *character.Character, path character.Path) temp
 			var templ_7745c5c3_Var34 string
 			templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(path.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 265, Col: 57}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 284, Col: 57}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 			if templ_7745c5c3_Err != nil {
@@ -951,7 +970,7 @@ func ActivePathPanelContent(char *character.Character, path character.Path) temp
 					var templ_7745c5c3_Var35 string
 					templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(character.SubPathMap[subPathID].PathName)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 275, Col: 119}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 294, Col: 119}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 					if templ_7745c5c3_Err != nil {
@@ -1016,7 +1035,7 @@ func BaseTalentCard(char *character.Character, pathID string, baseTalent charact
 		var templ_7745c5c3_Var37 string
 		templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(char.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 294, Col: 81}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 313, Col: 81}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var37)
 		if templ_7745c5c3_Err != nil {
@@ -1029,7 +1048,7 @@ func BaseTalentCard(char *character.Character, pathID string, baseTalent charact
 		var templ_7745c5c3_Var38 string
 		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.ResolveAttributeValue(pathID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 295, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 314, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var38)
 		if templ_7745c5c3_Err != nil {
@@ -1042,7 +1061,7 @@ func BaseTalentCard(char *character.Character, pathID string, baseTalent charact
 		var templ_7745c5c3_Var39 string
 		templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.ResolveAttributeValue(baseTalent.Id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 296, Col: 70}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 315, Col: 70}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var39)
 		if templ_7745c5c3_Err != nil {
@@ -1077,7 +1096,7 @@ func BaseTalentCard(char *character.Character, pathID string, baseTalent charact
 		var templ_7745c5c3_Var40 string
 		templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(baseTalent.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 312, Col: 81}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 331, Col: 81}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 		if templ_7745c5c3_Err != nil {
@@ -1090,7 +1109,7 @@ func BaseTalentCard(char *character.Character, pathID string, baseTalent charact
 		var templ_7745c5c3_Var41 string
 		templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(baseTalent.Description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 316, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 335, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 		if templ_7745c5c3_Err != nil {
@@ -1158,7 +1177,7 @@ func TalentPathCard(char *character.Character, pathID string, tw character.Talen
 		var templ_7745c5c3_Var45 string
 		templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(char.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 326, Col: 81}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 345, Col: 81}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var45)
 		if templ_7745c5c3_Err != nil {
@@ -1171,7 +1190,7 @@ func TalentPathCard(char *character.Character, pathID string, tw character.Talen
 		var templ_7745c5c3_Var46 string
 		templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.ResolveAttributeValue(pathID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 327, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 346, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var46)
 		if templ_7745c5c3_Err != nil {
@@ -1184,7 +1203,7 @@ func TalentPathCard(char *character.Character, pathID string, tw character.Talen
 		var templ_7745c5c3_Var47 string
 		templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.ResolveAttributeValue(tw.Talent.Id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 328, Col: 69}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 347, Col: 69}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var47)
 		if templ_7745c5c3_Err != nil {
@@ -1219,7 +1238,7 @@ func TalentPathCard(char *character.Character, pathID string, tw character.Talen
 		var templ_7745c5c3_Var48 string
 		templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(tw.Talent.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 343, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 362, Col: 62}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
 		if templ_7745c5c3_Err != nil {
@@ -1232,7 +1251,7 @@ func TalentPathCard(char *character.Character, pathID string, tw character.Talen
 		var templ_7745c5c3_Var49 string
 		templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(tw.Talent.Tier))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 344, Col: 100}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 363, Col: 100}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var49))
 		if templ_7745c5c3_Err != nil {
@@ -1250,7 +1269,7 @@ func TalentPathCard(char *character.Character, pathID string, tw character.Talen
 			var templ_7745c5c3_Var50 string
 			templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.JoinStringErrs(tw.Talent.ActionType)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 346, Col: 92}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 365, Col: 92}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var50))
 			if templ_7745c5c3_Err != nil {
@@ -1268,7 +1287,7 @@ func TalentPathCard(char *character.Character, pathID string, tw character.Talen
 		var templ_7745c5c3_Var51 string
 		templ_7745c5c3_Var51, templ_7745c5c3_Err = templ.JoinStringErrs(tw.Talent.Description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 350, Col: 75}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 369, Col: 75}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var51))
 		if templ_7745c5c3_Err != nil {
@@ -1291,7 +1310,7 @@ func TalentPathCard(char *character.Character, pathID string, tw character.Talen
 				var templ_7745c5c3_Var52 string
 				templ_7745c5c3_Var52, templ_7745c5c3_Err = templ.JoinStringErrs(req)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 356, Col: 37}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 375, Col: 37}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var52))
 				if templ_7745c5c3_Err != nil {
@@ -1356,7 +1375,7 @@ func SingerFormsPanel(char *character.Character) templ.Component {
 				var templ_7745c5c3_Var54 string
 				templ_7745c5c3_Var54, templ_7745c5c3_Err = templ.JoinStringErrs(t.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 377, Col: 65}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 396, Col: 65}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var54))
 				if templ_7745c5c3_Err != nil {
@@ -1369,7 +1388,7 @@ func SingerFormsPanel(char *character.Character) templ.Component {
 				var templ_7745c5c3_Var55 string
 				templ_7745c5c3_Var55, templ_7745c5c3_Err = templ.JoinStringErrs(t.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 378, Col: 74}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/talents.templ`, Line: 397, Col: 74}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var55))
 				if templ_7745c5c3_Err != nil {

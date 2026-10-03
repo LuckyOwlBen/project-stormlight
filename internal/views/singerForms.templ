@@ -1,0 +1,96 @@
+package views
+
+import (
+	"project-stormlight/internal/character"
+	"project-stormlight/internal/models"
+	"strconv"
+)
+
+// SingerFormsCard is the Singer-only "Singer Forms" selector on the Talents tab. The dropdown
+// is only enabled while the GM has a highstorm active; the server enforces the same rule.
+templ SingerFormsCard(characterSheet models.CharacterSheetData) {
+	{{ char := characterSheet.Char }}
+	{{ current := character.CurrentSingerForm(char) }}
+	<div class="card bg-base-200 shadow border-t-4 border-secondary mb-4">
+		<div class="card-body p-4">
+			<div class="flex justify-between items-center">
+				<span class="text-xs uppercase font-extrabold text-primary">Singer Forms</span>
+				if characterSheet.HighstormActive {
+					<span class="badge badge-warning">Highstorm - you may change form</span>
+				} else {
+					<span class="badge badge-ghost">Locked until the next highstorm</span>
+				}
+			</div>
+			<form
+				hx-post={ "/playspace/" + strconv.Itoa(char.ID) + "/singer-form" }
+				hx-target="#singerFormsCard"
+				hx-swap="innerHTML"
+				hx-trigger="change"
+			>
+				<select name="form" class="select w-full" disabled?={ !characterSheet.HighstormActive }>
+					for _, form := range character.UnlockedSingerForms(char) {
+						<option value={ form.ID } selected?={ form.ID == current.ID }>{ form.Name }</option>
+					}
+				</select>
+			</form>
+			<div class="mt-2">
+				<div class="font-semibold">{ current.Name }</div>
+				<p class="text-sm opacity-80">{ current.Description }</p>
+			</div>
+			<div class="mt-2">
+				<div class="text-xs uppercase font-bold opacity-70">Applied bonuses</div>
+				if lines := character.DescribeFormBonuses(char, current); len(lines) > 0 {
+					<ul class="list-disc list-inside text-sm">
+						for _, line := range lines {
+							<li>{ line }</li>
+						}
+					</ul>
+					<p class="text-xs opacity-60">Attribute bonuses are already included in your attributes, defenses, skills and derived stats.</p>
+				} else {
+					<p class="text-sm opacity-70">None</p>
+				}
+			</div>
+			if len(current.OtherEffects) > 0 {
+				<div class="mt-2">
+					<div class="text-xs uppercase font-bold opacity-70">Other effects (apply as described)</div>
+					<ul class="list-disc list-inside text-sm">
+						for _, effect := range current.OtherEffects {
+							<li>{ effect }</li>
+						}
+					</ul>
+				</div>
+			}
+			if names := grantedExpertiseNames(char, current.ID); len(names) > 0 {
+				<div class="mt-2">
+					<div class="text-xs uppercase font-bold opacity-70">Expertise while in this form</div>
+					<div class="flex flex-wrap gap-2">
+						for _, name := range names {
+							<span class="badge badge-accent badge-sm">{ name }</span>
+						}
+					</div>
+				</div>
+			}
+		</div>
+	</div>
+}
+
+// HighstormControl is the GM's highstorm toggle. Turning it on alerts every player and
+// unlocks the Singer Forms dropdown for Singers; turning it off locks their current form.
+templ HighstormControl(active bool) {
+	<div class="flex items-center justify-between">
+		<div>
+			<div class="font-bold text-sm">Highstorm</div>
+			<div class="text-xs opacity-60">While active, Singers may change form</div>
+		</div>
+		<form hx-post="/gm/highstorm/toggle" hx-target="#highstorm-control" hx-swap="innerHTML" class="inline">
+			<input
+				type="checkbox"
+				class="toggle toggle-warning"
+				if active {
+					checked
+				}
+				onChange="this.form.dispatchEvent(new Event('submit'))"
+			/>
+		</form>
+	</div>
+}

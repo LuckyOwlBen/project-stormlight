@@ -31,10 +31,30 @@
         ],
         "tier": 1,
         "bonuses": [],
-        "otherEffects": [
-            "Unlock Artform (Awareness +1, expertise in Painting and Music, advantage on Crafting and entertainment)",
-            "Unlock Nimbleform (Speed +1, Focus +2)",
-            "Can change into these forms during highstorms"
+        "forms": [
+            {
+                "id": "artform",
+                "name": "Artform",
+                "description": "A form suited to creation and expression.",
+                "bonuses": [
+                    { "type": "ATTRIBUTE", "target": "Awareness", "value": 1 }
+                ],
+                "expertiseGrants": [
+                    { "type": "fixed", "custom": true, "expertises": ["Painting", "Music"] }
+                ],
+                "otherEffects": [
+                    "Advantage on Crafting and entertainment tests"
+                ]
+            },
+            {
+                "id": "nimbleform",
+                "name": "Nimbleform",
+                "description": "A light, agile form.",
+                "bonuses": [
+                    { "type": "ATTRIBUTE", "target": "Speed", "value": 1 },
+                    { "type": "RESOURCE", "target": "focusMax", "value": 2 }
+                ]
+            }
         ]
     },
     {
@@ -49,10 +69,33 @@
         ],
         "tier": 1,
         "bonuses": [],
-        "otherEffects": [
-            "Unlock Meditationform (Presence +1, can aid without spending focus)",
-            "Unlock Scholarform (Intellect +1, temporarily gain expertise and cognitive skill rank)",
-            "Can change into these forms during highstorms"
+        "forms": [
+            {
+                "id": "meditationform",
+                "name": "Meditationform",
+                "description": "A calm, centered form.",
+                "bonuses": [
+                    { "type": "ATTRIBUTE", "target": "Presence", "value": 1 }
+                ],
+                "otherEffects": [
+                    "You can aid without spending focus"
+                ]
+            },
+            {
+                "id": "scholarform",
+                "name": "Scholarform",
+                "description": "A studious form. Choose its temporary expertise and skill rank with Manage.",
+                "retrainable": true,
+                "bonuses": [
+                    { "type": "ATTRIBUTE", "target": "Intellect", "value": 1 }
+                ],
+                "expertiseGrants": [
+                    { "type": "custom", "choiceCount": 1 }
+                ],
+                "skillGrants": [
+                    { "type": "category", "choiceCount": 1, "categories": ["cognitive"], "excludeSurge": true }
+                ]
+            }
         ]
     },
     {
@@ -67,10 +110,28 @@
         ],
         "tier": 1,
         "bonuses": [],
-        "otherEffects": [
-            "Unlock Warform (Strength +1, Physical Deflect +1)",
-            "Unlock Workform (Willpower +1, ignore Exhausted, disguise as parshman)",
-            "Can change into these forms during highstorms"
+        "forms": [
+            {
+                "id": "warform",
+                "name": "Warform",
+                "description": "A powerful, armored form built for battle.",
+                "bonuses": [
+                    { "type": "ATTRIBUTE", "target": "Strength", "value": 1 },
+                    { "type": "DEFLECT", "target": "Physical", "value": 1 }
+                ]
+            },
+            {
+                "id": "workform",
+                "name": "Workform",
+                "description": "A resilient form suited to labor.",
+                "bonuses": [
+                    { "type": "ATTRIBUTE", "target": "Willpower", "value": 1 }
+                ],
+                "otherEffects": [
+                    "Ignore the Exhausted condition",
+                    "Can disguise as a parshman"
+                ]
+            }
         ]
     },
     {
@@ -105,10 +166,32 @@
         ],
         "tier": 4,
         "bonuses": [],
-        "otherEffects": [
-            "Unlock Direform (Strength +2, Physical Deflect +2, can use reactive strikes to grapple)",
-            "Unlock Stormform (Strength +1, Speed +1, Physical Deflect +1, grants Unleash Lightning ability)",
-            "Can change into these forms during highstorms"
+        "forms": [
+            {
+                "id": "direform",
+                "name": "Direform",
+                "description": "A fearsome Voidspren-bonded form.",
+                "bonuses": [
+                    { "type": "ATTRIBUTE", "target": "Strength", "value": 2 },
+                    { "type": "DEFLECT", "target": "Physical", "value": 2 }
+                ],
+                "otherEffects": [
+                    "You can use reactive strikes to grapple"
+                ]
+            },
+            {
+                "id": "stormform",
+                "name": "Stormform",
+                "description": "A Voidspren-bonded form that channels the storm.",
+                "bonuses": [
+                    { "type": "ATTRIBUTE", "target": "Strength", "value": 1 },
+                    { "type": "ATTRIBUTE", "target": "Speed", "value": 1 },
+                    { "type": "DEFLECT", "target": "Physical", "value": 1 }
+                ],
+                "otherEffects": [
+                    "Grants the Unleash Lightning ability"
+                ]
+            }
         ]
     },
     {
@@ -124,10 +207,32 @@
         ],
         "tier": 4,
         "bonuses": [],
-        "otherEffects": [
-            "Unlock Envoyform (Intellect +1, Presence +1, know all languages, advantage on Insight)",
-            "Unlock Relayform (Speed +2, ignore Slowed, can spend focus for advantage on agility tests)",
-            "Can change into these forms during highstorms"
+        "forms": [
+            {
+                "id": "envoyform",
+                "name": "Envoyform",
+                "description": "A Voidspren-bonded form suited to diplomacy.",
+                "bonuses": [
+                    { "type": "ATTRIBUTE", "target": "Intellect", "value": 1 },
+                    { "type": "ATTRIBUTE", "target": "Presence", "value": 1 }
+                ],
+                "otherEffects": [
+                    "You know all languages",
+                    "Advantage on Insight tests"
+                ]
+            },
+            {
+                "id": "relayform",
+                "name": "Relayform",
+                "description": "A swift Voidspren-bonded form.",
+                "bonuses": [
+                    { "type": "ATTRIBUTE", "target": "Speed", "value": 2 }
+                ],
+                "otherEffects": [
+                    "Ignore the Slowed condition",
+                    "You can spend focus for advantage on agility tests"
+                ]
+            }
         ]
     },
     {
@@ -143,10 +248,31 @@
         ],
         "tier": 4,
         "bonuses": [],
-        "otherEffects": [
-            "Unlock Decayform (Willpower +2, can prevent healing/focus recovery)",
-            "Unlock Nightform (Awareness +1, Intellect +1, Focus +2, preroll d20s for visions)",
-            "Can change into these forms during highstorms"
+        "forms": [
+            {
+                "id": "decayform",
+                "name": "Decayform",
+                "description": "A mysterious Voidspren-bonded form of withering.",
+                "bonuses": [
+                    { "type": "ATTRIBUTE", "target": "Willpower", "value": 2 }
+                ],
+                "otherEffects": [
+                    "You can prevent healing and focus recovery"
+                ]
+            },
+            {
+                "id": "nightform",
+                "name": "Nightform",
+                "description": "A mysterious Voidspren-bonded form of foresight.",
+                "bonuses": [
+                    { "type": "ATTRIBUTE", "target": "Awareness", "value": 1 },
+                    { "type": "ATTRIBUTE", "target": "Intellect", "value": 1 },
+                    { "type": "RESOURCE", "target": "focusMax", "value": 2 }
+                ],
+                "otherEffects": [
+                    "Preroll d20s for visions"
+                ]
+            }
         ]
     }
 ]

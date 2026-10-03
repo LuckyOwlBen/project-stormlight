@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/go-chi/chi/v5"
+
 	"project-stormlight/internal/character"
 	"project-stormlight/internal/playspace"
 	"project-stormlight/internal/views"
@@ -220,4 +222,112 @@ func (s *Server) handleSprenUnbondPost(w http.ResponseWriter, r *http.Request) {
 	s.resyncTalentBonuses(r.Context(), char)
 	s.hub.SendEventToCharacterSheet(char.ID, "Your GM has undone your spren bond", views.ModalCloseButton("Understood"))
 	views.SprenGrantForm(charId, character.SprenList, "").Render(r.Context(), w)
+}
+
+// requireGM writes an error response and returns false unless the caller is a logged-in GM.
+func (s *Server) requireGM(w http.ResponseWriter, r *http.Request) bool {
+	userID, ok := r.Context().Value("userID").(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return false
+	}
+	user, err := s.store.GetUserByID(r.Context(), userID)
+	if err != nil || !user.IsGM {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return false
+	}
+	return true
+}
+
+// GET /gm/highstorm/controls
+func (s *Server) handleHighstormControlsGet(w http.ResponseWriter, r *http.Request) {
+	if !s.requireGM(w, r) {
+		return
+	}
+	views.HighstormControl(s.hub.HighstormActive()).Render(r.Context(), w)
+}
+
+// POST /gm/highstorm/toggle starts or ends a highstorm. Starting one alerts every connected
+// player; either way each connected Singer's Singer Forms card is refreshed so its dropdown
+// unlocks or locks immediately.
+func (s *Server) handleHighstormTogglePost(w http.ResponseWriter, r *http.Request) {
+	if !s.requireGM(w, r) {
+		return
+	}
+
+	active := !s.hub.HighstormActive()
+	s.hub.SetHighstorm(active)
+
+	if active {
+		s.hub.SendEventToCharacterSheet(0, "A highstorm has begun!", views.ModalCloseButton("Brace yourself"))
+	}
+
+	seen := make(map[int]bool)
+	for _, charID := range s.hub.ConnectedCharacterIDs() {
+		if seen[charID] {
+			continue
+		}
+		seen[charID] = true
+		char, err := s.store.GetCharacterByID(r.Context(), charID)
+		if err != nil || char.Ancestry != character.Singer {
+			continue
+		}
+		s.hub.UpdateSingerFormsCard(s.buildSheetData(*char), r)
+	}
+
+	views.HighstormControl(active).Render(r.Context(), w)
+}
+
+// POST /playspace/{id}/singer-form changes a Singer's active form. Rejected unless the GM has
+// a highstorm active, so the lock cannot be bypassed by a stale or hand-built request.
+func (s *Server) handleSingerFormPost(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	charID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, "Invalid character ID", http.StatusBadRequest)
+		return
+	}
+	char, err := s.store.GetCharacterByID(r.Context(), charID)
+	if err != nil || char.UserID != userID {
+		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+	if char.Ancestry != character.Singer {
+		http.Error(w, "Only Singers can change form", http.StatusBadRequest)
+		return
+	}
+	if !s.hub.HighstormActive() {
+		// Refresh the card so a stale, still-unlocked dropdown re-locks.
+		s.hub.UpdateSingerFormsCard(s.buildSheetData(*char), r)
+		http.Error(w, "Forms can only be changed during a highstorm", http.StatusForbidden)
+		return
+	}
+
+	if err := character.ChangeSingerForm(char, r.FormValue("form")); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	character.RecalculateDefenses(char)
+	character.RecalculateResources(char)
+	character.RecalculateDerivedAttributes(char)
+	bonuses := character.RecalculateBonuses(char)
+
+	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
+		http.Error(w, "Failed to update character", http.StatusInternalServerError)
+		return
+	}
+	_ = s.store.UpsertBonuses(r.Context(), char.ID, bonuses)
+
+	sheet := s.buildSheetData(*char)
+	s.hub.UpdateBasicsComponentOnCharacterSheet(sheet, r)
+	s.hub.UpdateSkillsComponentOnCharacterSheet(sheet, r)
+	s.hub.UpdateDerivedAttributesComponentOnCharacterSheet(sheet, r)
+	s.hub.UpdateTalentsComponentOnCharacterSheet(sheet, r)
+
+	views.SingerFormsCard(sheet).Render(r.Context(), w)
 }

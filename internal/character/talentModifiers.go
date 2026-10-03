@@ -41,6 +41,12 @@ func modifiesTargets(t Talent) []string {
 func AggregateModifierGrants(char *Character, baseTalentID string) AggregatedGrants {
 	result := AggregatedGrants{BaseTalentID: baseTalentID}
 
+	if form, isForm := SingerForms[baseTalentID]; isForm {
+		result.ExpertiseGrants = append(result.ExpertiseGrants, form.ExpertiseGrants...)
+		result.SkillGrants = append(result.SkillGrants, form.SkillGrants...)
+		return result
+	}
+
 	base, ok := AllTalents[baseTalentID]
 	if !ok || char == nil || char.Talents == nil {
 		return result
@@ -140,11 +146,15 @@ func containsString(list []string, value string) bool {
 // a base talent via ModifierEffect don't need this themselves; the box lives on the base talent.
 func HasReassignableGrants(talentID string) bool {
 	talent, ok := AllTalents[talentID]
+	if form, isForm := SingerForms[talentID]; isForm {
+		// Singer forms hold their grants only while active, so they use the same Manage UI.
+		talent, ok = Talent{ExpertiseGrants: form.ExpertiseGrants, SkillGrants: form.SkillGrants, Retrainable: form.Retrainable}, true
+	}
 	if !ok || !talent.Retrainable {
 		return false
 	}
 	for _, grant := range talent.ExpertiseGrants {
-		if grant.Type == "choice" || grant.Type == "category" {
+		if grant.Type == "choice" || grant.Type == "category" || grant.Type == "custom" {
 			return true
 		}
 	}

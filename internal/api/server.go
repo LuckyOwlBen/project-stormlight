@@ -166,6 +166,7 @@ func (s *Server) Mount() http.Handler {
 		r.Post("/playspace/{id}/store/sell", s.handlePlayspaceStoreSellPost)
 		r.Post("/playspace/toggle-equipped", s.updateEquippedStatus)
 		r.Post("/playspace/toggle-active-stance", s.changeActiveStance)
+		r.Post("/playspace/{id}/singer-form", s.handleSingerFormPost)
 
 		// GM views
 		r.Get("/gm", s.handleGMGet)
@@ -179,6 +180,8 @@ func (s *Server) Mount() http.Handler {
 		r.Get("/gm/spren-grant-modal", s.handleSprenGrantGet)
 		r.Post("/gm/grant-spren", s.handleSprenGrantPost)
 		r.Post("/gm/unbond-spren", s.handleSprenUnbondPost)
+		r.Get("/gm/highstorm/controls", s.handleHighstormControlsGet)
+		r.Post("/gm/highstorm/toggle", s.handleHighstormTogglePost)
 
 		// Combat endpoints
 		r.Get("/combat/tracker", s.handleCombatTrackerGet)

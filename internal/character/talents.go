@@ -24,6 +24,7 @@ type TalentsTracker struct {
 	ID           int             `json:"id" gorm:"primaryKey"`
 	CharacterID  int             `json:"-" gorm:"not null;uniqueIndex"`
 	SprenBond    string          `json:"sprenBond" gorm:"not null;default:''"`
+	SingerForm   string          `json:"singerForm" gorm:"not null;default:''"` // currently selected Singer form ID; empty means dullform
 	List         []TalentHistory `json:"list" gorm:"foreignKey:TalentsTrackerID;constraint:OnDelete:CASCADE;"`
 	PointTracker `gorm:"embedded"`
 
@@ -79,6 +80,9 @@ type Talent struct {
 	GrantsAdvantage    []string       `json:"grantsAdvantage,omitempty"`
 	GrantsDisadvantage []string       `json:"grantsDisadvantage,omitempty"`
 	OtherEffects       []string       `json:"otherEffects,omitempty"`
+
+	/** Singer forms this talent unlocks (Forms of Finesse, Forms of Wisdom, etc.) */
+	Forms []SingerForm `json:"forms,omitempty"`
 
 	// Structured data fields - these replace otherEffects wherever possible
 	/** Structured expertise grants - replaces text parsing */
@@ -138,10 +142,13 @@ type Bonus struct {
 
 type ExpertiseGrant struct {
 	/** Type of grant */
-	Type string `json:"type"` // "fixed", "choice", or "category"
+	Type string `json:"type"` // "fixed", "choice", "category", or "custom" (player-entered free text)
 
 	/** Fixed expertises granted (for type: 'fixed') */
 	Expertises []string `json:"expertises,omitempty"`
+
+	/** For type "fixed": expertise names need not exist in ExpertiseList (rules allow any expertise) */
+	Custom bool `json:"custom,omitempty"`
 
 	/** Number of choices allowed (for type: 'choice') */
 	ChoiceCount int `json:"choiceCount,omitempty"`
@@ -821,6 +828,8 @@ func expertiseGrantSource(talentID string, grantIndex int) string {
 	return fmt.Sprintf("talent:%s:%d", talentID, grantIndex)
 }
 
+const maxCustomExpertiseLength = 60
+
 // ApplyFixedExpertiseGrants grants any "fixed" ExpertiseGrant entries on the talent.
 // Idempotent: does nothing if already applied for this talent.
 func ApplyFixedExpertiseGrants(char *Character, talent Talent) []Expertise {
@@ -840,7 +849,7 @@ func ApplyFixedExpertiseGrants(char *Character, talent Talent) []Expertise {
 			continue
 		}
 		for _, name := range grant.Expertises {
-			if _, ok := ExpertiseList[name]; !ok {
+			if _, ok := ExpertiseList[name]; !ok && !grant.Custom {
 				continue
 			}
 			granted = append(granted, Expertise{
@@ -866,22 +875,33 @@ func ApplyExpertiseChoice(char *Character, talent Talent, grantIndex int, select
 		return fmt.Errorf("invalid grant index: %d", grantIndex)
 	}
 	grant := talent.ExpertiseGrants[grantIndex]
-	if grant.Type != "choice" && grant.Type != "category" {
+	if grant.Type != "choice" && grant.Type != "category" && grant.Type != "custom" {
 		return fmt.Errorf("grant at index %d does not require a choice", grantIndex)
 	}
 
-	options, err := ResolveExpertiseGrantOptions(grant)
-	if err != nil {
-		return err
-	}
-	valid := make(map[string]bool, len(options))
-	for _, opt := range options {
-		valid[opt.Name] = true
+	valid := make(map[string]bool)
+	if grant.Type != "custom" {
+		options, err := ResolveExpertiseGrantOptions(grant)
+		if err != nil {
+			return err
+		}
+		for _, opt := range options {
+			valid[opt.Name] = true
+		}
 	}
 
 	choiceCount := grant.ChoiceCount
 	if choiceCount <= 0 {
 		choiceCount = 1
+	}
+	if grant.Type == "custom" {
+		cleaned := make([]string, 0, len(selectedNames))
+		for _, name := range selectedNames {
+			if name = strings.TrimSpace(name); name != "" {
+				cleaned = append(cleaned, name)
+			}
+		}
+		selectedNames = cleaned
 	}
 	if len(selectedNames) != choiceCount {
 		return fmt.Errorf("expected %d selections, got %d", choiceCount, len(selectedNames))
@@ -890,7 +910,11 @@ func ApplyExpertiseChoice(char *Character, talent Talent, grantIndex int, select
 	source := expertiseGrantSource(talent.Id, grantIndex)
 	granted := make([]Expertise, 0, len(selectedNames))
 	for _, name := range selectedNames {
-		if !valid[name] {
+		if grant.Type == "custom" {
+			if len(name) > maxCustomExpertiseLength {
+				return fmt.Errorf("custom expertise name is too long (max %d characters)", maxCustomExpertiseLength)
+			}
+		} else if !valid[name] {
 			return fmt.Errorf("selected expertise %s is not in the available options", name)
 		}
 		granted = append(granted, Expertise{
@@ -926,7 +950,7 @@ func PruneOrphanedTalentExpertises(char *Character, keptTalentIDs []string) {
 	for _, e := range char.Expertises.List {
 		if strings.HasPrefix(e.Source, "talent:") {
 			parts := strings.SplitN(e.Source, ":", 3)
-			if len(parts) >= 2 && !kept[parts[1]] {
+			if len(parts) >= 2 && !kept[parts[1]] && !isSingerFormID(parts[1]) {
 				continue
 			}
 		}
@@ -946,8 +970,15 @@ func LoadSingerTalentTree() error {
 		return err
 	}
 
+	SingerForms = make(map[string]SingerForm)
+	singerFormOrder = nil
 	for _, t := range singerTalents {
 		SingerTalents[t.Id] = t
+		for _, f := range t.Forms {
+			f.TalentID = t.Id
+			SingerForms[f.ID] = f
+			singerFormOrder = append(singerFormOrder, f.ID)
+		}
 	}
 
 	return nil
@@ -1008,6 +1039,8 @@ func RemoveSingerAncestryTalents(char *Character) {
 		kept = append(kept, h)
 	}
 	char.Talents.List = kept
+	char.Talents.SingerForm = ""
+	removeAllSingerFormGrants(char)
 
 	keptIDs := make([]string, 0, len(kept))
 	for _, h := range kept {

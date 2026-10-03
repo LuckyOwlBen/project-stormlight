@@ -27,36 +27,55 @@ type grantChoice struct {
     ChoiceCount int
     Options     []character.Expertise
     Selected    map[string]bool
+    // Custom grants take free-text names instead of picking from Options.
+    Custom       bool
+    SelectedList []string
+}
+
+// SelectedAt returns the i-th previously chosen name for a custom grant, or "".
+func (g grantChoice) SelectedAt(i int) string {
+    if i < len(g.SelectedList) {
+        return g.SelectedList[i]
+    }
+    return ""
 }
 
 func pendingGrantChoices(char *character.Character, talent character.Talent) []grantChoice {
     var result []grantChoice
     for i, grant := range talent.ExpertiseGrants {
-        if grant.Type != "choice" && grant.Type != "category" {
+        if grant.Type != "choice" && grant.Type != "category" && grant.Type != "custom" {
             continue
         }
-        options, err := character.ResolveExpertiseGrantOptions(grant)
-        if err != nil {
-            continue
+        var options []character.Expertise
+        if grant.Type != "custom" {
+            var err error
+            options, err = character.ResolveExpertiseGrantOptions(grant)
+            if err != nil {
+                continue
+            }
         }
         choiceCount := grant.ChoiceCount
         if choiceCount <= 0 {
             choiceCount = 1
         }
         selected := make(map[string]bool)
+        var selectedList []string
         if char != nil && char.Expertises != nil {
             source := fmt.Sprintf("talent:%s:%d", talent.Id, i)
             for _, e := range char.Expertises.List {
                 if e.Source == source {
                     selected[e.Name] = true
+                    selectedList = append(selectedList, e.Name)
                 }
             }
         }
         result = append(result, grantChoice{
-            GrantIndex:  i,
-            ChoiceCount: choiceCount,
-            Options:     options,
-            Selected:    selected,
+            GrantIndex:   i,
+            ChoiceCount:  choiceCount,
+            Options:      options,
+            Selected:     selected,
+            Custom:       grant.Type == "custom",
+            SelectedList: selectedList,
         })
     }
     return result

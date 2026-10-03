@@ -218,6 +218,11 @@ templ SkillComponentSection(spread character.SkillDisplayStructure) {
 }
 
 templ TalentsComponent(characterSheet models.CharacterSheetData) {
+	if characterSheet.Char.Ancestry == character.Singer {
+		<div id="singerFormsCard">
+			@SingerFormsCard(characterSheet)
+		</div>
+	}
 	for _, talentID := range reassignableGrantTalentIDs(characterSheet.Char) {
 		@TalentGrantsBox(characterSheet.Char, talentID)
 	}
@@ -331,6 +336,10 @@ func reassignableGrantTalentIDs(char *character.Character) []string {
 			ids = append(ids, h.TalentID)
 		}
 	}
+	// A Singer form with its own choice grants (Scholarform) gets the same box while active.
+	if form := character.CurrentSingerForm(char); character.HasReassignableGrants(form.ID) {
+		ids = append(ids, form.ID)
+	}
 	return ids
 }
 
@@ -341,7 +350,7 @@ templ TalentGrantsBox(char *character.Character, talentID string) {
 	<div class="card bg-base-200 shadow border-t-4 border-secondary col-span-1 md:col-span-2">
 		<div class="card-body p-4">
 			<div class="flex justify-between items-center">
-				<span class="text-xs uppercase font-extrabold text-primary">{ character.AllTalents[talentID].Name }</span>
+				<span class="text-xs uppercase font-extrabold text-primary">{ character.GrantSourceName(talentID) }</span>
 				<button
 					type="button"
 					class="btn btn-xs btn-primary"
@@ -353,7 +362,7 @@ templ TalentGrantsBox(char *character.Character, talentID string) {
 					Manage
 				</button>
 			</div>
-			<p class="text-xs opacity-70 mt-1">Temporary expertise and skills granted by { character.AllTalents[talentID].Name } - reassign anytime.</p>
+			<p class="text-xs opacity-70 mt-1">Temporary expertise and skills granted by { character.GrantSourceName(talentID) } - reassign anytime.</p>
 			<div class="flex flex-wrap gap-2 mt-2">
 				for _, name := range grantedExpertiseNames(char, talentID) {
 					<span class="badge badge-accent badge-sm">{ name }</span>
@@ -375,7 +384,7 @@ templ TalentGrantsManageModalPlaceholder() {
 templ TalentGrantsManageModal(char *character.Character, talentID string, agg character.AggregatedGrants) {
 	<dialog id="talent-grants-manage-modal" class="modal">
 		<div class="modal-box w-11/12 max-w-3xl">
-			<h3 class="font-bold text-lg">{ character.AllTalents[talentID].Name }: Manage Expertise &amp; Skills</h3>
+			<h3 class="font-bold text-lg">{ character.GrantSourceName(talentID) }: Manage Expertise &amp; Skills</h3>
 			<form
 				hx-post={ string(templ.SafeURL("/characters/" + strconv.Itoa(char.ID) + "/talents/" + talentID + "/manage-grants")) }
 				hx-target="#talent-grants-manage-modal"
@@ -387,6 +396,12 @@ templ TalentGrantsManageModal(char *character.Character, talentID string, agg ch
 					<div class="mb-4">
 						if grant.ChoiceCount > 1 {
 							<p class="text-sm opacity-70 mb-2">Choose { strconv.Itoa(grant.ChoiceCount) }:</p>
+						}
+						if grant.Custom {
+							<p class="text-sm opacity-70 mb-2">Enter an expertise:</p>
+							for i := 0; i < grant.ChoiceCount; i++ {
+								<input type="text" maxlength="60" name={ "expertiseGrant" + strconv.Itoa(grant.GrantIndex) } value={ grant.SelectedAt(i) } class="input w-full mb-2" placeholder="e.g. Ancient Languages" />
+							}
 						}
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-2">
 							for _, opt := range grant.Options {

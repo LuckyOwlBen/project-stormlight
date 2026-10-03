@@ -19,6 +19,7 @@ type Hub struct {
 	Register   chan *Client
 	Unregister chan *Client
 	broadcast  chan []byte
+	highstorm  bool
 }
 
 // NewHub creates an initialised Hub ready to Run.
@@ -63,6 +64,23 @@ func (h *Hub) Run() {
 			h.mu.RUnlock()
 		}
 	}
+}
+
+// HighstormActive reports whether the GM currently has a highstorm active. Held in memory
+// only, so it resets to off when the server restarts.
+func (h *Hub) HighstormActive() bool {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	return h.highstorm
+}
+
+// SetHighstorm records the highstorm state and reports whether it changed.
+func (h *Hub) SetHighstorm(active bool) bool {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	changed := h.highstorm != active
+	h.highstorm = active
+	return changed
 }
 
 // Broadcast enqueues a raw message for delivery to all connected clients.
@@ -370,4 +388,13 @@ func (h *Hub) UpdateTalentsComponentOnCharacterSheet(characterSheet models.Chara
 	buf.WriteString(`</div>`)
 	msg := buf.Bytes()
 	h.SendToCharacter(characterSheet.Char.ID, msg)
+}
+
+// UpdateSingerFormsCard pushes a freshly rendered Singer Forms card to the character's sheet.
+func (h *Hub) UpdateSingerFormsCard(characterSheet models.CharacterSheetData, r *http.Request) {
+	var buf bytes.Buffer
+	buf.WriteString(`<div id="singerFormsCard" hx-swap-oob="true">`)
+	views.SingerFormsCard(characterSheet).Render(r.Context(), &buf)
+	buf.WriteString(`</div>`)
+	h.SendToCharacter(characterSheet.Char.ID, buf.Bytes())
 }

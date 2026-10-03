@@ -29,7 +29,8 @@ func BuildDisplayObject(attributes Attributes) map[string]string {
 
 func RecalculateDerivedAttributes(char *Character) {
 	// Recalculate derived attributes based on the character's current attributes
-	char.DerivedAttributes = BuildDisplayObject(*char.Attributes)
+	attrs := EffectiveAttributes(char)
+	char.DerivedAttributes = BuildDisplayObject(attrs)
 }
 
 func getSensesRange(awareness int) int {
