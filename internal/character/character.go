@@ -222,5 +222,7 @@ func (c *Character) LevelUp() {
 		}
 	}
 
+	// Levels granted but not yet finalized; cleared when the character is finalized.
+	c.PendingLevels++
 	c.IsFinalized = false
 }

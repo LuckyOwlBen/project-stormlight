@@ -99,8 +99,8 @@ templ ActiveSessionsComponent(p []models.PlayerInfo) {
                     //have to pre load the modal content to avoid issues with htmx and modals
                     <div hx-get={"/gm/store/grant-item-modal?playerId=" + strconv.Itoa(player.CharID)} hx-trigger="load" hx-target="body" hx-swap="beforeend"></div>
                     <div hx-get={"/gm/spren-grant-modal?charId=" + strconv.Itoa(player.CharID)} hx-trigger="load" hx-target="body" hx-swap="beforeend"></div>
-                    <button class="btn btn-xs btn-primary font-bold ml-auto" onclick="document.getElementById('grant-spren-modal').showModal()">Grant Spren</button>
-                    <button class="btn btn-xs btn-primary font-bold ml-auto" onclick="document.getElementById('grant-item-modal').showModal()">Grant Item</button> 
+                    <button class="btn btn-xs btn-primary font-bold ml-auto" data-modal={ "grant-spren-modal-" + strconv.Itoa(player.CharID) } onclick="document.getElementById(this.dataset.modal).showModal()">Grant Spren</button>
+                    <button class="btn btn-xs btn-primary font-bold ml-auto" data-modal={ "grant-item-modal-" + strconv.Itoa(player.CharID) } onclick="document.getElementById(this.dataset.modal).showModal()">Grant Item</button> 
 					<button class="btn btn-xs btn-primary font-bold ml-auto" hx-post={"/characters/" + strconv.Itoa(player.CharID) + "/level-up"} hx-swap="none">Level Up</button>
 				</div>
                 }
@@ -483,11 +483,11 @@ templ GMStoreControls(storeState *models.StoreState) {
 }
 
 templ GrantItemModal(playerId int, itemMap map[string][]store.Item) {
-    <dialog id="grant-item-modal" class="modal">
+    <dialog id={ "grant-item-modal-" + strconv.Itoa(playerId) } class="modal">
         <div class="modal-box relative max-w-2xl">
             <input type="hidden" name="playerId" value={ strconv.Itoa(playerId) } />
             <div class="card bg-base-100 shadow p-4">            
-                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onclick="document.getElementById('grant-item-modal').close()">✕</button>
+                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onclick="this.closest('dialog').close()">✕</button>
                 <h3 class="text-lg font-bold mb-4 text-center">Grant Item to Player</h3>
                 <div class="tabs tabs-lift tabs-bottom mb-6 justify-center">
                     for category := range itemMap {
@@ -520,7 +520,7 @@ templ GrantItemModal(playerId int, itemMap map[string][]store.Item) {
 }
 
 templ SprenGrantForm(playerId int, sprenList []string, currentBond string) {
-    <dialog id="grant-spren-modal" class="modal">
+    <dialog id={ "grant-spren-modal-" + strconv.Itoa(playerId) } class="modal">
         <div class="modal-box relative max-w-2xl">
             if (len(sprenList) == 0) {
                 <div class="text-center py-10 space-y-4">

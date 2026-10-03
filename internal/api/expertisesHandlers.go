@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -51,8 +52,12 @@ func (s *Server) handleCharacterExpertisesPointsGet(w http.ResponseWriter, r *ht
 
 	remaining := maxExpertises - len(selectedNames)
 
-	views.PointsRemaining(remaining).Render(r.Context(), w)
-	views.NextButtonOOB(remaining == 0).Render(r.Context(), w)
+	if err := views.PointsRemaining(remaining).Render(r.Context(), w); err != nil {
+		log.Printf("render views.PointsRemaining failed: %v", err)
+	}
+	if err := views.NextButtonOOB(remaining == 0).Render(r.Context(), w); err != nil {
+		log.Printf("render views.NextButtonOOB failed: %v", err)
+	}
 }
 
 func (s *Server) handleCharacterExpertisesGet(w http.ResponseWriter, r *http.Request) {
@@ -175,6 +180,7 @@ func (s *Server) handleCharacterExpertisesPost(w http.ResponseWriter, r *http.Re
 
 	err = s.store.UpdateCharacter(r.Context(), char)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update expertises", err)
 		http.Error(w, "Failed to update expertises", http.StatusInternalServerError)
 		return
 	}

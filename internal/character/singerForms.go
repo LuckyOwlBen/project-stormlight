@@ -63,15 +63,6 @@ func isSingerFormID(id string) bool {
 	return ok
 }
 
-// SingerFormByID returns the form with the given ID, including dullform.
-func SingerFormByID(id string) (SingerForm, bool) {
-	if id == DullFormID {
-		return dullForm, true
-	}
-	f, ok := SingerForms[id]
-	return f, ok
-}
-
 // UnlockedSingerForms returns dullform plus every form unlocked by a "Forms of ..." talent
 // the character owns, in declaration order.
 func UnlockedSingerForms(char *Character) []SingerForm {

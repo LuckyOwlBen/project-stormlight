@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 	"project-stormlight/internal/views"
 	"strconv"
@@ -24,6 +25,7 @@ func (s *Server) IncrementHealthResource(w http.ResponseWriter, r *http.Request)
 
 	resourcesTable, err := s.store.GetResourcesTable(r.Context(), charID)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Unable to retrieve resources", err)
 		http.Error(w, "Unable to retrieve resources", http.StatusInternalServerError)
 		return
 	}
@@ -36,12 +38,15 @@ func (s *Server) IncrementHealthResource(w http.ResponseWriter, r *http.Request)
 	newValue, err := s.store.IncrementCurrentHealth(r.Context(), charID)
 
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Unable to increment health", err)
 		http.Error(w, "Unable to increment health", http.StatusInternalServerError)
 		return
 	}
 	s.hub.ResourceChangeEvent(charID, newValue, resourcesTable.FocusCurrent, resourcesTable.InvestitureCurrent)
 	s.pushCombatTrackerUpdate(r)
-	views.ValueJoinCard(newValue, resourcesTable.HealthMax, "health", "/characters/"+charIDStr+"/resources/health").Render(r.Context(), w)
+	if err := views.ValueJoinCard(newValue, resourcesTable.HealthMax, "health", "/characters/"+charIDStr+"/resources/health").Render(r.Context(), w); err != nil {
+		log.Printf("render views.ValueJoinCard failed: %v", err)
+	}
 }
 
 func (s *Server) DecrementHealthResource(w http.ResponseWriter, r *http.Request) {
@@ -60,6 +65,7 @@ func (s *Server) DecrementHealthResource(w http.ResponseWriter, r *http.Request)
 
 	resourcesTable, err := s.store.GetResourcesTable(r.Context(), charID)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Unable to retrieve resources", err)
 		http.Error(w, "Unable to retrieve resources", http.StatusInternalServerError)
 		return
 	}
@@ -72,6 +78,7 @@ func (s *Server) DecrementHealthResource(w http.ResponseWriter, r *http.Request)
 	newValue, err := s.store.DecrementCurrentHealth(r.Context(), charID)
 
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Unable to decrement health", err)
 		http.Error(w, "Unable to decrement health", http.StatusInternalServerError)
 		return
 	}
@@ -79,7 +86,9 @@ func (s *Server) DecrementHealthResource(w http.ResponseWriter, r *http.Request)
 	s.hub.ResourceChangeEvent(charID, newValue, resourcesTable.FocusCurrent, resourcesTable.InvestitureCurrent)
 	s.pushCombatTrackerUpdate(r)
 
-	views.ValueJoinCard(newValue, resourcesTable.HealthMax, "health", "/characters/"+charIDStr+"/resources/health").Render(r.Context(), w)
+	if err := views.ValueJoinCard(newValue, resourcesTable.HealthMax, "health", "/characters/"+charIDStr+"/resources/health").Render(r.Context(), w); err != nil {
+		log.Printf("render views.ValueJoinCard failed: %v", err)
+	}
 }
 
 func (s *Server) IncrementFocusResource(w http.ResponseWriter, r *http.Request) {
@@ -98,6 +107,7 @@ func (s *Server) IncrementFocusResource(w http.ResponseWriter, r *http.Request) 
 
 	resourcesTable, err := s.store.GetResourcesTable(r.Context(), charID)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Unable to retrieve resources", err)
 		http.Error(w, "Unable to retrieve resources", http.StatusInternalServerError)
 		return
 	}
@@ -109,12 +119,15 @@ func (s *Server) IncrementFocusResource(w http.ResponseWriter, r *http.Request) 
 
 	newValue, err := s.store.IncrementCurrentFocus(r.Context(), charID)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Unable to increment focus", err)
 		http.Error(w, "Unable to increment focus", http.StatusInternalServerError)
 		return
 	}
 	s.hub.ResourceChangeEvent(charID, resourcesTable.HealthCurrent, newValue, resourcesTable.InvestitureCurrent)
 	s.pushCombatTrackerUpdate(r)
-	views.ValueJoinCard(newValue, resourcesTable.FocusMax, "focus", "/characters/"+charIDStr+"/resources/focus").Render(r.Context(), w)
+	if err := views.ValueJoinCard(newValue, resourcesTable.FocusMax, "focus", "/characters/"+charIDStr+"/resources/focus").Render(r.Context(), w); err != nil {
+		log.Printf("render views.ValueJoinCard failed: %v", err)
+	}
 }
 
 func (s *Server) DecrementFocusResource(w http.ResponseWriter, r *http.Request) {
@@ -133,6 +146,7 @@ func (s *Server) DecrementFocusResource(w http.ResponseWriter, r *http.Request) 
 
 	resourcesTable, err := s.store.GetResourcesTable(r.Context(), charID)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Unable to retrieve resources", err)
 		http.Error(w, "Unable to retrieve resources", http.StatusInternalServerError)
 		return
 	}
@@ -144,6 +158,7 @@ func (s *Server) DecrementFocusResource(w http.ResponseWriter, r *http.Request) 
 
 	newValue, err := s.store.DecrementCurrentFocus(r.Context(), charID)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Unable to decrement focus", err)
 		http.Error(w, "Unable to decrement focus", http.StatusInternalServerError)
 		return
 	}
@@ -151,7 +166,9 @@ func (s *Server) DecrementFocusResource(w http.ResponseWriter, r *http.Request) 
 	s.hub.ResourceChangeEvent(charID, resourcesTable.HealthCurrent, newValue, resourcesTable.InvestitureCurrent)
 	s.pushCombatTrackerUpdate(r)
 
-	views.ValueJoinCard(newValue, resourcesTable.FocusMax, "focus", "/characters/"+charIDStr+"/resources/focus").Render(r.Context(), w)
+	if err := views.ValueJoinCard(newValue, resourcesTable.FocusMax, "focus", "/characters/"+charIDStr+"/resources/focus").Render(r.Context(), w); err != nil {
+		log.Printf("render views.ValueJoinCard failed: %v", err)
+	}
 }
 
 func (s *Server) IncrementInvestitureResource(w http.ResponseWriter, r *http.Request) {
@@ -170,6 +187,7 @@ func (s *Server) IncrementInvestitureResource(w http.ResponseWriter, r *http.Req
 
 	resourcesTable, err := s.store.GetResourcesTable(r.Context(), charID)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Unable to retrieve resources", err)
 		http.Error(w, "Unable to retrieve resources", http.StatusInternalServerError)
 		return
 	}
@@ -181,6 +199,7 @@ func (s *Server) IncrementInvestitureResource(w http.ResponseWriter, r *http.Req
 
 	newValue, err := s.store.IncrementCurrentInvestiture(r.Context(), charID)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Unable to increment investiture", err)
 		http.Error(w, "Unable to increment investiture", http.StatusInternalServerError)
 		return
 	}
@@ -188,7 +207,9 @@ func (s *Server) IncrementInvestitureResource(w http.ResponseWriter, r *http.Req
 	s.hub.ResourceChangeEvent(charID, resourcesTable.HealthCurrent, resourcesTable.FocusCurrent, newValue)
 	s.pushCombatTrackerUpdate(r)
 
-	views.ValueJoinCard(newValue, resourcesTable.InvestitureMax, "investiture", "/characters/"+charIDStr+"/resources/investiture").Render(r.Context(), w)
+	if err := views.ValueJoinCard(newValue, resourcesTable.InvestitureMax, "investiture", "/characters/"+charIDStr+"/resources/investiture").Render(r.Context(), w); err != nil {
+		log.Printf("render views.ValueJoinCard failed: %v", err)
+	}
 }
 
 func (s *Server) DecrementInvestitureResource(w http.ResponseWriter, r *http.Request) {
@@ -207,6 +228,7 @@ func (s *Server) DecrementInvestitureResource(w http.ResponseWriter, r *http.Req
 
 	resourcesTable, err := s.store.GetResourcesTable(r.Context(), charID)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Unable to retrieve resources", err)
 		http.Error(w, "Unable to retrieve resources", http.StatusInternalServerError)
 		return
 	}
@@ -218,6 +240,7 @@ func (s *Server) DecrementInvestitureResource(w http.ResponseWriter, r *http.Req
 
 	newValue, err := s.store.DecrementCurrentInvestiture(r.Context(), charID)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Unable to decrement investiture", err)
 		http.Error(w, "Unable to decrement investiture", http.StatusInternalServerError)
 		return
 	}
@@ -225,6 +248,8 @@ func (s *Server) DecrementInvestitureResource(w http.ResponseWriter, r *http.Req
 	s.hub.ResourceChangeEvent(charID, resourcesTable.HealthCurrent, resourcesTable.FocusCurrent, newValue)
 	s.pushCombatTrackerUpdate(r)
 
-	views.ValueJoinCard(newValue, resourcesTable.InvestitureMax, "investiture", "/characters/"+charIDStr+"/resources/investiture").Render(r.Context(), w)
+	if err := views.ValueJoinCard(newValue, resourcesTable.InvestitureMax, "investiture", "/characters/"+charIDStr+"/resources/investiture").Render(r.Context(), w); err != nil {
+		log.Printf("render views.ValueJoinCard failed: %v", err)
+	}
 
 }

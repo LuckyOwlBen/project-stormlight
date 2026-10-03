@@ -56,6 +56,15 @@ func (s *Store) InitSchema(ctx context.Context) error {
 	return s.SeedStoreState(ctx)
 }
 
+// Ping verifies the database connection is alive.
+func (s *Store) Ping(ctx context.Context) error {
+	sqlDB, err := s.db.DB()
+	if err != nil {
+		return err
+	}
+	return sqlDB.PingContext(ctx)
+}
+
 // Connect opens a database connection and verifies it with a ping
 func Connect(dsn string) (*gorm.DB, error) {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})

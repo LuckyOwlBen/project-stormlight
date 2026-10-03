@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -74,8 +75,12 @@ func (s *Server) handleCharacterCulturesPointsGet(w http.ResponseWriter, r *http
 	selectedNames := r.Form["cultures"]
 	remaining := 2 - len(selectedNames)
 
-	views.PointsRemaining(remaining).Render(r.Context(), w)
-	views.NextButtonOOB(len(selectedNames) > 0).Render(r.Context(), w)
+	if err := views.PointsRemaining(remaining).Render(r.Context(), w); err != nil {
+		log.Printf("render views.PointsRemaining failed: %v", err)
+	}
+	if err := views.NextButtonOOB(len(selectedNames) > 0).Render(r.Context(), w); err != nil {
+		log.Printf("render views.NextButtonOOB failed: %v", err)
+	}
 }
 
 // POST /characters/{id}/cultures
@@ -145,6 +150,7 @@ func (s *Server) handleCharacterCulturesPost(w http.ResponseWriter, r *http.Requ
 
 	err = s.store.UpdateCharacter(r.Context(), char)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update cultures", err)
 		http.Error(w, "Failed to update cultures", http.StatusInternalServerError)
 		return
 	}

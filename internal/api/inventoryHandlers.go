@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 	"sort"
 	"strconv"
@@ -82,6 +83,7 @@ func (s *Server) handleCharacterInventoryPost(w http.ResponseWriter, r *http.Req
 
 	char.CreationStep = "review"
 	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to advance step", err)
 		http.Error(w, "Failed to advance step", http.StatusInternalServerError)
 		return
 	}
@@ -126,6 +128,7 @@ func (s *Server) handleCharacterInventoryKitPost(w http.ResponseWriter, r *http.
 	}
 
 	if err := s.store.ApplyStartingKit(r.Context(), charID, kit); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to apply kit", err)
 		http.Error(w, "Failed to apply kit", http.StatusInternalServerError)
 		return
 	}
@@ -172,12 +175,15 @@ func (s *Server) handleCharacterInventoryBuyPost(w http.ResponseWriter, r *http.
 
 	char, err = s.store.GetCharacterByID(r.Context(), charID)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to reload character", err)
 		http.Error(w, "Failed to reload character", http.StatusInternalServerError)
 		return
 	}
 
 	if r.Header.Get("HX-Request") == "true" {
-		views.InventoryAndCurrencyPartial(char).Render(r.Context(), w)
+		if err := views.InventoryAndCurrencyPartial(char).Render(r.Context(), w); err != nil {
+			log.Printf("render views.InventoryAndCurrencyPartial failed: %v", err)
+		}
 	} else {
 		http.Redirect(w, r, "/characters/"+strconv.Itoa(charID)+"/inventory", http.StatusSeeOther)
 	}
@@ -215,19 +221,23 @@ func (s *Server) handleCharacterInventorySellPost(w http.ResponseWriter, r *http
 		return
 	}
 
-	if err := s.store.SellItem(r.Context(), invItemID); err != nil {
+	if err := s.store.SellItem(r.Context(), charID, invItemID); err != nil {
+		log.Printf("%s %s: %v", r.Method, r.URL.Path, err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	char, err = s.store.GetCharacterByID(r.Context(), charID)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to reload character", err)
 		http.Error(w, "Failed to reload character", http.StatusInternalServerError)
 		return
 	}
 
 	if r.Header.Get("HX-Request") == "true" {
-		views.InventoryAndCurrencyPartial(char).Render(r.Context(), w)
+		if err := views.InventoryAndCurrencyPartial(char).Render(r.Context(), w); err != nil {
+			log.Printf("render views.InventoryAndCurrencyPartial failed: %v", err)
+		}
 	} else {
 		http.Redirect(w, r, "/characters/"+strconv.Itoa(charID)+"/inventory", http.StatusSeeOther)
 	}

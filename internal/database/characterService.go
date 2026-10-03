@@ -219,12 +219,15 @@ func (s *Store) BuyItem(ctx context.Context, charID int, item store.Item) error 
 	})
 }
 
-// SellItem removes one quantity of an inventory item and refunds its price in chips.
-func (s *Store) SellItem(ctx context.Context, inventoryItemID int) error {
+// SellItem removes one quantity of an inventory item owned by charID and refunds its price in chips.
+func (s *Store) SellItem(ctx context.Context, charID int, inventoryItemID int) error {
 	return s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		var item character.Inventory
 		if err := tx.First(&item, inventoryItemID).Error; err != nil {
 			return err
+		}
+		if item.CharacterID != charID {
+			return fmt.Errorf("unauthorized: item does not belong to this character")
 		}
 		if item.Quantity > 1 {
 			if err := tx.Model(&item).Update("quantity", item.Quantity-1).Error; err != nil {
@@ -238,4 +241,18 @@ func (s *Store) SellItem(ctx context.Context, inventoryItemID int) error {
 		return tx.Model(&character.Character{}).Where("id = ?", item.CharacterID).
 			Update("currency_in_chips", gorm.Expr("currency_in_chips + ?", item.Price)).Error
 	})
+}
+
+// GetCharacterOwnerID returns the user ID that owns a character without loading the
+// character's relations, for cheap authorization checks.
+func (s *Store) GetCharacterOwnerID(ctx context.Context, id int) (int, error) {
+	var ownerID int
+	result := s.db.WithContext(ctx).Model(&character.Character{}).Select("user_id").Where("id = ?", id).Limit(1).Scan(&ownerID)
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	if result.RowsAffected == 0 {
+		return 0, gorm.ErrRecordNotFound
+	}
+	return ownerID, nil
 }

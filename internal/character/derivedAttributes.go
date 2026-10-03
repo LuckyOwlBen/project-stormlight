@@ -31,6 +31,9 @@ func RecalculateDerivedAttributes(char *Character) {
 	// Recalculate derived attributes based on the character's current attributes
 	attrs := EffectiveAttributes(char)
 	char.DerivedAttributes = BuildDisplayObject(attrs)
+	if bondRange := SprenBondRange(char); bondRange > 0 {
+		char.DerivedAttributes["Spren Bond Range"] = fmt.Sprintf("%d", bondRange)
+	}
 }
 
 func getSensesRange(awareness int) int {

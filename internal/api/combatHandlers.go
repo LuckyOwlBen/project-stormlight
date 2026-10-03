@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"project-stormlight/internal/models"
 	"project-stormlight/internal/views"
@@ -19,6 +20,7 @@ func (s *Server) handleCombatTrackerGet(w http.ResponseWriter, r *http.Request) 
 func (s *Server) refreshCombatTracker(w http.ResponseWriter, r *http.Request) {
 	data, err := s.buildCombatTrackerData(r.Context())
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to build combat tracker", err)
 		http.Error(w, "Failed to build combat tracker", http.StatusInternalServerError)
 		return
 	}
@@ -31,6 +33,7 @@ func (s *Server) refreshCombatTracker(w http.ResponseWriter, r *http.Request) {
 func (s *Server) pushCombatTrackerUpdate(r *http.Request) {
 	data, err := s.buildCombatTrackerData(r.Context())
 	if err != nil {
+		log.Printf("combat: failed to push tracker update: %v", err)
 		return
 	}
 	s.hub.UpdateCombatSection(data, r)
@@ -177,12 +180,14 @@ func (s *Server) handleCombatSessionCreate(w http.ResponseWriter, r *http.Reques
 	session := &models.CombatSession{Active: false, CurrentTurnIndex: -1}
 	sessionID, err := s.store.CreateCombatSession(r.Context(), session)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to create combat session", err)
 		http.Error(w, "Failed to create combat session", http.StatusInternalServerError)
 		return
 	}
 	for _, charID := range s.hub.ConnectedCharacterIDs() {
 		p := &models.CombatParticipant{CharacterID: charID, SessionID: sessionID, Mode: ""}
 		if err := s.store.CreateCombatParticipant(r.Context(), p); err != nil {
+			log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to enrol participant", err)
 			http.Error(w, "Failed to enrol participant", http.StatusInternalServerError)
 			return
 		}
@@ -204,10 +209,14 @@ func (s *Server) handleCombatSessionStart(w http.ResponseWriter, r *http.Request
 	session.Active = true
 	session.CurrentTurnIndex = -1
 	if err := s.store.UpdateCombatSession(r.Context(), &session); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to start combat", err)
 		http.Error(w, "Failed to start combat", http.StatusInternalServerError)
 		return
 	}
-	participants, _ := s.store.RetrieveCombatParticipantsBySessionID(r.Context(), sessionID)
+	participants, err := s.store.RetrieveCombatParticipantsBySessionID(r.Context(), sessionID)
+	if err != nil {
+		log.Printf("combat: failed to load participants for session %d: %v", sessionID, err)
+	}
 	for _, p := range participants {
 		p.Mode = ""
 		s.store.UpdateCombatParticipant(r.Context(), &p)
@@ -222,12 +231,16 @@ func (s *Server) handleCombatSessionEnd(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "Invalid session ID", http.StatusBadRequest)
 		return
 	}
-	participants, _ := s.store.RetrieveCombatParticipantsBySessionID(r.Context(), sessionID)
+	participants, err := s.store.RetrieveCombatParticipantsBySessionID(r.Context(), sessionID)
+	if err != nil {
+		log.Printf("combat: failed to load participants for session %d: %v", sessionID, err)
+	}
 	for _, p := range participants {
 		s.store.DeleteCombatParticipant(r.Context(), p.ID)
 	}
 	s.store.DeleteCombatSessionEnemiesBySessionID(r.Context(), sessionID)
 	if err := s.store.DeleteCombatSession(r.Context(), sessionID); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to delete session", err)
 		http.Error(w, "Failed to delete session", http.StatusInternalServerError)
 		return
 	}
@@ -248,6 +261,7 @@ func (s *Server) handleCombatEndCombat(w http.ResponseWriter, r *http.Request) {
 	session.Active = false
 	session.CurrentTurnIndex = -1
 	if err := s.store.UpdateCombatSession(r.Context(), &session); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to end combat", err)
 		http.Error(w, "Failed to end combat", http.StatusInternalServerError)
 		return
 	}
@@ -276,7 +290,10 @@ func (s *Server) handleCombatNextTurn(w http.ResponseWriter, r *http.Request) {
 	nextIdx := session.CurrentTurnIndex + 1
 	if nextIdx >= len(flat) || len(flat) == 0 {
 		// End of round → reset pace, start new round.
-		participants, _ := s.store.RetrieveCombatParticipantsBySessionID(r.Context(), sessionID)
+		participants, err := s.store.RetrieveCombatParticipantsBySessionID(r.Context(), sessionID)
+		if err != nil {
+			log.Printf("combat: failed to load participants for session %d: %v", sessionID, err)
+		}
 		for _, p := range participants {
 			p.Mode = ""
 			s.store.UpdateCombatParticipant(r.Context(), &p)
@@ -324,6 +341,7 @@ func (s *Server) handleCombatSessionAddEnemy(w http.ResponseWriter, r *http.Requ
 		MaxHP:     vault.HP,
 	}
 	if err := s.store.CreateCombatSessionEnemy(r.Context(), se); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to add enemy to session", err)
 		http.Error(w, "Failed to add enemy to session", http.StatusInternalServerError)
 		return
 	}
@@ -337,6 +355,7 @@ func (s *Server) handleCombatSessionRemoveEnemy(w http.ResponseWriter, r *http.R
 		return
 	}
 	if err := s.store.DeleteCombatSessionEnemy(r.Context(), seID); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to remove enemy from session", err)
 		http.Error(w, "Failed to remove enemy from session", http.StatusInternalServerError)
 		return
 	}
@@ -359,6 +378,7 @@ func (s *Server) handleCombatEnemyAdd(w http.ResponseWriter, r *http.Request) {
 	}
 	enemy := &models.Enemy{Name: name, HP: hp, Mode: mode}
 	if err := s.store.CreateStoredEnemy(r.Context(), enemy); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to create enemy", err)
 		http.Error(w, "Failed to create enemy", http.StatusInternalServerError)
 		return
 	}
@@ -372,6 +392,7 @@ func (s *Server) handleCombatEnemyRemove(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	if err := s.store.DeleteStoredEnemy(r.Context(), enemyID); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to delete enemy", err)
 		http.Error(w, "Failed to delete enemy", http.StatusInternalServerError)
 		return
 	}
@@ -401,6 +422,7 @@ func (s *Server) adjustSessionEnemyHP(w http.ResponseWriter, r *http.Request, de
 	}
 	se.CurrentHP = max(0, min(se.CurrentHP+delta, se.MaxHP))
 	if err := s.store.UpdateCombatSessionEnemy(r.Context(), se); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update HP", err)
 		http.Error(w, "Failed to update HP", http.StatusInternalServerError)
 		return
 	}
@@ -421,6 +443,7 @@ func (s *Server) handleSessionEnemyPaceUpdate(w http.ResponseWriter, r *http.Req
 	}
 	se.Mode = mode
 	if err := s.store.UpdateCombatSessionEnemy(r.Context(), se); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update pace", err)
 		http.Error(w, "Failed to update pace", http.StatusInternalServerError)
 		return
 	}
@@ -450,10 +473,13 @@ func (s *Server) setCharacterPace(w http.ResponseWriter, r *http.Request, mode s
 	}
 	participant.Mode = mode
 	if err := s.store.UpdateCombatParticipant(r.Context(), &participant); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update pace", err)
 		http.Error(w, "Failed to update pace", http.StatusInternalServerError)
 		return
 	}
-	views.EventModal("", nil).Render(r.Context(), w)
+	if err := views.EventModal("", nil).Render(r.Context(), w); err != nil {
+		log.Printf("render views.EventModal failed: %v", err)
+	}
 	s.refreshCombatTracker(w, r)
 }
 
@@ -467,9 +493,4 @@ func (s *Server) handleCombatNotifyTurn(w http.ResponseWriter, r *http.Request) 
 	}
 	s.hub.SendEventToCharacterSheet(charID, "It's your turn in combat!", views.ModalCloseButton("Let's go!"))
 	w.WriteHeader(http.StatusOK)
-}
-
-// handleFastTurnSelection is superseded by handleCharacterPaceFast but kept for compatibility.
-func (s *Server) handleFastTurnSelection(w http.ResponseWriter, r *http.Request) {
-	s.setCharacterPace(w, r, "Fast")
 }

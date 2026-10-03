@@ -548,11 +548,11 @@ templ EquipmentComponent(characterSheet models.CharacterSheetData) {
 
 templ DerivedAttributesComponent(characterSheet models.CharacterSheetData) {
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-		for attr, value := range characterSheet.DerivedAttributes {
+		for _, attr := range sortedKeys(characterSheet.DerivedAttributes) {
 			<div class="card bg-base-200 shadow border-t-4 border-primary">
 				<div class="card-body p-4 text-center">
 					<span class="text-xs uppercase font-extrabold text-primary">{ attr }</span>
-					<span class="text-3xl font-extrabold text-base-content">{ value }</span>
+					<span class="text-3xl font-extrabold text-base-content">{ characterSheet.DerivedAttributes[attr] }</span>
 				</div>
 			</div>
 	}

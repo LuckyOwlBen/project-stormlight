@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -93,8 +94,12 @@ func (s *Server) handleCharacterAttributesPointsGet(w http.ResponseWriter, r *ht
 
 	remaining := char.Attributes.PointsRemaining - totalSpent
 
-	views.PointsRemaining(remaining).Render(r.Context(), w)
-	views.NextButtonOOB(remaining == 0).Render(r.Context(), w)
+	if err := views.PointsRemaining(remaining).Render(r.Context(), w); err != nil {
+		log.Printf("render views.PointsRemaining failed: %v", err)
+	}
+	if err := views.NextButtonOOB(remaining == 0).Render(r.Context(), w); err != nil {
+		log.Printf("render views.NextButtonOOB failed: %v", err)
+	}
 }
 
 func (s *Server) handleCharacterAttributesPost(w http.ResponseWriter, r *http.Request) {
@@ -167,6 +172,7 @@ func (s *Server) handleCharacterAttributesPost(w http.ResponseWriter, r *http.Re
 
 	err = s.store.UpdateCharacter(r.Context(), char)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update attributes", err)
 		http.Error(w, "Failed to update attributes", http.StatusInternalServerError)
 		return
 	}

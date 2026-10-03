@@ -3,6 +3,7 @@ package playspace
 import (
 	"bytes"
 	"context"
+	"log"
 	"net/http"
 	"project-stormlight/internal/models"
 	"project-stormlight/internal/views"
@@ -116,7 +117,9 @@ func (h *Hub) broadcastPresence() {
 
 	var buf bytes.Buffer
 	buf.WriteString(`<div id="activeSessions" hx-swap-oob="true">`)
-	views.ActiveSessionsComponent(players).Render(context.TODO(), &buf)
+	if err := views.ActiveSessionsComponent(players).Render(context.TODO(), &buf); err != nil {
+		log.Printf("render views.ActiveSessionsComponent failed: %v", err)
+	}
 	buf.WriteString(`</div>`)
 	msg := buf.Bytes()
 	h.SendToGM(msg)
@@ -147,7 +150,9 @@ func (h *Hub) UpdateCombatSection(data models.CombatTrackerData, r *http.Request
 
 	var buf bytes.Buffer
 	buf.WriteString(`<div id="combatTracker" hx-swap-oob="true">`)
-	views.CombatTracker(data).Render(r.Context(), &buf)
+	if err := views.CombatTracker(data).Render(r.Context(), &buf); err != nil {
+		log.Printf("render views.CombatTracker failed: %v", err)
+	}
 	buf.WriteString(`</div>`)
 	h.SendToGM(buf.Bytes())
 }
@@ -277,7 +282,9 @@ func (h *Hub) ResourceChangeEvent(charID int, newHp, newFocus, newInvest int) {
 	h.mu.Unlock()
 	var buf bytes.Buffer
 	buf.WriteString(`<div id="activeSessions" hx-swap-oob="true">`)
-	views.ActiveSessionsComponent(players).Render(context.TODO(), &buf)
+	if err := views.ActiveSessionsComponent(players).Render(context.TODO(), &buf); err != nil {
+		log.Printf("render views.ActiveSessionsComponent failed: %v", err)
+	}
 	buf.WriteString(`</div>`)
 	msg := buf.Bytes()
 	h.mu.RLock()
@@ -324,7 +331,9 @@ func (h *Hub) SendToAllCharacters(msg []byte) {
 func (h *Hub) UpdateEquipmentComponentOnCharacterSheet(characterSheet models.CharacterSheetData, r *http.Request) {
 	var buf bytes.Buffer
 	buf.WriteString(`<div id="equipmentComponent" hx-swap-oob="true">`)
-	views.EquipmentComponent(characterSheet).Render(r.Context(), &buf)
+	if err := views.EquipmentComponent(characterSheet).Render(r.Context(), &buf); err != nil {
+		log.Printf("render views.EquipmentComponent failed: %v", err)
+	}
 	buf.WriteString(`</div>`)
 	msg := buf.Bytes()
 	h.SendToCharacter(characterSheet.Char.ID, msg)
@@ -333,7 +342,9 @@ func (h *Hub) UpdateEquipmentComponentOnCharacterSheet(characterSheet models.Cha
 func (h *Hub) SendEventToCharacterSheet(charID int, message string, button templ.Component) {
 	var buf bytes.Buffer
 	buf.WriteString(`<div id="eventModal" hx-swap-oob="true">`)
-	views.EventModal(message, button).Render(context.TODO(), &buf)
+	if err := views.EventModal(message, button).Render(context.TODO(), &buf); err != nil {
+		log.Printf("render views.EventModal failed: %v", err)
+	}
 	buf.WriteString(`</div>`)
 	msg := buf.Bytes()
 	if charID == 0 {
@@ -357,7 +368,9 @@ func (h *Hub) UpdateClientLevel(charID int, newLevel int) {
 func (h *Hub) UpdateSkillsComponentOnCharacterSheet(characterSheet models.CharacterSheetData, r *http.Request) {
 	var buf bytes.Buffer
 	buf.WriteString(`<div id="skillsComponent" hx-swap-oob="true">`)
-	views.SkillsComponent(characterSheet).Render(r.Context(), &buf)
+	if err := views.SkillsComponent(characterSheet).Render(r.Context(), &buf); err != nil {
+		log.Printf("render views.SkillsComponent failed: %v", err)
+	}
 	buf.WriteString(`</div>`)
 	msg := buf.Bytes()
 	h.SendToCharacter(characterSheet.Char.ID, msg)
@@ -366,7 +379,9 @@ func (h *Hub) UpdateSkillsComponentOnCharacterSheet(characterSheet models.Charac
 func (h *Hub) UpdateDerivedAttributesComponentOnCharacterSheet(characterSheet models.CharacterSheetData, r *http.Request) {
 	var buf bytes.Buffer
 	buf.WriteString(`<div id="derivedAttributesComponent" hx-swap-oob="true">`)
-	views.DerivedAttributesComponent(characterSheet).Render(r.Context(), &buf)
+	if err := views.DerivedAttributesComponent(characterSheet).Render(r.Context(), &buf); err != nil {
+		log.Printf("render views.DerivedAttributesComponent failed: %v", err)
+	}
 	buf.WriteString(`</div>`)
 	msg := buf.Bytes()
 	h.SendToCharacter(characterSheet.Char.ID, msg)
@@ -375,7 +390,9 @@ func (h *Hub) UpdateDerivedAttributesComponentOnCharacterSheet(characterSheet mo
 func (h *Hub) UpdateBasicsComponentOnCharacterSheet(characterSheet models.CharacterSheetData, r *http.Request) {
 	var buf bytes.Buffer
 	buf.WriteString(`<div id="basicsComponent" hx-swap-oob="true">`)
-	views.BasicsComponent(characterSheet).Render(r.Context(), &buf)
+	if err := views.BasicsComponent(characterSheet).Render(r.Context(), &buf); err != nil {
+		log.Printf("render views.BasicsComponent failed: %v", err)
+	}
 	buf.WriteString(`</div>`)
 	msg := buf.Bytes()
 	h.SendToCharacter(characterSheet.Char.ID, msg)
@@ -384,7 +401,9 @@ func (h *Hub) UpdateBasicsComponentOnCharacterSheet(characterSheet models.Charac
 func (h *Hub) UpdateTalentsComponentOnCharacterSheet(characterSheet models.CharacterSheetData, r *http.Request) {
 	var buf bytes.Buffer
 	buf.WriteString(`<div id="talentsComponent" hx-swap-oob="true">`)
-	views.TalentsComponent(characterSheet).Render(r.Context(), &buf)
+	if err := views.TalentsComponent(characterSheet).Render(r.Context(), &buf); err != nil {
+		log.Printf("render views.TalentsComponent failed: %v", err)
+	}
 	buf.WriteString(`</div>`)
 	msg := buf.Bytes()
 	h.SendToCharacter(characterSheet.Char.ID, msg)
@@ -394,7 +413,9 @@ func (h *Hub) UpdateTalentsComponentOnCharacterSheet(characterSheet models.Chara
 func (h *Hub) UpdateSingerFormsCard(characterSheet models.CharacterSheetData, r *http.Request) {
 	var buf bytes.Buffer
 	buf.WriteString(`<div id="singerFormsCard" hx-swap-oob="true">`)
-	views.SingerFormsCard(characterSheet).Render(r.Context(), &buf)
+	if err := views.SingerFormsCard(characterSheet).Render(r.Context(), &buf); err != nil {
+		log.Printf("render views.SingerFormsCard failed: %v", err)
+	}
 	buf.WriteString(`</div>`)
 	h.SendToCharacter(characterSheet.Char.ID, buf.Bytes())
 }

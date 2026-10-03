@@ -102,13 +102,6 @@ func (s *Store) CreateStoredEnemy(ctx context.Context, enemy *models.Enemy) erro
 	return nil
 }
 
-func (s *Store) UpdateStoredEnemy(ctx context.Context, enemy *models.Enemy) error {
-	if err := s.db.WithContext(ctx).Save(enemy).Error; err != nil {
-		return err
-	}
-	return nil
-}
-
 func (s *Store) DeleteStoredEnemy(ctx context.Context, id int) error {
 	if err := s.db.WithContext(ctx).Delete(&models.Enemy{}, id).Error; err != nil {
 		return err

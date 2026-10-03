@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 	"project-stormlight/internal/views"
 	"strconv"
@@ -29,11 +30,14 @@ func (s *Server) IncrementPetHp(w http.ResponseWriter, r *http.Request) {
 
 	newValue, err := s.store.IncrementPetHp(r.Context(), charID)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Unable to increment pet HP", err)
 		http.Error(w, "Unable to increment pet HP", http.StatusInternalServerError)
 		return
 	}
 
-	views.PetValueCard(newValue, petRes.HpMax, "HP", "/characters/"+charIDStr+"/pet/hp").Render(r.Context(), w)
+	if err := views.PetValueCard(newValue, petRes.HpMax, "HP", "/characters/"+charIDStr+"/pet/hp").Render(r.Context(), w); err != nil {
+		log.Printf("render views.PetValueCard failed: %v", err)
+	}
 }
 
 func (s *Server) DecrementPetHp(w http.ResponseWriter, r *http.Request) {
@@ -57,11 +61,14 @@ func (s *Server) DecrementPetHp(w http.ResponseWriter, r *http.Request) {
 
 	newValue, err := s.store.DecrementPetHp(r.Context(), charID)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Unable to decrement pet HP", err)
 		http.Error(w, "Unable to decrement pet HP", http.StatusInternalServerError)
 		return
 	}
 
-	views.PetValueCard(newValue, petRes.HpMax, "HP", "/characters/"+charIDStr+"/pet/hp").Render(r.Context(), w)
+	if err := views.PetValueCard(newValue, petRes.HpMax, "HP", "/characters/"+charIDStr+"/pet/hp").Render(r.Context(), w); err != nil {
+		log.Printf("render views.PetValueCard failed: %v", err)
+	}
 }
 
 func (s *Server) IncrementPetFocus(w http.ResponseWriter, r *http.Request) {
@@ -85,11 +92,14 @@ func (s *Server) IncrementPetFocus(w http.ResponseWriter, r *http.Request) {
 
 	newValue, err := s.store.IncrementPetFocus(r.Context(), charID)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Unable to increment pet Focus", err)
 		http.Error(w, "Unable to increment pet Focus", http.StatusInternalServerError)
 		return
 	}
 
-	views.PetValueCard(newValue, petRes.FocusMax, "Focus", "/characters/"+charIDStr+"/pet/focus").Render(r.Context(), w)
+	if err := views.PetValueCard(newValue, petRes.FocusMax, "Focus", "/characters/"+charIDStr+"/pet/focus").Render(r.Context(), w); err != nil {
+		log.Printf("render views.PetValueCard failed: %v", err)
+	}
 }
 
 func (s *Server) DecrementPetFocus(w http.ResponseWriter, r *http.Request) {
@@ -113,9 +123,12 @@ func (s *Server) DecrementPetFocus(w http.ResponseWriter, r *http.Request) {
 
 	newValue, err := s.store.DecrementPetFocus(r.Context(), charID)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Unable to decrement pet Focus", err)
 		http.Error(w, "Unable to decrement pet Focus", http.StatusInternalServerError)
 		return
 	}
 
-	views.PetValueCard(newValue, petRes.FocusMax, "Focus", "/characters/"+charIDStr+"/pet/focus").Render(r.Context(), w)
+	if err := views.PetValueCard(newValue, petRes.FocusMax, "Focus", "/characters/"+charIDStr+"/pet/focus").Render(r.Context(), w); err != nil {
+		log.Printf("render views.PetValueCard failed: %v", err)
+	}
 }

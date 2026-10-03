@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"sort"
 	"strconv"
@@ -48,11 +49,14 @@ func (s *Server) handlePlayspaceStoreGet(w http.ResponseWriter, r *http.Request)
 
 	storeState, err := s.store.GetStoreState(r.Context())
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to load store state", err)
 		http.Error(w, "Failed to load store state", http.StatusInternalServerError)
 		return
 	}
 
-	views.PlayspaceStorePage(char, storeState, groupItemsByCategory()).Render(r.Context(), w)
+	if err := views.PlayspaceStorePage(char, storeState, groupItemsByCategory()).Render(r.Context(), w); err != nil {
+		log.Printf("render views.PlayspaceStorePage failed: %v", err)
+	}
 }
 
 // GET /playspace/{id}/store/content
@@ -78,11 +82,14 @@ func (s *Server) handlePlayspaceStoreContentGet(w http.ResponseWriter, r *http.R
 
 	storeState, err := s.store.GetStoreState(r.Context())
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to load store state", err)
 		http.Error(w, "Failed to load store state", http.StatusInternalServerError)
 		return
 	}
 
-	views.PlayspaceStoreContent(char, storeState, groupItemsByCategory()).Render(r.Context(), w)
+	if err := views.PlayspaceStoreContent(char, storeState, groupItemsByCategory()).Render(r.Context(), w); err != nil {
+		log.Printf("render views.PlayspaceStoreContent failed: %v", err)
+	}
 }
 
 // POST /playspace/{id}/store/buy
@@ -127,18 +134,22 @@ func (s *Server) handlePlayspaceStoreBuyPost(w http.ResponseWriter, r *http.Requ
 	// Reload character and store state to render updated UI
 	char, err = s.store.GetCharacterByID(r.Context(), charID)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to reload character", err)
 		http.Error(w, "Failed to reload character", http.StatusInternalServerError)
 		return
 	}
 
 	storeState, err := s.store.GetStoreState(r.Context())
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to reload store state", err)
 		http.Error(w, "Failed to reload store state", http.StatusInternalServerError)
 		return
 	}
 
 	if r.Header.Get("HX-Request") == "true" {
-		views.PlayspaceStoreContent(char, storeState, groupItemsByCategory()).Render(r.Context(), w)
+		if err := views.PlayspaceStoreContent(char, storeState, groupItemsByCategory()).Render(r.Context(), w); err != nil {
+			log.Printf("render views.PlayspaceStoreContent failed: %v", err)
+		}
 	} else {
 		http.Redirect(w, r, "/playspace/"+strconv.Itoa(charID)+"/store", http.StatusSeeOther)
 	}
@@ -186,18 +197,22 @@ func (s *Server) handlePlayspaceStoreSellPost(w http.ResponseWriter, r *http.Req
 	// Reload character and store state to render updated UI
 	char, err = s.store.GetCharacterByID(r.Context(), charID)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to reload character", err)
 		http.Error(w, "Failed to reload character", http.StatusInternalServerError)
 		return
 	}
 
 	storeState, err := s.store.GetStoreState(r.Context())
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to reload store state", err)
 		http.Error(w, "Failed to reload store state", http.StatusInternalServerError)
 		return
 	}
 
 	if r.Header.Get("HX-Request") == "true" {
-		views.PlayspaceStoreContent(char, storeState, groupItemsByCategory()).Render(r.Context(), w)
+		if err := views.PlayspaceStoreContent(char, storeState, groupItemsByCategory()).Render(r.Context(), w); err != nil {
+			log.Printf("render views.PlayspaceStoreContent failed: %v", err)
+		}
 	} else {
 		http.Redirect(w, r, "/playspace/"+strconv.Itoa(charID)+"/store", http.StatusSeeOther)
 	}
@@ -219,11 +234,14 @@ func (s *Server) handleGMStoreControlsGet(w http.ResponseWriter, r *http.Request
 
 	storeState, err := s.store.GetStoreState(r.Context())
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to load store state", err)
 		http.Error(w, "Failed to load store state", http.StatusInternalServerError)
 		return
 	}
 
-	views.GMStoreControls(storeState).Render(r.Context(), w)
+	if err := views.GMStoreControls(storeState).Render(r.Context(), w); err != nil {
+		log.Printf("render views.GMStoreControls failed: %v", err)
+	}
 }
 
 // POST /gm/store/toggle-section
@@ -247,6 +265,7 @@ func (s *Server) handleGMStoreToggleSectionPost(w http.ResponseWriter, r *http.R
 
 	code := r.FormValue("code")
 	if err := s.store.ToggleStoreSection(r.Context(), code); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, fmt.Sprintf("Failed to toggle section: %v", err), err)
 		http.Error(w, fmt.Sprintf("Failed to toggle section: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -256,12 +275,15 @@ func (s *Server) handleGMStoreToggleSectionPost(w http.ResponseWriter, r *http.R
 
 	storeState, err := s.store.GetStoreState(r.Context())
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to reload store state", err)
 		http.Error(w, "Failed to reload store state", http.StatusInternalServerError)
 		return
 	}
 
 	if r.Header.Get("HX-Request") == "true" {
-		views.GMStoreControls(storeState).Render(r.Context(), w)
+		if err := views.GMStoreControls(storeState).Render(r.Context(), w); err != nil {
+			log.Printf("render views.GMStoreControls failed: %v", err)
+		}
 	} else {
 		http.Redirect(w, r, "/gm", http.StatusSeeOther)
 	}
@@ -282,6 +304,7 @@ func (s *Server) handleGMStoreToggleSellPost(w http.ResponseWriter, r *http.Requ
 	}
 
 	if err := s.store.ToggleStoreCanSell(r.Context()); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, fmt.Sprintf("Failed to toggle sell settings: %v", err), err)
 		http.Error(w, fmt.Sprintf("Failed to toggle sell settings: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -291,12 +314,15 @@ func (s *Server) handleGMStoreToggleSellPost(w http.ResponseWriter, r *http.Requ
 
 	storeState, err := s.store.GetStoreState(r.Context())
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to reload store state", err)
 		http.Error(w, "Failed to reload store state", http.StatusInternalServerError)
 		return
 	}
 
 	if r.Header.Get("HX-Request") == "true" {
-		views.GMStoreControls(storeState).Render(r.Context(), w)
+		if err := views.GMStoreControls(storeState).Render(r.Context(), w); err != nil {
+			log.Printf("render views.GMStoreControls failed: %v", err)
+		}
 	} else {
 		http.Redirect(w, r, "/gm", http.StatusSeeOther)
 	}
@@ -338,12 +364,15 @@ func (s *Server) handleGMStoreUpdateSellPercentagePost(w http.ResponseWriter, r 
 
 	storeState, err := s.store.GetStoreState(r.Context())
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to reload store state", err)
 		http.Error(w, "Failed to reload store state", http.StatusInternalServerError)
 		return
 	}
 
 	if r.Header.Get("HX-Request") == "true" {
-		views.GMStoreControls(storeState).Render(r.Context(), w)
+		if err := views.GMStoreControls(storeState).Render(r.Context(), w); err != nil {
+			log.Printf("render views.GMStoreControls failed: %v", err)
+		}
 	} else {
 		http.Redirect(w, r, "/gm", http.StatusSeeOther)
 	}
@@ -369,7 +398,9 @@ func (s *Server) handleGMStoreGrantModalGet(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	views.GrantItemModal(playerID, groupItemsByCategory()).Render(r.Context(), w)
+	if err := views.GrantItemModal(playerID, groupItemsByCategory()).Render(r.Context(), w); err != nil {
+		log.Printf("render views.GrantItemModal failed: %v", err)
+	}
 }
 
 func (s *Server) handleGMStoreGrantItemPost(w http.ResponseWriter, r *http.Request) {
@@ -405,12 +436,14 @@ func (s *Server) handleGMStoreGrantItemPost(w http.ResponseWriter, r *http.Reque
 	}
 
 	if err := s.store.GrantItemToPlayer(r.Context(), playerID, item); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, fmt.Sprintf("Failed to grant item: %v", err), err)
 		http.Error(w, fmt.Sprintf("Failed to grant item: %v", err), http.StatusInternalServerError)
 		return
 	}
 
 	char, err := s.store.GetCharacterByID(r.Context(), playerID)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to refresh character state", err)
 		http.Error(w, "Failed to refresh character state", http.StatusInternalServerError)
 		return
 	}

@@ -102,13 +102,3 @@ func NewExpertises() *Expertises {
 		},
 	}
 }
-
-func getExpertiseByCategory(category string) []Expertise {
-	expertises := []Expertise{}
-	for _, expertise := range ExpertiseList {
-		if expertise.Category == category {
-			expertises = append(expertises, expertise)
-		}
-	}
-	return expertises
-}

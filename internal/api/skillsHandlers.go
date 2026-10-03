@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -100,8 +101,12 @@ func (s *Server) handleCharacterSkillsPointsGet(w http.ResponseWriter, r *http.R
 	}
 
 	remaining := char.Skills.PointsRemaining - totalSpent
-	views.PointsRemaining(remaining).Render(r.Context(), w)
-	views.NextButtonOOB(remaining == 0).Render(r.Context(), w)
+	if err := views.PointsRemaining(remaining).Render(r.Context(), w); err != nil {
+		log.Printf("render views.PointsRemaining failed: %v", err)
+	}
+	if err := views.NextButtonOOB(remaining == 0).Render(r.Context(), w); err != nil {
+		log.Printf("render views.NextButtonOOB failed: %v", err)
+	}
 }
 
 func (s *Server) handleCharacterSkillsPost(w http.ResponseWriter, r *http.Request) {
@@ -165,6 +170,7 @@ func (s *Server) handleCharacterSkillsPost(w http.ResponseWriter, r *http.Reques
 
 	err = s.store.UpdateCharacter(r.Context(), char)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update skills", err)
 		http.Error(w, "Failed to update skills", http.StatusInternalServerError)
 		return
 	}

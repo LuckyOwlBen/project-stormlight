@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -16,10 +17,7 @@ import (
 var gmUpgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		// Single-server app for trusted friends; allow all origins.
-		return true
-	},
+	CheckOrigin:     sameOrigin,
 }
 
 // GET /gm
@@ -36,7 +34,9 @@ func (s *Server) handleGMGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	views.DashboardRoot().Render(r.Context(), w)
+	if err := views.DashboardRoot().Render(r.Context(), w); err != nil {
+		log.Printf("render views.DashboardRoot failed: %v", err)
+	}
 }
 
 // GET /gm/ws
@@ -97,7 +97,9 @@ func (s *Server) handleSprenGrantGet(w http.ResponseWriter, r *http.Request) {
 		sprenList = character.SprenList
 	}
 
-	views.SprenGrantForm(charId, sprenList, char.Talents.SprenBond).Render(r.Context(), w)
+	if err := views.SprenGrantForm(charId, sprenList, char.Talents.SprenBond).Render(r.Context(), w); err != nil {
+		log.Printf("render views.SprenGrantForm failed: %v", err)
+	}
 
 }
 
@@ -146,11 +148,14 @@ func (s *Server) handleSprenGrantPost(w http.ResponseWriter, r *http.Request) {
 
 	err = s.store.UpdateCharacter(r.Context(), char)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update character", err)
 		http.Error(w, "Failed to update character", http.StatusInternalServerError)
 		return
 	}
 	s.hub.SendEventToCharacterSheet(char.ID, "You have bonded with a spren", views.ModalCloseButton("Commence the Friendship!"))
-	views.SprenGrantForm(charId, []string{}, spren).Render(r.Context(), w)
+	if err := views.SprenGrantForm(charId, []string{}, spren).Render(r.Context(), w); err != nil {
+		log.Printf("render views.SprenGrantForm failed: %v", err)
+	}
 }
 
 // handleSprenUnbondPost is a GM-only correction tool for a mistakenly granted spren: it
@@ -216,12 +221,15 @@ func (s *Server) handleSprenUnbondPost(w http.ResponseWriter, r *http.Request) {
 	char.Talents.SprenBond = ""
 
 	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update character", err)
 		http.Error(w, "Failed to update character", http.StatusInternalServerError)
 		return
 	}
 	s.resyncTalentBonuses(r.Context(), char)
 	s.hub.SendEventToCharacterSheet(char.ID, "Your GM has undone your spren bond", views.ModalCloseButton("Understood"))
-	views.SprenGrantForm(charId, character.SprenList, "").Render(r.Context(), w)
+	if err := views.SprenGrantForm(charId, character.SprenList, "").Render(r.Context(), w); err != nil {
+		log.Printf("render views.SprenGrantForm failed: %v", err)
+	}
 }
 
 // requireGM writes an error response and returns false unless the caller is a logged-in GM.
@@ -244,7 +252,9 @@ func (s *Server) handleHighstormControlsGet(w http.ResponseWriter, r *http.Reque
 	if !s.requireGM(w, r) {
 		return
 	}
-	views.HighstormControl(s.hub.HighstormActive()).Render(r.Context(), w)
+	if err := views.HighstormControl(s.hub.HighstormActive()).Render(r.Context(), w); err != nil {
+		log.Printf("render views.HighstormControl failed: %v", err)
+	}
 }
 
 // POST /gm/highstorm/toggle starts or ends a highstorm. Starting one alerts every connected
@@ -275,7 +285,9 @@ func (s *Server) handleHighstormTogglePost(w http.ResponseWriter, r *http.Reques
 		s.hub.UpdateSingerFormsCard(s.buildSheetData(*char), r)
 	}
 
-	views.HighstormControl(active).Render(r.Context(), w)
+	if err := views.HighstormControl(active).Render(r.Context(), w); err != nil {
+		log.Printf("render views.HighstormControl failed: %v", err)
+	}
 }
 
 // POST /playspace/{id}/singer-form changes a Singer's active form. Rejected unless the GM has
@@ -312,16 +324,16 @@ func (s *Server) handleSingerFormPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	character.RecalculateDefenses(char)
-	character.RecalculateResources(char)
-	character.RecalculateDerivedAttributes(char)
-	bonuses := character.RecalculateBonuses(char)
+	bonuses := character.RecalculateAll(char)
 
 	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update character", err)
 		http.Error(w, "Failed to update character", http.StatusInternalServerError)
 		return
 	}
-	_ = s.store.UpsertBonuses(r.Context(), char.ID, bonuses)
+	if err := s.store.UpsertBonuses(r.Context(), char.ID, bonuses); err != nil {
+		log.Printf("gm: failed to save bonus ledger for character %d: %v", char.ID, err)
+	}
 
 	sheet := s.buildSheetData(*char)
 	s.hub.UpdateBasicsComponentOnCharacterSheet(sheet, r)
@@ -329,5 +341,7 @@ func (s *Server) handleSingerFormPost(w http.ResponseWriter, r *http.Request) {
 	s.hub.UpdateDerivedAttributesComponentOnCharacterSheet(sheet, r)
 	s.hub.UpdateTalentsComponentOnCharacterSheet(sheet, r)
 
-	views.SingerFormsCard(sheet).Render(r.Context(), w)
+	if err := views.SingerFormsCard(sheet).Render(r.Context(), w); err != nil {
+		log.Printf("render views.SingerFormsCard failed: %v", err)
+	}
 }

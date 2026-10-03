@@ -2,8 +2,12 @@ package api
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"net/url"
+	"os"
 	"strconv"
+	"strings"
 
 	"project-stormlight/internal/character"
 	"project-stormlight/internal/models"
@@ -19,9 +23,31 @@ import (
 var wsUpgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
+	CheckOrigin:     sameOrigin,
+}
+
+// sameOrigin only accepts WebSocket upgrades from pages served by this app (or from hosts
+// listed in ALLOWED_ORIGINS, comma separated), blocking cross-site WebSocket hijacking.
+func sameOrigin(r *http.Request) bool {
+	origin := r.Header.Get("Origin")
+	if origin == "" {
+		return true // not a browser request
+	}
+	u, err := url.Parse(origin)
+	if err != nil {
+		log.Printf("websocket: rejected malformed Origin %q: %v", origin, err)
+		return false
+	}
+	if strings.EqualFold(u.Host, r.Host) {
 		return true
-	},
+	}
+	for _, allowed := range strings.Split(os.Getenv("ALLOWED_ORIGINS"), ",") {
+		if allowed = strings.TrimSpace(allowed); allowed != "" && strings.EqualFold(u.Host, allowed) {
+			return true
+		}
+	}
+	log.Printf("websocket: rejected cross-origin upgrade from %q (host %q)", origin, r.Host)
+	return false
 }
 
 func (s *Server) handlePlayspaceGet(w http.ResponseWriter, r *http.Request) {
@@ -43,12 +69,10 @@ func (s *Server) handlePlayspaceGet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Character not found", http.StatusNotFound)
 		return
 	}
-	character.RecalculateDefenses(char)
-	character.RecalculateResources(char)
-	character.RecalculateDerivedAttributes(char)
-	character.RecalculateBonuses(char)
+	character.RecalculateAll(char)
 
 	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update character", err)
 		http.Error(w, "Failed to update character", http.StatusInternalServerError)
 		return
 	}
@@ -61,7 +85,9 @@ func (s *Server) handlePlayspaceGet(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	views.CharacterSheet(characterSheet).Render(r.Context(), w)
+	if err := views.CharacterSheet(characterSheet).Render(r.Context(), w); err != nil {
+		log.Printf("render views.CharacterSheet failed: %v", err)
+	}
 }
 
 // equippedPetName returns the name and true if the character has a pet equipped.
@@ -191,6 +217,10 @@ func (s *Server) updateEquippedStatus(w http.ResponseWriter, r *http.Request) {
 	itemID := inventoryUpdateRequest.ItemID
 	equippedBool := inventoryUpdateRequest.Equipped
 
+	if !s.authorizeCharacter(w, r, charID) {
+		return
+	}
+
 	currentCharacter, err := s.store.GetCharacterByID(r.Context(), charID)
 	if err != nil {
 		http.Error(w, "Character not found", http.StatusNotFound)
@@ -203,7 +233,11 @@ func (s *Server) updateEquippedStatus(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		mappedInventory := mapInventorySlice(inventory)
-		newInventory := mappedInventory[itemID]
+		newInventory, found := mappedInventory[itemID]
+		if !found {
+			http.Error(w, "Item not found in inventory", http.StatusNotFound)
+			return
+		}
 		newInventory.Equipped = !equippedBool
 		mappedInventory[itemID] = newInventory
 
@@ -216,6 +250,7 @@ func (s *Server) updateEquippedStatus(w http.ResponseWriter, r *http.Request) {
 		updatedCharacter := *currentCharacter
 		updatedCharacter.Inventory = &updatedInventory
 		if err := s.store.UpdateCharacter(r.Context(), &updatedCharacter); err != nil {
+			log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update inventory", err)
 			http.Error(w, "Failed to update inventory", http.StatusInternalServerError)
 			return
 		}
@@ -252,6 +287,10 @@ func (s *Server) changeActiveStance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !s.authorizeCharacter(w, r, stanceUpdateRequest.CharacterID) {
+		return
+	}
+
 	characterObject, err := s.store.GetCharacterByID(r.Context(), stanceUpdateRequest.CharacterID)
 	if err != nil {
 		http.Error(w, "Character not found", http.StatusNotFound)
@@ -261,7 +300,7 @@ func (s *Server) changeActiveStance(w http.ResponseWriter, r *http.Request) {
 	var activeTalent *character.TalentHistory
 
 	for i := range characterObject.Talents.List {
-		if characterObject.Talents.List[i].TalentID == stanceUpdateRequest.TalentID {
+		if characterObject.Talents.List[i].TalentID == stanceUpdateRequest.TalentID && characterObject.Talents.List[i].ActionType == "Stance" {
 			characterObject.Talents.List[i].Active = true
 			activeTalent = &characterObject.Talents.List[i]
 		} else if characterObject.Talents.List[i].ActionType == "Stance" {
@@ -271,18 +310,19 @@ func (s *Server) changeActiveStance(w http.ResponseWriter, r *http.Request) {
 
 	// Re-derive defenses/resources/bonuses so the newly active stance's conditional
 	// bonuses (e.g. Vinestance's defense increase) are folded in before saving.
-	character.RecalculateDefenses(characterObject)
-	character.RecalculateResources(characterObject)
-	character.RecalculateBonuses(characterObject)
+	character.RecalculateAll(characterObject)
 
 	if err := s.store.UpdateCharacter(r.Context(), characterObject); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update character", err)
 		http.Error(w, "Failed to update character", http.StatusInternalServerError)
 		return
 	}
 	characterSheet := buildCharacterSheetData(*characterObject)
 	s.hub.UpdateBasicsComponentOnCharacterSheet(characterSheet, r)
 	if activeTalent != nil {
-		views.ActiveStanceCard(*activeTalent).Render(r.Context(), w)
+		if err := views.ActiveStanceCard(*activeTalent).Render(r.Context(), w); err != nil {
+			log.Printf("render views.ActiveStanceCard failed: %v", err)
+		}
 	}
 }
 
@@ -313,7 +353,9 @@ func (s *Server) handleTalentGrantsManageGet(w http.ResponseWriter, r *http.Requ
 	}
 
 	agg := character.AggregateModifierGrants(char, talentID)
-	views.TalentGrantsManageModal(char, talentID, agg).Render(r.Context(), w)
+	if err := views.TalentGrantsManageModal(char, talentID, agg).Render(r.Context(), w); err != nil {
+		log.Printf("render views.TalentGrantsManageModal failed: %v", err)
+	}
 }
 
 // POST /characters/{id}/talents/{talentID}/manage-grants
@@ -373,6 +415,7 @@ func (s *Server) handleTalentGrantsManagePost(w http.ResponseWriter, r *http.Req
 	}
 
 	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update character", err)
 		http.Error(w, "Failed to update character", http.StatusInternalServerError)
 		return
 	}
@@ -380,7 +423,9 @@ func (s *Server) handleTalentGrantsManagePost(w http.ResponseWriter, r *http.Req
 	characterSheet := s.buildSheetData(*char)
 	s.hub.UpdateTalentsComponentOnCharacterSheet(characterSheet, r)
 
-	views.TalentGrantsManageModalPlaceholder().Render(r.Context(), w)
+	if err := views.TalentGrantsManageModalPlaceholder().Render(r.Context(), w); err != nil {
+		log.Printf("render views.TalentGrantsManageModalPlaceholder failed: %v", err)
+	}
 }
 
 func mapInventorySlice(inventory []character.Inventory) map[int]character.Inventory {

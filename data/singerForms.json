@@ -12,6 +12,7 @@
         "id": "singer_change_form",
         "name": "Change Form",
         "description": "During a highstorm, you can change into dullform, mateform, or another one of your singer forms.",
+        "actionType": "Action",
         "actionCost": 3,
         "prerequisites": [
             { "type": "talent", "target": "singer_ancestry" }

@@ -62,11 +62,11 @@ func RecalculateResources(char *Character) {
 	if r.HealthCurrent > r.HealthMax {
 		r.HealthCurrent = r.HealthMax
 	}
-	r.FocusMax = 2 + attrs.Intelligence/2 // Example: Focus max is 2 + half of Intelligence
+	r.FocusMax = 2 + attrs.Willpower
 	if r.FocusCurrent > r.FocusMax {
 		r.FocusCurrent = r.FocusMax
 	}
-	r.InvestitureMax = attrs.Willpower * 2 // Example: Investiture max is double the Willpower
+	r.InvestitureMax = 2 + max(attrs.Awareness, attrs.Presence)
 	if r.InvestitureCurrent > r.InvestitureMax {
 		r.InvestitureCurrent = r.InvestitureMax
 	}

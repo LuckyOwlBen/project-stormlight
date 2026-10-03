@@ -367,6 +367,9 @@ var (
 	// talentToPathID reverse-maps a talent ID to the top-level Path it belongs to,
 	// used to drive PathsTracker (which paths a character has invested in).
 	talentToPathID = map[string]string{}
+
+	// talentToSubPathID maps a talent ID to the sub-path (e.g. "tension") that contains it.
+	talentToSubPathID = map[string]string{}
 )
 
 func LoadTalents() error {
@@ -374,6 +377,7 @@ func LoadTalents() error {
 	SubPathMap = make(map[string]Talents)
 	AllTalents = make(map[string]Talent)
 	talentToPathID = make(map[string]string)
+	talentToSubPathID = make(map[string]string)
 
 	entries, err := data.TalentFiles.ReadDir("talents")
 	if err != nil {
@@ -409,6 +413,9 @@ func LoadTalents() error {
 				}
 				PathMap[path.ID] = path
 				for _, t := range path.TalentNodes {
+					if _, dup := AllTalents[t.Id]; dup {
+						return fmt.Errorf("duplicate talent id %q in %s", t.Id, filePath)
+					}
 					AllTalents[t.Id] = t
 					talentToPathID[t.Id] = path.ID
 				}
@@ -419,8 +426,12 @@ func LoadTalents() error {
 				}
 				SubPathMap[subPath.ID] = subPath
 				for _, t := range subPath.Nodes {
+					if _, dup := AllTalents[t.Id]; dup {
+						return fmt.Errorf("duplicate talent id %q in %s", t.Id, filePath)
+					}
 					AllTalents[t.Id] = t
 					talentToPathID[t.Id] = subPath.ParentID
+					talentToSubPathID[t.Id] = subPath.ID
 				}
 			}
 		}

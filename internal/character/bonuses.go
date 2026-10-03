@@ -50,6 +50,17 @@ func RecalculateBonuses(char *Character) []CharacterBonus {
 
 	var result []CharacterBonus
 
+	// Skill bonuses are persisted and derived values are layered on top of the base map, so
+	// both must start from a clean slate or every recalculation would stack them again.
+	if char.Skills != nil {
+		for i := range char.Skills.PlayerSkills {
+			char.Skills.PlayerSkills[i].Bonus = 0
+		}
+	}
+	if char.Attributes != nil {
+		RecalculateDerivedAttributes(char)
+	}
+
 	for _, history := range char.Talents.List {
 		talent, ok := LookupTalent(history.TalentID)
 		if !ok {
@@ -79,6 +90,44 @@ func RecalculateBonuses(char *Character) []CharacterBonus {
 	return result
 }
 
+// RecalculateAll rebuilds every derived stat (defenses, resources, derived attributes and
+// the bonus ledger) from the character's base data and returns the ledger.
+//
+// Current health and focus rise by however much their maximum grew since the last save, so
+// a character that levels up or gains a bonus isn't left permanently below their new max;
+// a shrinking maximum just clamps the current value. Investiture is only clamped, since it
+// is not automatically full.
+func RecalculateAll(char *Character) []CharacterBonus {
+	var prev Resources
+	hadResources := char.Resources != nil
+	if hadResources {
+		prev = *char.Resources
+	}
+
+	RecalculateDefenses(char)
+	RecalculateResources(char)
+	RecalculateDerivedAttributes(char)
+	bonuses := RecalculateBonuses(char)
+
+	if hadResources {
+		r := char.Resources
+		r.HealthCurrent = adjustCurrentToNewMax(prev.HealthCurrent, prev.HealthMax, r.HealthMax)
+		r.FocusCurrent = adjustCurrentToNewMax(prev.FocusCurrent, prev.FocusMax, r.FocusMax)
+		r.InvestitureCurrent = min(max(prev.InvestitureCurrent, 0), r.InvestitureMax)
+	}
+	return bonuses
+}
+
+func adjustCurrentToNewMax(prevCurrent, prevMax, newMax int) int {
+	current := prevCurrent
+	if prevMax <= 0 {
+		current = newMax
+	} else if newMax > prevMax {
+		current += newMax - prevMax
+	}
+	return min(max(current, 0), newMax)
+}
+
 func ApplyBonusesToCharacter(char *Character, bonuses []CharacterBonus) {
 	for _, bonus := range bonuses {
 		if !bonus.Active {
@@ -92,6 +141,8 @@ func ApplyBonusesToCharacter(char *Character, bonuses []CharacterBonus) {
 			applyResourceBonus(char, bonus)
 		case "defense":
 			applyDefenseBonus(char, bonus)
+		case "derived":
+			applyDerivedBonus(char, bonus)
 		}
 	}
 }
@@ -182,35 +233,43 @@ func ledgerEntryForBonus(char *Character, talent Talent, b Bonus, sourceType str
 		cb.TargetModule = "resource"
 		cb.TargetField = strings.ToLower(b.Target)
 	case "DEFENSE":
-		cb.TargetModule = "defense"
+		switch strings.ToLower(b.Target) {
+		case "physical", "cognitive", "spiritual", "deflect":
+			cb.TargetModule = "defense"
+		default:
+			// Some talents file non-defense stats (e.g. focus-cost-reduction) under DEFENSE.
+			cb.TargetModule = "derived"
+		}
 		cb.TargetField = b.Target
 	case "DEFLECT":
 		// deflect is a defence sub-field
 		cb.TargetModule = "defense"
 		cb.TargetField = "deflect"
+	case "DERIVED":
+		cb.TargetModule = "derived"
+		cb.TargetField = b.Target
 	case "ATTRIBUTE":
 		// Listed in the ledger for display, but applied via EffectiveAttributes rather than
 		// ApplyBonusesToCharacter, since stored attributes must stay base values.
 		cb.TargetModule = "attribute"
 		cb.TargetField = b.Target
 	default:
-		// Unknown bonus type — skip rather than store garbage.
+		// Unknown bonus type ? skip rather than store garbage.
 		return cb, false
 	}
 
-	// Resolve the integer value.
-	switch {
-	case b.Formula == "tier" && b.Scaling:
-		cb.Value = talent.Tier
-	case b.ValueFormula != "":
-		cb.FormulaRef = b.ValueFormula
-		cb.Value = 0
-	case b.Formula != "" && !b.Scaling:
-		// Static formula we can't resolve yet — store as FormulaRef.
-		cb.FormulaRef = b.Formula
-		cb.Value = 0
-	default:
+	// Resolve the integer value. Formulas that can't be reduced to a number (dice
+	// expressions, prose) are kept as FormulaRef text for display.
+	formula := b.ValueFormula
+	if formula == "" {
+		formula = b.Formula
+	}
+	if formula == "" {
 		cb.Value = b.Value
+	} else if v, ok := evaluateBonusFormula(char, talent, formula); ok {
+		cb.Value = v
+	} else {
+		cb.FormulaRef = formula
 	}
 
 	// Conditional handling. Bonuses owned by a Stance talent (e.g. Vinestance's

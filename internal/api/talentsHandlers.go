@@ -3,10 +3,12 @@ package api
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"slices"
 	"sort"
 	"strconv"
+	"strings"
 
 	"project-stormlight/internal/character"
 	"project-stormlight/internal/models"
@@ -42,7 +44,9 @@ func (s *Server) handleTalentsPageGet(w http.ResponseWriter, r *http.Request) {
 	ownedPathIDs := character.OwnedPathIDs(char)
 	activePathID := resolveActivePathID(r.URL.Query().Get("path"), filteredPaths, orderedPathIDs, ownedPathIDs)
 	singerQuotaMet := character.SingerQuotaMet(char)
-	views.TalentView(char, filteredPaths, orderedPathIDs, ownedPathIDs, activePathID, singerQuotaMet).Render(r.Context(), w)
+	if err := views.TalentView(char, filteredPaths, orderedPathIDs, ownedPathIDs, activePathID, singerQuotaMet).Render(r.Context(), w); err != nil {
+		log.Printf("render views.TalentView failed: %v", err)
+	}
 }
 
 // sortedPathIDs returns every path ID from filteredPaths in a stable, human-friendly
@@ -185,8 +189,12 @@ func (s *Server) handleTalentsTogglePath(w http.ResponseWriter, r *http.Request)
 
 	orderedPathIDs := sortedPathIDs(filteredPaths)
 	ownedPathIDs := character.OwnedPathIDs(char)
-	views.ActivePathPanelContent(char, path).Render(r.Context(), w)
-	views.PathTabs(char, filteredPaths, orderedPathIDs, ownedPathIDs, path.ID).Render(r.Context(), w)
+	if err := views.ActivePathPanelContent(char, path).Render(r.Context(), w); err != nil {
+		log.Printf("render views.ActivePathPanelContent failed: %v", err)
+	}
+	if err := views.PathTabs(char, filteredPaths, orderedPathIDs, ownedPathIDs, path.ID).Render(r.Context(), w); err != nil {
+		log.Printf("render views.PathTabs failed: %v", err)
+	}
 }
 
 type TalentToggleRequest struct {
@@ -254,11 +262,17 @@ func (s *Server) handleTalentsToggleTalent(w http.ResponseWriter, r *http.Reques
 			http.Error(w, "Cannot remove a finalized talent", http.StatusBadRequest)
 			return
 		}
+		if dependents := character.OwnedTalentsRequiring(char, req.TalentID); len(dependents) > 0 {
+			http.Error(w, "Cannot remove "+talent.Name+": required by "+strings.Join(dependents, ", "), http.StatusBadRequest)
+			return
+		}
 		char.Talents.List = append(char.Talents.List[:i], char.Talents.List[i+1:]...)
 		char.Talents.PointsRemaining++
 		char.Talents.PendingPoints--
 		character.PruneOrphanedTalentExpertises(char, character.OwnedTalentIDs(char))
+		character.PruneOrphanedTalentSkillGrants(char, character.OwnedTalentIDs(char))
 		if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
+			log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update talents", err)
 			http.Error(w, "Failed to update talents", http.StatusInternalServerError)
 			return
 		}
@@ -291,6 +305,7 @@ func (s *Server) handleTalentsToggleTalent(w http.ResponseWriter, r *http.Reques
 	character.ApplyFixedExpertiseGrants(char, talent)
 	character.SyncOwnedPaths(char)
 	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update talents", err)
 		http.Error(w, "Failed to update talents", http.StatusInternalServerError)
 		return
 	}
@@ -303,23 +318,33 @@ func (s *Server) handleTalentsToggleTalent(w http.ResponseWriter, r *http.Reques
 // remaining, Next button, Singer quota alert) that every toggle can affect.
 func (s *Server) renderTalentPanelUpdate(w http.ResponseWriter, r *http.Request, char *character.Character, path character.Path, pathOk bool) {
 	if pathOk {
-		views.ActivePathPanelContent(char, path).Render(r.Context(), w)
+		if err := views.ActivePathPanelContent(char, path).Render(r.Context(), w); err != nil {
+			log.Printf("render views.ActivePathPanelContent failed: %v", err)
+		}
 	}
 	filteredPaths := buildFilteredPaths(char)
 	orderedPathIDs := sortedPathIDs(filteredPaths)
 	ownedPathIDs := character.OwnedPathIDs(char)
-	views.PathTabs(char, filteredPaths, orderedPathIDs, ownedPathIDs, path.ID).Render(r.Context(), w)
-	views.PointsRemaining(char.Talents.PointsRemaining).Render(r.Context(), w)
-	views.NextButtonOOB(char.Talents.PointsRemaining == 0 && character.SingerQuotaMet(char)).Render(r.Context(), w)
+	if err := views.PathTabs(char, filteredPaths, orderedPathIDs, ownedPathIDs, path.ID).Render(r.Context(), w); err != nil {
+		log.Printf("render views.PathTabs failed: %v", err)
+	}
+	if err := views.PointsRemaining(char.Talents.PointsRemaining).Render(r.Context(), w); err != nil {
+		log.Printf("render views.PointsRemaining failed: %v", err)
+	}
+	if err := views.NextButtonOOB(char.Talents.PointsRemaining == 0 && character.SingerQuotaMet(char)).Render(r.Context(), w); err != nil {
+		log.Printf("render views.NextButtonOOB failed: %v", err)
+	}
 	if char.Ancestry == character.Singer {
-		views.SingerQuotaAlertOOB(char).Render(r.Context(), w)
+		if err := views.SingerQuotaAlertOOB(char).Render(r.Context(), w); err != nil {
+			log.Printf("render views.SingerQuotaAlertOOB failed: %v", err)
+		}
 	}
 }
 
 func (s *Server) resyncTalentBonuses(ctx context.Context, char *character.Character) {
 	bonuses := character.RecalculateBonuses(char)
 	if err := s.store.UpsertBonuses(ctx, char.ID, bonuses); err != nil {
-		_ = err
+		log.Printf("talents: failed to save bonus ledger for character %d: %v", char.ID, err)
 	}
 }
 
@@ -357,53 +382,24 @@ func (s *Server) handleCharacterTalentsPost(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// Talents selected in the form
-	selectedTalentIDs := r.Form["talents"]
-
-	// Ensure we preserve talents they may have already bought from outside this particular selected path
-	// The cost should only apply to *new* selections.
-	var newUnlocks []character.TalentHistory
-	for _, potentialBuy := range selectedTalentIDs {
-		alreadyHas := false
-		for _, existing := range char.Talents.List {
-			if existing.TalentID == potentialBuy {
-				alreadyHas = true
-				break
-			}
-		}
-		if !alreadyHas {
-			newUnlocks = append(newUnlocks, character.TalentHistory{
-				TalentsTrackerID: char.Talents.ID,
-				CharacterID:      char.ID,
-				TalentID:         potentialBuy,
-				Source:           "character_creation",
-			})
-		}
-	}
-
-	totalSpent := len(newUnlocks) // Each new talent bought costs 1 point
-	if totalSpent > char.Talents.PointsRemaining {
-		http.Error(w, "Not enough points remaining", http.StatusBadRequest)
+	// Talents are bought one at a time through handleTalentsToggleTalent, which validates each
+	// purchase. This submit never accepts new talent IDs from the form - it only confirms the
+	// character's talent list is complete and consistent before moving on.
+	if char.Talents.PointsRemaining > 0 {
+		http.Error(w, fmt.Sprintf("Spend all talent points before continuing (%d remaining)", char.Talents.PointsRemaining), http.StatusBadRequest)
 		return
 	}
-
-	// Calculate and apply
-	char.Talents.List = append(char.Talents.List, newUnlocks...)
-	char.Talents.PointsRemaining -= totalSpent
-	char.Talents.PendingPoints += totalSpent
+	if problems := character.ValidateOwnedTalents(char); len(problems) > 0 {
+		log.Printf("talents: character %d failed validation: %s", char.ID, strings.Join(problems, "; "))
+		http.Error(w, "Your talent selection is invalid: "+problems[0], http.StatusBadRequest)
+		return
+	}
 
 	if !character.SingerQuotaMet(char) {
 		required := character.SingerTalentsRequiredForLevel(char.Level)
 		owned := character.OwnedSingerOptionalCount(char)
 		http.Error(w, fmt.Sprintf("Select %d Singer Forms talent(s) (you have %d) before continuing", required, owned), http.StatusBadRequest)
 		return
-	}
-
-	// Auto-grant any "fixed" expertise grants for newly purchased talents.
-	for _, unlock := range newUnlocks {
-		if t, ok := character.AllTalents[unlock.TalentID]; ok {
-			character.ApplyFixedExpertiseGrants(char, t)
-		}
 	}
 
 	// A talent may have been checked and its expertise choice resolved via the modal,
@@ -416,11 +412,13 @@ func (s *Server) handleCharacterTalentsPost(w http.ResponseWriter, r *http.Reque
 		keptTalentIDs = append(keptTalentIDs, h.TalentID)
 	}
 	character.PruneOrphanedTalentExpertises(char, keptTalentIDs)
+	character.PruneOrphanedTalentSkillGrants(char, keptTalentIDs)
 
 	char.CreationStep = "inventory"
 
 	err = s.store.UpdateCharacter(r.Context(), char)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update talents", err)
 		http.Error(w, "Failed to update talents", http.StatusInternalServerError)
 		return
 	}
@@ -429,7 +427,7 @@ func (s *Server) handleCharacterTalentsPost(w http.ResponseWriter, r *http.Reque
 	bonuses := character.RecalculateBonuses(char)
 	if err := s.store.UpsertBonuses(r.Context(), char.ID, bonuses); err != nil {
 		// Non-fatal: log and continue — the talent save already succeeded.
-		_ = err
+		log.Printf("talents: failed to save bonus ledger for character %d: %v", char.ID, err)
 	}
 
 	http.Redirect(w, r, models.DetermineNextStepURL(char, "Talents"), http.StatusSeeOther)
@@ -464,7 +462,9 @@ func (s *Server) handleTalentExpertiseChoiceGet(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	views.TalentExpertiseChoiceModal(char, talent).Render(r.Context(), w)
+	if err := views.TalentExpertiseChoiceModal(char, talent).Render(r.Context(), w); err != nil {
+		log.Printf("render views.TalentExpertiseChoiceModal failed: %v", err)
+	}
 }
 
 // handleTalentExpertiseChoicePost persists the player's expertise selection(s) for a talent
@@ -525,6 +525,7 @@ func (s *Server) handleTalentExpertiseChoicePost(w http.ResponseWriter, r *http.
 	}
 
 	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update expertises", err)
 		http.Error(w, "Failed to update expertises", http.StatusInternalServerError)
 		return
 	}
@@ -532,16 +533,20 @@ func (s *Server) handleTalentExpertiseChoicePost(w http.ResponseWriter, r *http.
 	// Keep the bonus ledger in sync, per the same convention as the talent purchase submit.
 	bonuses := character.RecalculateBonuses(char)
 	if err := s.store.UpsertBonuses(r.Context(), char.ID, bonuses); err != nil {
-		_ = err
+		log.Printf("talents: failed to save bonus ledger for character %d: %v", char.ID, err)
 	}
 
-	views.TalentExpertiseModalPlaceholder().Render(r.Context(), w)
+	if err := views.TalentExpertiseModalPlaceholder().Render(r.Context(), w); err != nil {
+		log.Printf("render views.TalentExpertiseModalPlaceholder failed: %v", err)
+	}
 
 	// Also refresh the talent's owning path panel (out-of-band, since the modal is the
 	// primary target here) so its granted-expertise badge shows immediately.
 	if pathID, ok := character.ResolveOwnedPathID(talentID); ok {
 		if path, ok := buildFilteredPaths(char)[pathID]; ok {
-			views.ActivePathPanelOOB(char, path).Render(r.Context(), w)
+			if err := views.ActivePathPanelOOB(char, path).Render(r.Context(), w); err != nil {
+				log.Printf("render views.ActivePathPanelOOB failed: %v", err)
+			}
 		}
 	}
 }

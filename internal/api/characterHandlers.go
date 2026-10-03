@@ -1,6 +1,7 @@
-﻿package api
+package api
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -25,6 +26,7 @@ func (s *Server) handleCharacterCreate(w http.ResponseWriter, r *http.Request) {
 
 	err := s.store.CreateCharacter(r.Context(), char)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to create character", err)
 		http.Error(w, "Failed to create character", http.StatusInternalServerError)
 		return
 	}
@@ -35,7 +37,9 @@ func (s *Server) handleCharacterCreate(w http.ResponseWriter, r *http.Request) {
 
 // GET /characters/{id}/basics/validate
 func (s *Server) handleCharacterBasicsValidate(w http.ResponseWriter, r *http.Request) {
-	views.NextButton(strings.TrimSpace(r.URL.Query().Get("name")) != "").Render(r.Context(), w)
+	if err := views.NextButton(strings.TrimSpace(r.URL.Query().Get("name")) != "").Render(r.Context(), w); err != nil {
+		log.Printf("render views.NextButton failed: %v", err)
+	}
 }
 
 func (s *Server) handleCharacterBasicsGet(w http.ResponseWriter, r *http.Request) {
@@ -69,7 +73,9 @@ func (s *Server) handleCharacterBasicsGet(w http.ResponseWriter, r *http.Request
 		}
 	}
 
-	views.BasicsForm(char, cultures).Render(r.Context(), w)
+	if err := views.BasicsForm(char, cultures).Render(r.Context(), w); err != nil {
+		log.Printf("render views.BasicsForm failed: %v", err)
+	}
 }
 
 func (s *Server) handleCharacterBasicsPost(w http.ResponseWriter, r *http.Request) {
@@ -126,6 +132,7 @@ func (s *Server) handleCharacterBasicsPost(w http.ResponseWriter, r *http.Reques
 
 	err = s.store.UpdateCharacter(r.Context(), char)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update character", err)
 		http.Error(w, "Failed to update character", http.StatusInternalServerError)
 		return
 	}
@@ -155,6 +162,7 @@ func (s *Server) handleCharacterDelete(w http.ResponseWriter, r *http.Request) {
 
 	err = s.store.DeleteCharacterByID(r.Context(), charID)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to delete character", err)
 		http.Error(w, "Failed to delete character", http.StatusInternalServerError)
 		return
 	}
@@ -182,7 +190,9 @@ func (s *Server) handleCharacterReviewGet(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	views.CharacterReview(char).Render(r.Context(), w)
+	if err := views.CharacterReview(char).Render(r.Context(), w); err != nil {
+		log.Printf("render views.CharacterReview failed: %v", err)
+	}
 }
 
 func (s *Server) handleCharacterFinalizePost(w http.ResponseWriter, r *http.Request) {
@@ -211,6 +221,7 @@ func (s *Server) handleCharacterFinalizePost(w http.ResponseWriter, r *http.Requ
 	}
 
 	char.IsFinalized = true
+	char.PendingLevels = 0
 	char.CulturesFinalized = true
 	if char.Attributes != nil {
 		char.Attributes.Finalized = true
@@ -234,6 +245,7 @@ func (s *Server) handleCharacterFinalizePost(w http.ResponseWriter, r *http.Requ
 		}
 	}
 	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to finalize character", err)
 		http.Error(w, "Failed to finalize character", http.StatusInternalServerError)
 		return
 	}
@@ -275,6 +287,7 @@ func (s *Server) handleCharacterLevelUpPost(w http.ResponseWriter, r *http.Reque
 	// 4. Save to Database
 	err = s.store.UpdateCharacter(r.Context(), char)
 	if err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to level up character", err)
 		http.Error(w, "Failed to level up character", http.StatusInternalServerError)
 		return
 	}
@@ -283,7 +296,7 @@ func (s *Server) handleCharacterLevelUpPost(w http.ResponseWriter, r *http.Reque
 	s.hub.UpdateClientLevel(char.ID, char.Level)
 
 	// 6. Determine dynamic target edit URL
-	redirectURL := models.DetermineNextStepURL(char, "Cultures")
+	redirectURL := models.DetermineNextStepURL(char, "Culture")
 
 	// 7. Push real-time notification
 	s.hub.SendEventToCharacterSheet(char.ID, "Your character has leveled up!", views.HREFButton("Lets Go!", redirectURL))

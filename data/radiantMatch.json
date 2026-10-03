@@ -53,10 +53,10 @@
             "secondarySurge": "gravitation",
             "philosophy": "Protect the innocent and the defenseless."
     },
-    "uniquespren": {
-        "radiantPath": "bondsmith",
-            "primarySurge": "cohesion",
-            "secondarySurge": "tension",
-            "philosophy": "Unite before you divide, and strive for peace before engaging in war."
+    "enlightened": {
+        "radiantPath": "futuresight",
+            "primarySurge": "illumination",
+            "secondarySurge": "progression",
+            "philosophy": "Search for fundamental truth and share it."
     }
 }
