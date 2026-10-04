@@ -149,7 +149,7 @@
         {
             "id": "duelist_surefooted",
             "name": "Surefooted",
-            "description": "When you acquire this talent, increase your movement rate by 10. Additionally, before you take damage from dangerous terrain or falling, reduce that damage by 2 \u00c3\u2014 your tier.",
+            "description": "When you acquire this talent, increase your movement rate by 10. Additionally, before you take damage from dangerous terrain or falling, reduce that damage by 2 \u00d7 your tier.",
             "prerequisites": [
                 {
                     "type": "talent",
@@ -167,14 +167,14 @@
                 }
             ],
             "otherEffects": [
-                "Before taking damage from dangerous terrain or falling, reduce that damage by 2 \u00c3\u2014 your tier."
+                "Before taking damage from dangerous terrain or falling, reduce that damage by 2 \u00d7 your tier."
             ],
             "actionType": "Passive"
         },
         {
             "id": "vinestance",
             "name": "Vinestance",
-            "description": "When you acquire this talent, you learn a new stance, which you can enter as an action: Vinestance. Your Physical and Cognitive defenses increase by 1. Additionally, after you're hit or grazed by a melee attack, you can use a reaction to make an Athletics test against your attacker's Cognitive defense. On a success, your target loses 1d4 focus, and you can push them horizontally up to 5 feet \u00c3\u2014 your ranks in Athletics.",
+            "description": "When you acquire this talent, you learn a new stance, which you can enter as an action: Vinestance. Your Physical and Cognitive defenses increase by 1. Additionally, after you're hit or grazed by a melee attack, you can use a reaction to make an Athletics test against your attacker's Cognitive defense. On a success, your target loses 1d4 focus, and you can push them horizontally up to 5 feet \u00d7 your ranks in Athletics.",
             "actionCost": 1,
             "prerequisites": [
                 {
@@ -204,7 +204,7 @@
             ],
             "otherEffects": [
                 "While in Vinestance: after being hit or grazed by a melee attack, use a reaction to test Athletics vs. attacker's Cognitive defense.",
-                "On success: attacker loses 1d4 focus and you can push them horizontally up to 5 feet \u00c3\u2014 your Athletics ranks."
+                "On success: attacker loses 1d4 focus and you can push them horizontally up to 5 feet \u00d7 your Athletics ranks."
             ],
             "actionType": "Stance"
         },
@@ -244,7 +244,7 @@
                     "Move up to half your movement rate before attacking.",
                     "Target must have 0 focus.",
                     "Ignores the target's deflect value.",
-                    "Cannot graze \u00e2\u20ac\u201d only miss or hit.",
+                    "Cannot graze \u2014 only miss or hit.",
                     "Tier 3: extra 6d6 damage; Tier 4: extra 8d6; Tier 5: extra 10d6."
                 ]
             },

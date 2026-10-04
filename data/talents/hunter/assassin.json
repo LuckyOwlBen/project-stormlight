@@ -114,7 +114,7 @@
                     "resource": "focus",
                     "effect": "spend",
                     "amount": 3,
-                    "trigger": "succeed vs. Spiritual defense while in cover or obscured \u00e2\u20ac\u201d designate target as quarry",
+                    "trigger": "succeed vs. Spiritual defense while in cover or obscured \u2014 designate target as quarry",
                     "frequency": "unlimited"
                 }
             ],

@@ -128,7 +128,7 @@
                     "resource": "focus",
                     "effect": "spend",
                     "amount": 2,
-                    "trigger": "after making a ranged attack \u00e2\u20ac\u201d Disengage as free action",
+                    "trigger": "after making a ranged attack \u2014 Disengage as free action",
                     "frequency": "unlimited"
                 }
             ],

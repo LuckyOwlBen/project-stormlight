@@ -185,7 +185,7 @@
                     "resource": "focus",
                     "effect": "spend",
                     "amount": 1,
-                    "trigger": "use Rousing Presence \u00e2\u20ac\u201d boost target defense by 2 until end of next round",
+                    "trigger": "use Rousing Presence \u2014 boost target defense by 2 until end of next round",
                     "frequency": "unlimited"
                 }
             ],
@@ -195,7 +195,7 @@
             "id": "inspiredZeal",
             "name": "Inspired Zeal",
             "description": "After an ally you can sense uses their Determined condition to add an Opportunity to a test, you can choose a number of other allies you can influence up to your ranks in Discipline. Each target recovers 1 focus (no action required).",
-            "specialActivation": "After an ally uses Determined for an Opportunity, choose up to Discipline-ranks allies \u00e2\u20ac\u201d each recovers 1 focus.",
+            "specialActivation": "After an ally uses Determined for an Opportunity, choose up to Discipline-ranks allies \u2014 each recovers 1 focus.",
             "prerequisites": [
                 {
                     "type": "skill",

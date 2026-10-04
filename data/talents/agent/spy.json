@@ -63,7 +63,7 @@
                     "resource": "focus",
                     "effect": "spend",
                     "amount": 2,
-                    "trigger": "discovered skulking \u00e2\u20ac\u201d feign innocence",
+                    "trigger": "discovered skulking \u2014 feign innocence",
                     "frequency": "unlimited"
                 }
             ],

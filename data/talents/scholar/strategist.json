@@ -58,7 +58,7 @@
                     "resource": "focus",
                     "effect": "spend",
                     "amount": 2,
-                    "trigger": "using Strategize \u00e2\u20ac\u201d prevent the Gain Advantage target from using reactions against the chosen ally until end of your next turn",
+                    "trigger": "using Strategize \u2014 prevent the Gain Advantage target from using reactions against the chosen ally until end of your next turn",
                     "frequency": "unlimited"
                 }
             ],
@@ -189,7 +189,7 @@
                     "resource": "focus",
                     "effect": "spend",
                     "amount": 2,
-                    "trigger": "triggering Contingency \u00e2\u20ac\u201d remove a Complication from an influenced ally's test (ally must be within 20 feet)",
+                    "trigger": "triggering Contingency \u2014 remove a Complication from an influenced ally's test (ally must be within 20 feet)",
                     "frequency": "unlimited"
                 }
             ],

@@ -114,7 +114,7 @@
                     "resource": "focus",
                     "effect": "spend",
                     "amount": 1,
-                    "trigger": "on hit with unarmed attack against target your size or smaller \u00e2\u20ac\u201d apply Exhausted",
+                    "trigger": "on hit with unarmed attack against target your size or smaller \u2014 apply Exhausted",
                     "frequency": "unlimited"
                 }
             ],

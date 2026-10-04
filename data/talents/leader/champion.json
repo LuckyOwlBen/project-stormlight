@@ -233,12 +233,12 @@
                     "resource": "focus",
                     "effect": "spend",
                     "amount": 1,
-                    "trigger": "before an Athletics, Agility, or Leadership test \u00e2\u20ac\u201d add command die result to roll",
+                    "trigger": "before an Athletics, Agility, or Leadership test \u2014 add command die result to roll",
                     "frequency": "unlimited"
                 }
             ],
             "otherEffects": [
-                "When you acquire this talent, increase your command die size by one step (e.g. d4 \u00e2\u2020\u2019 d6)."
+                "When you acquire this talent, increase your command die size by one step (e.g. d4 \u2192 d6)."
             ],
             "actionType": "Special"
         },

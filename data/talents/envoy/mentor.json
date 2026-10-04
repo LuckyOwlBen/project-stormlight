@@ -50,7 +50,7 @@
                     "resource": "focus",
                     "effect": "spend",
                     "amount": 1,
-                    "trigger": "ally fails a skill test \u00e2\u20ac\u201d use Rousing Presence on them",
+                    "trigger": "ally fails a skill test \u2014 use Rousing Presence on them",
                     "frequency": "unlimited"
                 }
             ],

@@ -189,6 +189,7 @@ func buildSkillDisplayStructure(char character.Character) []character.SkillDispl
 			Skills:     skills,
 		})
 	}
+	character.SortSkillSpreads(result)
 	return result
 }
 
@@ -291,18 +292,23 @@ func (s *Server) changeActiveStance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var activeTalent *character.TalentHistory
-
+	// Entering a stance leaves any other; selecting the active stance again leaves it.
+	found := false
 	for i := range characterObject.Talents.List {
-		if characterObject.Talents.List[i].TalentID == stanceUpdateRequest.TalentID && characterObject.Talents.List[i].ActionType == "Stance" {
-			characterObject.Talents.List[i].Active = true
-			activeTalent = &characterObject.Talents.List[i]
-		} else if characterObject.Talents.List[i].ActionType == "Stance" {
-			characterObject.Talents.List[i].Active = false
+		h := &characterObject.Talents.List[i]
+		if h.TalentID == stanceUpdateRequest.TalentID && h.ActionType == "Stance" {
+			h.Active = !h.Active
+			found = true
+		} else if h.ActionType == "Stance" {
+			h.Active = false
 		}
 	}
+	if !found {
+		http.Error(w, "Stance not found", http.StatusNotFound)
+		return
+	}
 
-	// Re-derive defenses/resources/bonuses so the newly active stance's conditional
+	// Re-derive defenses/resources/bonuses so the active stance's conditional
 	// bonuses (e.g. Vinestance's defense increase) are folded in before saving.
 	character.RecalculateAll(characterObject)
 
@@ -311,12 +317,12 @@ func (s *Server) changeActiveStance(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to update character", http.StatusInternalServerError)
 		return
 	}
-	characterSheet := buildCharacterSheetData(*characterObject)
+	characterSheet := s.buildSheetData(*characterObject)
+	// Other open tabs get the update over the websocket; this response carries the same fragment.
 	s.hub.UpdateBasicsComponentOnCharacterSheet(characterSheet, r)
-	if activeTalent != nil {
-		if err := views.ActiveStanceCard(*activeTalent).Render(r.Context(), w); err != nil {
-			log.Printf("render views.ActiveStanceCard failed: %v", err)
-		}
+	s.hub.UpdateTalentsComponentOnCharacterSheet(characterSheet, r)
+	if err := views.TalentsComponent(characterSheet).Render(r.Context(), w); err != nil {
+		log.Printf("render views.TalentsComponent failed: %v", err)
 	}
 }
 

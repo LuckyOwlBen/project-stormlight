@@ -2,6 +2,7 @@ package character
 
 import (
 	"encoding/json"
+	"sort"
 	"strings"
 
 	"project-stormlight/data"
@@ -112,6 +113,32 @@ func (a Attributes) ConvertSkillsToDisplay(skills []Skill) []SkillDisplayStructu
 		})
 	}
 	return result
+}
+
+// skillSpreadOrder is the order skill spreads are shown in on the sheet.
+var skillSpreadOrder = []string{"physicalSkills", "mentalSkills", "socialSkills", "surgeSkills"}
+
+// SortSkillSpreads puts spreads in their display order and each spread's skills in
+// alphabetical order, so the sheet doesn't reshuffle between renders (maps iterate randomly).
+func SortSkillSpreads(spreads []SkillDisplayStructure) {
+	rank := func(name string) int {
+		for i, n := range skillSpreadOrder {
+			if n == name {
+				return i
+			}
+		}
+		return len(skillSpreadOrder)
+	}
+	sort.SliceStable(spreads, func(i, j int) bool {
+		ri, rj := rank(spreads[i].SpreadName), rank(spreads[j].SpreadName)
+		if ri != rj {
+			return ri < rj
+		}
+		return spreads[i].SpreadName < spreads[j].SpreadName
+	})
+	for _, s := range spreads {
+		sort.SliceStable(s.Skills, func(i, j int) bool { return s.Skills[i].SkillName < s.Skills[j].SkillName })
+	}
 }
 
 func calculateSkillPoints(level int) int {

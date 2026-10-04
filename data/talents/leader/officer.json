@@ -106,7 +106,7 @@
                     "resource": "focus",
                     "effect": "spend",
                     "amount": 2,
-                    "trigger": "making a test to requisition or allocate resources \u00e2\u20ac\u201d add an Opportunity to the result",
+                    "trigger": "making a test to requisition or allocate resources \u2014 add an Opportunity to the result",
                     "frequency": "unlimited"
                 }
             ],
@@ -135,19 +135,19 @@
                     "resource": "focus",
                     "effect": "spend",
                     "amount": 1,
-                    "trigger": "before an Intimidation, Leadership, or Persuasion test \u00e2\u20ac\u201d add command die result to roll",
+                    "trigger": "before an Intimidation, Leadership, or Persuasion test \u2014 add command die result to roll",
                     "frequency": "unlimited"
                 },
                 {
                     "resource": "focus",
                     "effect": "spend",
                     "amount": 1,
-                    "trigger": "before an Intimidation, Leadership, or Persuasion test \u00e2\u20ac\u201d add command die result to roll",
+                    "trigger": "before an Intimidation, Leadership, or Persuasion test \u2014 add command die result to roll",
                     "frequency": "unlimited"
                 }
             ],
             "otherEffects": [
-                "When you acquire this talent, increase your command die size by one step (e.g. d4 \u00e2\u2020\u2019 d6)."
+                "When you acquire this talent, increase your command die size by one step (e.g. d4 \u2192 d6)."
             ],
             "actionType": "Special"
         },
@@ -247,8 +247,8 @@
                 "range": "special",
                 "specialMechanics": [
                     "Test Leadership vs. Cognitive defense.",
-                    "On success: choose a number of allies up to your Leadership ranks \u00e2\u20ac\u201d each gains 1 action on their next turn to Strike the target.",
-                    "On failure: choose 1 ally you can influence \u00e2\u20ac\u201d they gain the same bonus Strike.",
+                    "On success: choose a number of allies up to your Leadership ranks \u2014 each gains 1 action on their next turn to Strike the target.",
+                    "On failure: choose 1 ally you can influence \u2014 they gain the same bonus Strike.",
                     "The bonus Strike does not count against the ally's normal Strike limit for that weapon hand."
                 ]
             },

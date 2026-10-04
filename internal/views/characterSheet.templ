@@ -255,81 +255,211 @@ templ ValueJoinCard(current int, maxValue int, label string, endpoint string) {
 }
 
 templ SkillsComponent(characterSheet models.CharacterSheetData) {
-	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-		for _, spread := range characterSheet.SkillsDisplayStructure {
-			<div class="card bg-base-200 shadow border-t-4 border-primary">
-				<div class="card-body p-4 text-center">
-					<span class="text-xs uppercase font-extrabold text-primary">{ spread.SpreadName }</span>
-					@SkillComponentSection(spread)
-				</div>
-			</div>
+	if len(characterSheet.SkillsDisplayStructure) == 0 {
+		<div class="text-sm opacity-60 italic">No skills yet.</div>
 	}
+	<div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+		for _, spread := range characterSheet.SkillsDisplayStructure {
+			@SkillComponentSection(spread)
+		}
+	</div>
+	<div class="flex flex-wrap gap-x-6 gap-y-1 mt-4 text-xs opacity-70">
+		<span class="flex items-center gap-1"><span class={ skillPipClass("bought") }></span> Rank</span>
+		<span class="flex items-center gap-1"><span class={ skillPipClass("granted") }></span> Granted by a talent</span>
+		<span>Hover a modifier to see how it's built.</span>
 	</div>
 }
 
 templ SkillComponentSection(spread character.SkillDisplayStructure) {
-	<div>
-		for _, skill := range spread.Skills {
-			<div class="card bg-base-200 shadow border-t-4 border-primary">
-				<div class="card-body p-4 text-center">
-					<span class="text-xs uppercase font-extrabold text-primary">{ skill.SkillName }</span>
-					<span class="text-3xl font-extrabold text-base-content">{ strconv.Itoa(skill.Total) }</span>
-					<span class="text-sm text-secondary">({ strconv.Itoa(skill.AttributeBonus) } + { strconv.Itoa(skill.Bonus) })</span>
-					<span class="text-xs uppercase font-extrabold text-primary">{ skill.AttributeName }</span>
-				</div>
+	<div class={ "card bg-base-200 shadow border-t-4", templ.KV("border-secondary", spread.SpreadName == "surgeSkills"), templ.KV("border-primary", spread.SpreadName != "surgeSkills") }>
+		<div class="card-body p-4 gap-2">
+			<div class="flex items-baseline justify-between">
+				<span class="text-xs uppercase font-extrabold text-primary tracking-wider">{ skillSpreadLabel(spread.SpreadName) }</span>
+				<span class="text-xs opacity-60">{ strconv.Itoa(skillTrainedCount(spread)) } trained</span>
 			</div>
-		}
+			<table class="table table-sm">
+				<thead>
+					<tr>
+						<th>Skill</th>
+						<th class="hidden sm:table-cell">Attribute</th>
+						<th>Rank</th>
+						<th class="text-right">Mod</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, skill := range spread.Skills {
+						<tr class={ templ.KV("opacity-50", !skillTrained(skill)) }>
+							<td class="font-semibold">{ skillDisplayName(skill.SkillName) }</td>
+							<td class="hidden sm:table-cell text-xs opacity-70">{ skill.AttributeName }</td>
+							<td>
+								<span class="flex gap-1" aria-label={ "Rank " + strconv.Itoa(skill.Value + skill.GrantedRank) }>
+									for _, pip := range skillPips(skill) {
+										<span class={ skillPipClass(pip) }></span>
+									}
+								</span>
+							</td>
+							<td class="text-right">
+								<span class="tooltip tooltip-left" data-tip={ skillBreakdown(skill) }>
+									<span class="text-xl font-extrabold">{ strconv.Itoa(skill.Total) }</span>
+								</span>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
 	</div>
 }
 
 templ TalentsComponent(characterSheet models.CharacterSheetData) {
-	if characterSheet.Char.Ancestry == character.Singer {
-		<div id="singerFormsCard">
-			@SingerFormsCard(characterSheet)
-		</div>
-	}
-	for _, talentID := range reassignableGrantTalentIDs(characterSheet.Char) {
-		@TalentGrantsBox(characterSheet.Char, talentID)
-	}
-	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-		if characterSheet.ActionTypeMap != nil && len(characterSheet.ActionTypeMap) > 0 {
-			for _, actionType := range characterSheet.ActionTypeMap {
-				<div class="card bg-base-200 shadow border-t-4 border-primary">
-					<div class="card-body p-4 text-center">
-						<span class="text-xs uppercase font-extrabold text-primary">{ actionType.Category }</span>
-						if actionType.Category == "Stance" {
-							@StanceCard(actionType.Talents)
-						} else {
-							for _, talent := range actionType.Talents {
-								@TalentRadioAccordian(talent)
-							}
-						}
-					</div>
-				</div>
-			}
-		} else {
+	{{ char := characterSheet.Char }}
+	<div class="space-y-6">
+		@BasicAttackCard(character.BuildAttacks(char))
+		if char.Ancestry == character.Singer {
+			<div id="singerFormsCard">
+				@SingerFormsCard(characterSheet)
+			</div>
+		}
+		for _, talentID := range reassignableGrantTalentIDs(char) {
+			@TalentGrantsBox(char, talentID)
+		}
+		{{ sections := character.BuildTalentSections(char) }}
+		if len(sections) == 0 {
 			<div class="card bg-base-200 shadow border-t-4 border-primary">
 				<div class="card-body p-4 text-center">
-					<span class="text-xs uppercase font-extrabold text-primary">No Talents or Expertises</span>
-					<span class="text-sm text-secondary">This character has no talents or expertises.</span>
+					<span class="text-xs uppercase font-extrabold text-primary">No Talents</span>
+					<span class="text-sm text-secondary">This character has no talents yet.</span>
 				</div>
 			</div>
+		}
+		for _, section := range sections {
+			@TalentSectionView(char.ID, section)
 		}
 	</div>
 }
 
-templ TalentRadioAccordian(talent character.TalentHistory) {
-	for _, actionType := range []string{"Special", "Action", "Passive", "Reaction", "Free"} {
-		if talent.ActionType == actionType {
-			<div class="collapse bg-base-100 border border-base-300">
-				<input type="radio" name="my-accordion-1" checked="checked" />
-				<div class="collapse-title font-semibold">
-					<span>{ talent.Name }</span> <span>cost: { strconv.Itoa(talent.ActionCost) }</span>  
-				</div>
-				<div class="collapse-content text-sm">@TalentCard(talent)</div>
+// BasicAttackCard shows the strike the character would make right now: one row per equipped
+// weapon, or the unarmed strike when nothing is equipped.
+templ BasicAttackCard(attacks []character.AttackView) {
+	<div class="card bg-base-200 shadow border-t-4 border-error">
+		<div class="card-body p-4 gap-3">
+			<div class="flex items-baseline justify-between">
+				<span class="text-xs uppercase font-extrabold text-error tracking-wider">Basic Attack</span>
+				<span class="text-xs opacity-60">Strike</span>
 			</div>
-		}
-	}
+			for _, a := range attacks {
+				<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 items-center">
+					<div class="col-span-2 sm:col-span-1">
+						<div class="font-bold">{ a.Name }</div>
+						<div class="flex flex-wrap gap-1 mt-1">
+							if a.Slot != "" {
+								<span class="badge badge-sm badge-outline">{ a.Slot }</span>
+							}
+							if a.Range != "" {
+								<span class="badge badge-sm badge-ghost">{ a.Range }</span>
+							}
+							for _, trait := range a.Traits {
+								<span class="badge badge-sm badge-ghost">{ trait }</span>
+							}
+							for _, trait := range a.ExpertTraits {
+								<span class="badge badge-sm badge-ghost opacity-60" title="Needs the matching expertise">Expert: { trait }</span>
+							}
+						</div>
+					</div>
+					<div>
+						<div class="text-xs uppercase opacity-60">Attack roll</div>
+						if a.HasModifier {
+							<div class="text-2xl font-extrabold">{ signedInt(a.Modifier) }</div>
+							<div class="text-xs opacity-60">{ skillDisplayName(a.Skill) }</div>
+						} else {
+							<div class="text-sm opacity-60">No { skillDisplayName(a.Skill) } skill</div>
+						}
+					</div>
+					<div>
+						<div class="text-xs uppercase opacity-60">Damage</div>
+						<div class="text-2xl font-extrabold">{ a.Damage }</div>
+						<div class="text-xs opacity-60">
+							{ a.DamageType }
+							if a.NoDieRoll {
+								(no die roll)
+							}
+						</div>
+					</div>
+					if a.Unarmed {
+						<div class="text-xs opacity-60 col-span-2 sm:col-span-1">No weapon equipped. Damage comes from your Strength.</div>
+					}
+				</div>
+			}
+		</div>
+	</div>
+}
+
+templ TalentSectionView(charID int, section character.TalentSection) {
+	<div>
+		<div class="flex items-baseline gap-2 mb-2">
+			<h3 class="text-lg font-bold">{ section.Title }</h3>
+			<span class="text-xs opacity-60">{ strconv.Itoa(len(section.Cards)) }</span>
+		</div>
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+			for _, card := range section.Cards {
+				@TalentSheetCard(charID, card)
+			}
+		</div>
+	</div>
+}
+
+// TalentSheetCard is one talent: what it costs, what it does, and every bonus it grants.
+templ TalentSheetCard(charID int, card character.TalentCardView) {
+	<div class={ "card bg-base-200 shadow border-t-4", templ.KV("border-success", card.Active), templ.KV("border-primary", !card.Active) }>
+		<div class="card-body p-4 gap-2">
+			<div class="flex items-start justify-between gap-2">
+				<div class="min-w-0">
+					<h4 class="font-bold">{ card.Name }</h4>
+					<div class="flex flex-wrap gap-1 mt-1">
+						if card.PathName != "" {
+							<span class="badge badge-sm badge-ghost">{ card.PathName }</span>
+						}
+						for _, base := range card.Enhances {
+							<span class="badge badge-sm badge-outline">Enhances { base }</span>
+						}
+					</div>
+				</div>
+				<div class="flex flex-col items-end gap-1 shrink-0">
+					if card.Cost != "" {
+						<span class="badge badge-primary badge-sm">{ card.Cost }</span>
+					}
+					if card.IsStance {
+						<form hx-post="/playspace/toggle-active-stance" hx-target="#talentsComponent" hx-swap="innerHTML">
+							<input type="hidden" name="id" value={ strconv.Itoa(charID) }/>
+							<input type="hidden" name="activeStance" value={ card.ID }/>
+							if card.Active {
+								<button class="btn btn-success btn-xs" type="submit">Active</button>
+							} else {
+								<button class="btn btn-outline btn-xs" type="submit">Enter stance</button>
+							}
+						</form>
+					}
+				</div>
+			</div>
+			if card.SpecialActivation != "" {
+				<p class="text-xs"><span class="font-semibold">Activation:</span> <span class="italic">{ card.SpecialActivation }</span></p>
+			}
+			if len(card.Effects) > 0 {
+				<ul class="space-y-1">
+					for _, effect := range card.Effects {
+						<li class="flex items-start gap-2 text-sm">
+							<span class={ effectBadgeClass(effect.Tone) }>{ effect.Label }</span>
+							<span class={ effectTextClass(effect.Tone) }>{ effect.Text }</span>
+						</li>
+					}
+				</ul>
+			}
+			<details class="text-xs opacity-80">
+				<summary class="cursor-pointer select-none">Description</summary>
+				<p class="mt-1">{ card.Description }</p>
+			</details>
+		</div>
+	</div>
 }
 
 // skillGrantChoice pairs one resolved "choice"/"category" SkillGrant with its selectable
@@ -509,81 +639,6 @@ templ TalentGrantsManageModal(char *character.Character, talentID string, agg ch
 			</form>
 		</div>
 	</dialog>
-}
-
-templ TalentCard(talent character.TalentHistory) {
-	<div class="card bg-base-200 shadow border-t-4 border-primary">
-		if talent.AttackDefinition != nil {
-			if talent.AttackDefinition.BaseDamage != "" {
-				<span class="text-sm">Base Damage: { talent.AttackDefinition.BaseDamage }</span>
-			}
-			if talent.AttackDefinition.DamageType != "" {
-				<span class="text-sm">Damage Type: { talent.AttackDefinition.DamageType }</span>
-			}
-			if talent.AttackDefinition.DamageScaling != nil && len(talent.AttackDefinition.DamageScaling) > 0 {
-				for _, damageScaling := range talent.AttackDefinition.DamageScaling {
-					<span class="text-sm">Damage Scaling: { damageScaling.Damage } - { damageScaling.Tier }</span>
-				}
-			}
-			<span class="text-sm">Range: { talent.AttackDefinition.Range }</span>
-			<span class="text-sm">Target Defense: { talent.AttackDefinition.TargetDefense }</span>
-			<span class="text-sm">Weapon Type: { talent.AttackDefinition.WeaponType }</span>
-			for _, conditionalAdvantage := range talent.AttackDefinition.ConditionalAdvantages {
-				<span class="text-sm">Conditional Advantage: { conditionalAdvantage.Condition } - { conditionalAdvantage.Value }</span>
-			}
-			<span class="text-sm">Resource Cost Type:		
-			{talent.AttackDefinition.ResourceCost.Type} - {talent.AttackDefinition.ResourceCost.Amount}</span>
-			for _, mechanic := range talent.AttackDefinition.SpecialMechanics {
-				<span class="text-sm">Special Mechanic: { mechanic }</span>
-			}
-		}
-		if talent.SpecialActivation != "" {
-			<span class="text-sm">Special Activation: { talent.SpecialActivation }</span>
-		} else {
-			<span class="text-sm">{ talent.Description }</span>
-		}
-	</div>
-}
-
-templ StanceCard(stance []character.TalentHistory) {
-	<div class="card bg-base-200 shadow border-t-4 border-primary">
-		<div class="card-body p-4 text-center">
-			<fieldset class="fieldset">
-				<legend class="fieldset-legend">Stances</legend>
-				<form
-					hx-post={ "/playspace/toggle-active-stance" }
-					hx-target="#stanceComponent"
-					hx-swap="innerHTML"
-					hx-trigger="change">
-					<input type="hidden" name="id" value={ strconv.Itoa(stance[0].CharacterID) } />
-					<select class="select" name="activeStance">
-					for _, s := range stance {
-						<option value={ s.TalentID }>{ s.Name }</option>
-					}
-				</select>
-				</form>
-			</fieldset>
-					<div id="stanceComponent">
-						<div class="card bg-base-200 shadow border-t-4 border-primary">
-							<div class="card-body p-4 text-center">
-								<span class="text-sm">Active Stance: { stance[0].Name }</span>
-								<span class="text-sm">{ stance[0].Description }</span>
-								<span class="text-sm">Cost: { strconv.Itoa(stance[0].ActionCost) }</span>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-}
-
-templ ActiveStanceCard(stance character.TalentHistory) {
-	<div class="card bg-base-200 shadow border-t-4 border-primary">
-		<div class="card-body p-4 text-center">
-			<span class="text-sm">Active Stance: { stance.Name }</span>
-			<span class="text-sm">{ stance.Description }</span>
-			<span class="text-sm">Cost: { strconv.Itoa(stance.ActionCost) }</span>
-		</div>
-	</div>
 }
 
 templ EquipmentComponent(characterSheet models.CharacterSheetData) {

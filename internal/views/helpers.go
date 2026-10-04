@@ -106,3 +106,99 @@ func resourceColor(label string) string {
 	}
 	return "text-primary"
 }
+
+// skillSpreadLabel turns a spread key like "mentalSkills" into its sheet heading.
+func skillSpreadLabel(spread string) string {
+	switch spread {
+	case "physicalSkills":
+		return "Physical"
+	case "mentalSkills":
+		return "Cognitive"
+	case "socialSkills":
+		return "Social"
+	case "surgeSkills":
+		return "Surges"
+	}
+	return spread
+}
+
+// skillDisplayName shows "Heavy-Weaponry" as "Heavy Weaponry".
+func skillDisplayName(name string) string { return character.SkillLabel(name) }
+
+// skillBreakdown spells out how a skill's total is built, e.g. "Rank 2 + Strength 1 + Bonus 1".
+func skillBreakdown(s character.DisplaySkill) string {
+	parts := []string{fmt.Sprintf("Rank %d", s.Value), fmt.Sprintf("%s %d", s.AttributeName, s.AttributeBonus)}
+	if s.Bonus != 0 {
+		parts = append(parts, fmt.Sprintf("Bonus %+d", s.Bonus))
+	}
+	if s.GrantedRank != 0 {
+		parts = append(parts, fmt.Sprintf("Granted %+d", s.GrantedRank))
+	}
+	return strings.Join(parts, " + ")
+}
+
+// skillTrained reports whether the character has any rank (bought or granted) in the skill.
+func skillTrained(s character.DisplaySkill) bool { return s.Value > 0 || s.GrantedRank > 0 }
+
+// skillTrainedCount counts the trained skills in a spread.
+func skillTrainedCount(spread character.SkillDisplayStructure) int {
+	n := 0
+	for _, s := range spread.Skills {
+		if skillTrained(s) {
+			n++
+		}
+	}
+	return n
+}
+
+// skillPips returns the 5 rank pips for a skill: "bought" for ranks the character paid for,
+// "granted" for talent-granted ranks, "empty" for the rest.
+func skillPips(s character.DisplaySkill) []string {
+	pips := make([]string, 5)
+	bought := min(max(s.Value, 0), 5)
+	granted := min(max(s.GrantedRank, 0), 5-bought)
+	for i := range pips {
+		switch {
+		case i < bought:
+			pips[i] = "bought"
+		case i < bought+granted:
+			pips[i] = "granted"
+		default:
+			pips[i] = "empty"
+		}
+	}
+	return pips
+}
+
+func skillPipClass(kind string) string {
+	switch kind {
+	case "bought":
+		return "inline-block size-2.5 rounded-full bg-primary"
+	case "granted":
+		return "inline-block size-2.5 rounded-full bg-secondary"
+	}
+	return "inline-block size-2.5 rounded-full border border-base-content/30"
+}
+
+// signedInt renders a modifier with an explicit sign (+3, -1, +0).
+func signedInt(n int) string { return fmt.Sprintf("%+d", n) }
+
+// effectBadgeClass styles a talent effect's label: green for bonuses already included in the
+// sheet's numbers, amber for conditional ones the player applies, grey for everything else.
+func effectBadgeClass(tone string) string {
+	base := "badge badge-sm shrink-0 "
+	switch tone {
+	case character.ToneApplied:
+		return base + "badge-success"
+	case character.ToneConditional:
+		return base + "badge-warning badge-outline"
+	}
+	return base + "badge-ghost"
+}
+
+func effectTextClass(tone string) string {
+	if tone == character.ToneConditional {
+		return "opacity-80"
+	}
+	return ""
+}

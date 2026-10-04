@@ -134,7 +134,7 @@
             "id": "feralConnection",
             "name": "Feral Connection",
             "modifiesTalent": "animalBond",
-            "description": "Animal companion's max and current health increase by 5 \u00c3\u2014 your tier (scales with tier increases). Companion's Physical, Cognitive, and Spiritual defenses increase by 2 each. Companion adds your Survival ranks as bonus to their tests. Gain Animal Care utility expertise.",
+            "description": "Animal companion's max and current health increase by 5 \u00d7 your tier (scales with tier increases). Companion's Physical, Cognitive, and Spiritual defenses increase by 2 each. Companion adds your Survival ranks as bonus to their tests. Gain Animal Care utility expertise.",
             "prerequisites": [
                 {
                     "type": "skill",
@@ -157,7 +157,7 @@
                 }
             ],
             "otherEffects": [
-                "Companion's max and current health increase by 5 \u00c3\u2014 your tier (scales when tier increases).",
+                "Companion's max and current health increase by 5 \u00d7 your tier (scales when tier increases).",
                 "Companion's Physical, Cognitive, and Spiritual defenses each increase by 2.",
                 "Companion adds your Survival ranks as a bonus to their tests."
             ],
