@@ -132,6 +132,9 @@ func (c *Character) Hydrate() {
 	// truth for "which paths has this character invested in".
 	SyncOwnedPaths(c)
 
+	// Characters bonded before the key talent was granted for free get it now.
+	EnsureRadiantBond(c)
+
 	if c.DerivedAttributes == nil && c.Attributes != nil {
 		c.DerivedAttributes = BuildDisplayObject(*c.Attributes)
 	}

@@ -510,16 +510,21 @@ func RemoveRadiantTalents(char *Character) (removedCount int) {
 		return 0
 	}
 	kept := char.Talents.List[:0]
+	refunded := 0
 	for _, h := range char.Talents.List {
 		if pathID, ok := ResolveOwnedPathID(h.TalentID); ok && pathID == "radiant" {
 			removedCount++
+			// Talents granted by the bond itself were never paid for, so they aren't refunded.
+			if h.Source != bondSource {
+				refunded++
+			}
 			continue
 		}
 		kept = append(kept, h)
 	}
 	char.Talents.List = kept
-	char.Talents.PointsRemaining += removedCount
-	char.Talents.PendingPoints -= removedCount
+	char.Talents.PointsRemaining += refunded
+	char.Talents.PendingPoints -= refunded
 	if char.Talents.PendingPoints < 0 {
 		char.Talents.PendingPoints = 0
 	}
@@ -702,6 +707,10 @@ func collectUnmetPrereqs(char *Character, pendingIDs []string, prereqs []Prerequ
 			if char == nil || char.Level < req.Value {
 				missing = append(missing, fmt.Sprintf("Level %d", req.Value))
 			}
+		case "ideal":
+			if !ownsIdeal(char, pendingIDs, idealOrdinals[strings.ToLower(req.Target)]) {
+				missing = append(missing, idealPrereqLabel(req.Target))
+			}
 		}
 	}
 	return missing
@@ -716,7 +725,8 @@ func talentStateFor(char *Character, pendingIDs []string, maxVisibleTier int, t 
 			}
 		}
 	}
-	if t.Tier > maxVisibleTier {
+	// Ideals are gated only by their prerequisites, not by the tier-reveal rule.
+	if t.Tier > maxVisibleTier && !isIdealTalent(t.Id) {
 		return StateHidden
 	}
 	if !meetsPrerequisites(char, pendingIDs, t.Prerequisites) {
@@ -763,7 +773,11 @@ func meetsPrerequisites(char *Character, pendingIDs []string, prereqs []Prerequi
 				return false
 			}
 		case "ideal":
-			// Radiant paths are excluded from character creation; ideal checks skipped
+			// Ideals are tracked as talents: the nth Ideal is owned once the order's matching
+			// Ideal talent is. The GM decides when a player may take it.
+			if !ownsIdeal(char, pendingIDs, idealOrdinals[strings.ToLower(req.Target)]) {
+				return false
+			}
 		}
 	}
 	return true

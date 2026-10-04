@@ -130,21 +130,12 @@ func (s *Server) handleSprenGrantPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	char.Talents.SprenBond = spren
-
-	// Add the two surge skills and grant 2 bonus points so the player can invest in them.
-	if char.Skills != nil {
-		for _, surgeSkill := range character.SurgeSkillsForBond(spren) {
-			char.Skills.PlayerSkills = append(char.Skills.PlayerSkills, character.Skill{
-				CharacterID:      char.ID,
-				SkillsID:         char.Skills.ID,
-				SkillName:        surgeSkill.SkillName,
-				SkillAssociation: surgeSkill.SkillAssociation,
-			})
-		}
-		char.Skills.TotalPoints += 2
-		char.Skills.PointsRemaining += 2
+	if err := character.GrantRadiantBond(char, spren); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
+	// Opens up Investiture now that the key talent is owned.
+	bonuses := character.RecalculateAll(char)
 
 	err = s.store.UpdateCharacter(r.Context(), char)
 	if err != nil {
@@ -152,6 +143,10 @@ func (s *Server) handleSprenGrantPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to update character", http.StatusInternalServerError)
 		return
 	}
+	if err := s.store.UpsertBonuses(r.Context(), char.ID, bonuses); err != nil {
+		log.Printf("gm: failed to save bonus ledger for character %d: %v", char.ID, err)
+	}
+	s.pushBondChange(r, char)
 	s.hub.SendEventToCharacterSheet(char.ID, "You have bonded with a spren", views.ModalCloseButton("Commence the Friendship!"))
 	if err := views.SprenGrantForm(charId, []string{}, spren).Render(r.Context(), w); err != nil {
 		log.Printf("render views.SprenGrantForm failed: %v", err)
@@ -188,37 +183,9 @@ func (s *Server) handleSprenUnbondPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	oldBond := char.Talents.SprenBond
-	character.RemoveRadiantTalents(char)
-
-	// Revert the surge skills + bonus skill points granted at bond time.
-	if char.Skills != nil {
-		grantedSkills := character.SurgeSkillsForBond(oldBond)
-		keptSkills := char.Skills.PlayerSkills[:0]
-		for _, sk := range char.Skills.PlayerSkills {
-			granted := false
-			for _, gs := range grantedSkills {
-				if sk.SkillName == gs.SkillName && sk.SkillAssociation == gs.SkillAssociation {
-					granted = true
-					break
-				}
-			}
-			if !granted {
-				keptSkills = append(keptSkills, sk)
-			}
-		}
-		char.Skills.PlayerSkills = keptSkills
-		char.Skills.TotalPoints -= 2
-		char.Skills.PointsRemaining -= 2
-		if char.Skills.TotalPoints < 0 {
-			char.Skills.TotalPoints = 0
-		}
-		if char.Skills.PointsRemaining < 0 {
-			char.Skills.PointsRemaining = 0
-		}
-	}
-
-	char.Talents.SprenBond = ""
+	character.RemoveRadiantBond(char)
+	// Masks Investiture again now that the key talent is gone.
+	character.RecalculateAll(char)
 
 	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
 		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update character", err)
@@ -226,6 +193,7 @@ func (s *Server) handleSprenUnbondPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.resyncTalentBonuses(r.Context(), char)
+	s.pushBondChange(r, char)
 	s.hub.SendEventToCharacterSheet(char.ID, "Your GM has undone your spren bond", views.ModalCloseButton("Understood"))
 	if err := views.SprenGrantForm(charId, character.SprenList, "").Render(r.Context(), w); err != nil {
 		log.Printf("render views.SprenGrantForm failed: %v", err)
@@ -343,5 +311,19 @@ func (s *Server) handleSingerFormPost(w http.ResponseWriter, r *http.Request) {
 
 	if err := views.SingerFormsCard(sheet).Render(r.Context(), w); err != nil {
 		log.Printf("render views.SingerFormsCard failed: %v", err)
+	}
+}
+
+// pushBondChange refreshes everything a spren bond (or its removal) touches on the player's
+// open sheet and in the GM's presence list: resources, Investiture, skills and talents.
+func (s *Server) pushBondChange(r *http.Request, char *character.Character) {
+	sheet := s.buildSheetData(*char)
+	s.hub.UpdateBasicsComponentOnCharacterSheet(sheet, r)
+	s.hub.UpdateSkillsComponentOnCharacterSheet(sheet, r)
+	s.hub.UpdateTalentsComponentOnCharacterSheet(sheet, r)
+	s.hub.UpdateDerivedAttributesComponentOnCharacterSheet(sheet, r)
+	if res := char.Resources; res != nil {
+		s.hub.UpdateClientResources(char.ID, res.HealthCurrent, res.HealthMax, res.FocusCurrent, res.FocusMax,
+			res.InvestitureCurrent, res.InvestitureMax, res.InvestitureActive)
 	}
 }

@@ -70,4 +70,10 @@ func RecalculateResources(char *Character) {
 	if r.InvestitureCurrent > r.InvestitureMax {
 		r.InvestitureCurrent = r.InvestitureMax
 	}
+	// Investiture only opens up once the character owns their order's key talent (the First
+	// Ideal); before that, and after a bond is undone, it stays masked and empty.
+	r.InvestitureActive = HasRadiantKeyTalent(char)
+	if !r.InvestitureActive {
+		r.InvestitureCurrent = 0
+	}
 }

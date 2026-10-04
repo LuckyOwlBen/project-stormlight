@@ -96,11 +96,18 @@ func buildFilteredPaths(char *character.Character) map[string]character.Path {
 
 	if char.Talents != nil && char.Talents.SprenBond != "" {
 		radiantMatches := character.RadiantMatchTable[char.Talents.SprenBond]
-		filteredPaths["radiant"] = character.Path{
+		radiantPath := character.Path{
 			ID:       "radiant",
 			Name:     radiantMatches.RadiantPath,
 			SubPaths: []string{radiantMatches.RadiantPath, radiantMatches.PrimarySurge, radiantMatches.SecondarySurge},
 		}
+		// The order's key talent (the First Ideal) is the path's tier 0, shown as its base card.
+		if ids := character.IdealTalentIDs(radiantMatches.RadiantPath); len(ids) > 0 {
+			if key, ok := character.LookupTalent(ids[0]); ok {
+				radiantPath.TalentNodes = []character.Talent{key}
+			}
+		}
+		filteredPaths["radiant"] = radiantPath
 	}
 
 	if char.Ancestry == character.Singer {

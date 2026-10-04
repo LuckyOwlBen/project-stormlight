@@ -353,6 +353,22 @@ func (h *Hub) SendEventToCharacterSheet(charID int, message string, button templ
 	h.SendToCharacter(charID, msg)
 }
 
+// UpdateClientResources refreshes the cached resource figures (and whether Investiture is
+// unlocked) on every connection for a character, then pushes the new presence to the GM.
+func (h *Hub) UpdateClientResources(charID, hp, maxHp, focus, maxFocus, invest, maxInvest int, invested bool) {
+	h.mu.Lock()
+	for c := range h.clients {
+		if c.CharID == charID {
+			c.CurrentHp, c.MaxHp = hp, maxHp
+			c.CurrentFocus, c.MaxFocus = focus, maxFocus
+			c.CurrentInvest, c.MaxInvest = invest, maxInvest
+			c.IsInvested = invested
+		}
+	}
+	h.mu.Unlock()
+	h.broadcastPresence()
+}
+
 // UpdateClientLevel locks client registry, updates the level inside all matching connections, and broadcasts.
 func (h *Hub) UpdateClientLevel(charID int, newLevel int) {
 	h.mu.Lock()

@@ -294,7 +294,7 @@ templ ActivePathPanelContent(char *character.Character, path character.Path) {
                             <h3 class="text-lg font-bold mb-2 border-b pb-1">{ character.SubPathMap[subPathID].PathName }</h3>
                             <div class="space-y-3">
                                 for _, tw := range character.EvaluatePathTalents(char, path)[subPathID] {
-                                    if tw.State != character.StateHidden {
+                                    if tw.State != character.StateHidden && !isBaseTalent(path, tw.Talent.Id) {
                                         @TalentPathCard(char, path.ID, tw)
                                     }
                                 }
@@ -305,6 +305,19 @@ templ ActivePathPanelContent(char *character.Character, path character.Path) {
             }
         }
     </div>
+}
+
+// isBaseTalent reports whether the talent is the path's own tier-0 card, so it isn't also
+// listed again inside a sub-path column (the Radiant key talent lives in its order's sub-path).
+func isBaseTalent(path character.Path, talentID string) bool {
+    return len(path.TalentNodes) > 0 && path.TalentNodes[0].Id == talentID
+}
+
+func baseTalentSuffix(pathID string) string {
+    if pathID == "radiant" {
+        return "(Key Talent)"
+    }
+    return "(Base Path Talent)"
 }
 
 templ BaseTalentCard(char *character.Character, pathID string, baseTalent character.Talent) {
@@ -328,7 +341,7 @@ templ BaseTalentCard(char *character.Character, pathID string, baseTalent charac
                         }
                     />
                     <div>
-                        <h2 class="card-title m-0 inline-block">{ baseTalent.Name } (Base Path Talent)</h2>
+                        <h2 class="card-title m-0 inline-block">{ baseTalent.Name } { baseTalentSuffix(pathID) }</h2>
                         <span class="badge badge-secondary ml-2">Tier 0</span>
                     </div>
                 </label>

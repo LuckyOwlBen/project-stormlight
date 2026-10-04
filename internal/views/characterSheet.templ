@@ -93,16 +93,81 @@ templ CharacterSheet(characterSheet models.CharacterSheetData) {
 
 
 templ BasicsComponent(characterSheet models.CharacterSheetData) {
-	<div class="grid grid-cols-3 md:grid-cols-3 gap-4">
-		@ResourcesComponent(characterSheet.Char.ID, *characterSheet.Char.Resources)
-		@DefensesComponent(characterSheet.DefensesMap)
-		@AttributesComponent(characterSheet.AttributesMap)
+	{{ char := characterSheet.Char }}
+	{{ bond := character.BuildBondView(char) }}
+	<div class="space-y-6">
+		<div class={ "grid grid-cols-1 gap-4", templ.KV("lg:grid-cols-2", bond.Bonded) }>
+			@CharacterSummaryCard(char)
+			if bond.Bonded {
+				@SprenBondCard(bond)
+			}
+		</div>
+		@ResourcesComponent(char.ID, *char.Resources)
+		<div>
+			<h3 class="text-xs uppercase font-extrabold text-primary mb-2 tracking-wider">Defenses</h3>
+			@DefensesComponent(characterSheet.DefensesMap)
+		</div>
+		<div>
+			<h3 class="text-xs uppercase font-extrabold text-primary mb-2 tracking-wider">Attributes</h3>
+			@AttributesComponent(characterSheet.AttributesMap)
+		</div>
 	</div>
 }
 
-
-templ ResourcesComponent(characterId int, resources character.Resources ) {
+templ CharacterSummaryCard(char *character.Character) {
 	<div class="card bg-base-200 shadow border-t-4 border-primary">
+		<div class="card-body p-4 gap-2">
+			<div class="flex flex-wrap items-center justify-between gap-2">
+				<h2 class="card-title text-2xl">{ char.Name }</h2>
+				<div class="flex flex-wrap gap-2">
+					<span class="badge badge-primary">Level { strconv.Itoa(char.Level) }</span>
+					<span class="badge badge-outline">{ string(char.Ancestry) }</span>
+					if char.PendingLevels > 0 {
+						<span class="badge badge-warning">{ strconv.Itoa(char.PendingLevels) } level-up(s) to finalize</span>
+					}
+				</div>
+			</div>
+			if len(char.UnlockedCultureIDs) > 0 {
+				<div class="text-sm">
+					<span class="opacity-60">Cultures:</span>
+					{ strings.Join(char.UnlockedCultureIDs, ", ") }
+				</div>
+			}
+			if char.Ancestry == character.Singer {
+				<div class="text-sm">
+					<span class="opacity-60">Current form:</span>
+					{ character.CurrentSingerForm(char).Name }
+				</div>
+			}
+		</div>
+	</div>
+}
+
+templ SprenBondCard(bond character.BondView) {
+	<div class="card bg-base-200 shadow border-t-4 border-secondary">
+		<div class="card-body p-4 gap-2">
+			<div class="flex flex-wrap items-baseline justify-between gap-2">
+				<span class="text-xs uppercase font-extrabold text-secondary tracking-wider">Spren Bond</span>
+				<span class="font-bold">{ bond.SprenName } &middot; { bond.Order }</span>
+			</div>
+			<div class="text-sm">
+				<span class="opacity-60">Surges:</span>
+				{ bond.PrimarySurge } &middot; { bond.SecondarySurge }
+			</div>
+			if bond.Philosophy != "" {
+				<p class="text-sm italic opacity-80">"{ bond.Philosophy }"</p>
+			}
+			<ul class="steps w-full mt-1">
+				for _, ideal := range bond.Ideals {
+					<li class={ "step", templ.KV("step-secondary", ideal.Reached) } title={ ideal.Name }>{ ideal.Label } Ideal</li>
+				}
+			</ul>
+		</div>
+	</div>
+}
+
+templ ResourcesComponent(characterId int, resources character.Resources) {
+	<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 		@ValueJoinCard(resources.HealthCurrent, resources.HealthMax, "Health", "/characters/" + strconv.Itoa(characterId) + "/resources/health")
 		@ValueJoinCard(resources.FocusCurrent, resources.FocusMax, "Focus", "/characters/" + strconv.Itoa(characterId) + "/resources/focus")
 		if resources.InvestitureActive {
@@ -113,14 +178,13 @@ templ ResourcesComponent(characterId int, resources character.Resources ) {
 	</div>
 }
 
-	
 templ DefensesComponent(defensesMap map[string]int) {
-	<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-		for defense, value := range defensesMap {
+	<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+		for _, defense := range orderedKeys(defensesMap, defenseOrder) {
 			<div class="card bg-base-200 shadow border-t-4 border-primary">
 				<div class="card-body p-4 text-center">
 					<span class="text-xs uppercase font-extrabold text-primary">{ defense }</span>
-					<span class="text-3xl font-extrabold text-base-content">{ strconv.Itoa(value) }</span>
+					<span class="text-3xl font-extrabold text-base-content">{ strconv.Itoa(defensesMap[defense]) }</span>
 				</div>
 			</div>
 		}
@@ -128,30 +192,26 @@ templ DefensesComponent(defensesMap map[string]int) {
 }
 
 templ AttributesComponent(attributesMap map[string]int) {
-	<div class="grid grid-cols-6 gap-4 md:grid-cols-3">
-		for attr, value := range attributesMap {
-		<div class="card-body">
-			<h3 class="font-bold text-md mb-3 opacity-80 uppercase tracking-wider">Attributes</h3>
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-				<div class="stat">
-					<div class="stat-title">{ attr }</div>
-					<div class="stat-value">{ strconv.Itoa(value) }</div>
+	<div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+		for _, attr := range orderedKeys(attributesMap, attributeOrder) {
+			<div class="card bg-base-200 shadow">
+				<div class="card-body p-3 text-center">
+					<span class="text-xs uppercase opacity-70">{ attr }</span>
+					<span class="text-2xl font-extrabold">{ strconv.Itoa(attributesMap[attr]) }</span>
 				</div>
 			</div>
-		</div>
-	}
+		}
 	</div>
 }
 
 templ UninvestedPlaceholder() {
-	<div class="card w-full bg-base-200 shadow-xl mb-6 border-2 border-primary">
-		<div class="card-body p-4 text-center">
-			<h2 class="card-title m-0 inline-block">Uninvested</h2>
-			<p class="text-sm mt-2">Seek out friendship with the spren.</p>
+	<div class="card bg-base-200 shadow border-2 border-dashed border-base-300">
+		<div class="card-body p-4 text-center justify-center">
+			<h2 class="card-title justify-center text-sm uppercase opacity-70">Uninvested</h2>
+			<p class="text-sm opacity-60">Seek out friendship with the spren.</p>
 		</div>
 	</div>
 }
-
 
 /*
 Radial progress needs --value CSS variable to work.
@@ -161,32 +221,37 @@ To change the thickness, use --thickness CSS variable which is 10% of the size b
 For Radial progress we need to use a div instead of the progress tag because browsers can't show text inside progress tag, and Firefox doesn’t render pseudo-elements inside progress tag at all.
 Adding role="progressbar" makes it accessible to screen readers as well.
 */
-templ ValueJoinCard(current int, max int, label string, endpoint string) {
-    <div id={ "card-" + label } class="card card-border bg-base-100 w-96">
-        <div class="card-body" width="100%">
-            <h2 class="card-title">{ label }</h2>
-            <div class="join" width="100%">
-                <button class="btn join-item"
-                        hx-post={ endpoint + "/decrement" }
-                        hx-target={ "#card-" + label }
-                        hx-swap="outerHTML">-</button>
-				<div class="card bg-base-200 shadow border-t-4 border-primary" style="width: 100%;">
-					<div
-						class="radial-progress text-primary-content border-primary border-4 join-item"
-						style={ "--value:" + strconv.Itoa(max) + ";" }
-						aria-valuenow={ strconv.Itoa(current) } 
-						aria-valuemax={ strconv.Itoa(max) } 
-						role="progressbar">
-						{ strconv.Itoa(current) } / { strconv.Itoa(max) }
-					</div>
+templ ValueJoinCard(current int, maxValue int, label string, endpoint string) {
+	<div id={ "card-" + strings.ToLower(label) } class="card bg-base-200 shadow border-t-4 border-primary">
+		<div class="card-body p-4 items-center text-center gap-2">
+			<h2 class="card-title text-xs uppercase font-extrabold text-primary tracking-wider">{ label }</h2>
+			<div class="flex items-center gap-4">
+				<button
+					class="btn btn-circle btn-sm"
+					aria-label={ "Decrease " + label }
+					hx-post={ endpoint + "/decrement" }
+					hx-target={ "#card-" + strings.ToLower(label) }
+					hx-swap="outerHTML"
+				>&minus;</button>
+				<div
+					class={ "radial-progress border-base-300 border-4 font-bold", resourceColor(label) }
+					style={ "--value:" + strconv.Itoa(percentOf(current, maxValue)) + "; --size:6.5rem; --thickness:0.5rem;" }
+					aria-valuenow={ strconv.Itoa(current) }
+					aria-valuemax={ strconv.Itoa(maxValue) }
+					role="progressbar"
+				>
+					{ strconv.Itoa(current) } / { strconv.Itoa(maxValue) }
 				</div>
-                <button class="btn join-item"
-                        hx-post={ endpoint + "/increment" }
-                        hx-target={ "#card-" + label }
-                        hx-swap="outerHTML">+</button>
-            </div>
-        </div>
-    </div>
+				<button
+					class="btn btn-circle btn-sm"
+					aria-label={ "Increase " + label }
+					hx-post={ endpoint + "/increment" }
+					hx-target={ "#card-" + strings.ToLower(label) }
+					hx-swap="outerHTML"
+				>+</button>
+			</div>
+		</div>
+	</div>
 }
 
 templ SkillsComponent(characterSheet models.CharacterSheetData) {
