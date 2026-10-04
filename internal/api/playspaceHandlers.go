@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -192,74 +193,67 @@ func buildSkillDisplayStructure(char character.Character) []character.SkillDispl
 }
 
 type InventoryUpdateRequest struct {
-	ItemID      int  `form:"itemID"`
-	CharacterID int  `form:"characterID"`
-	Equipped    bool `form:"equipped"`
+	ItemID      int `form:"itemID"`
+	CharacterID int `form:"characterID"`
 }
 
 func (inventoryUpdateRequest *InventoryUpdateRequest) Bind(r *http.Request) error {
 	if inventoryUpdateRequest.ItemID <= 0 {
 		return fmt.Errorf("invalid itemId: must be a positive integer")
 	}
-	if inventoryUpdateRequest.Equipped != true && inventoryUpdateRequest.Equipped != false {
-		return fmt.Errorf("invalid equipped value: must be true or false")
+	if inventoryUpdateRequest.CharacterID <= 0 {
+		return fmt.Errorf("invalid characterID: must be a positive integer")
 	}
 	return nil
 }
 
+// POST /playspace/toggle-equipped equips or unequips one inventory row based on its current
+// server-side state. Equipping into an occupied armor/hand/companion slot swaps the old item
+// out. Weight never blocks equipping; the sheet only warns when the character is overloaded.
 func (s *Server) updateEquippedStatus(w http.ResponseWriter, r *http.Request) {
-	var inventoryUpdateRequest InventoryUpdateRequest
-	if err := render.Bind(r, &inventoryUpdateRequest); err != nil {
+	var req InventoryUpdateRequest
+	if err := render.Bind(r, &req); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	charID := inventoryUpdateRequest.CharacterID
-	itemID := inventoryUpdateRequest.ItemID
-	equippedBool := inventoryUpdateRequest.Equipped
-
-	if !s.authorizeCharacter(w, r, charID) {
+	if !s.authorizeCharacter(w, r, req.CharacterID) {
 		return
 	}
 
-	currentCharacter, err := s.store.GetCharacterByID(r.Context(), charID)
+	char, err := s.store.GetCharacterByID(r.Context(), req.CharacterID)
 	if err != nil {
 		http.Error(w, "Character not found", http.StatusNotFound)
 		return
 	}
-	if currentCharacter.Inventory != nil {
-		inventory := *currentCharacter.Inventory
-		if len(inventory) == 0 {
-			http.Error(w, "Inventory is empty", http.StatusNotFound)
-			return
-		}
-		mappedInventory := mapInventorySlice(inventory)
-		newInventory, found := mappedInventory[itemID]
-		if !found {
-			http.Error(w, "Item not found in inventory", http.StatusNotFound)
-			return
-		}
-		newInventory.Equipped = !equippedBool
-		mappedInventory[itemID] = newInventory
 
-		// Convert the map back to a slice
-		updatedInventory := make([]character.Inventory, 0, len(mappedInventory))
-		for _, item := range mappedInventory {
-			updatedInventory = append(updatedInventory, item)
-		}
-
-		updatedCharacter := *currentCharacter
-		updatedCharacter.Inventory = &updatedInventory
-		if err := s.store.UpdateCharacter(r.Context(), &updatedCharacter); err != nil {
-			log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update inventory", err)
+	if _, _, err := character.ToggleEquipped(char, req.ItemID); err != nil {
+		switch {
+		case errors.Is(err, character.ErrItemNotInInventory):
+			http.Error(w, err.Error(), http.StatusNotFound)
+		case errors.Is(err, character.ErrNotEquipable):
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		default:
+			log.Printf("%s %s: toggle equipped: %v", r.Method, r.URL.Path, err)
 			http.Error(w, "Failed to update inventory", http.StatusInternalServerError)
-			return
 		}
-		characterSheet := buildCharacterSheetData(updatedCharacter)
-		s.hub.UpdateEquipmentComponentOnCharacterSheet(characterSheet, r)
 		return
-	} else {
-		http.Error(w, "Inventory not found", http.StatusNotFound)
+	}
+
+	// Armor feeds Deflect, so defenses must be re-derived before saving.
+	character.RecalculateAll(char)
+	if err := s.store.UpdateCharacter(r.Context(), char); err != nil {
+		log.Printf("%s %s: %s: %v", r.Method, r.URL.Path, "Failed to update inventory", err)
+		http.Error(w, "Failed to update inventory", http.StatusInternalServerError)
 		return
+	}
+
+	sheet := buildCharacterSheetData(*char)
+	// Other open tabs for this character get the update over the websocket; this request's
+	// own response carries the same fragment.
+	s.hub.UpdateEquipmentComponentOnCharacterSheet(sheet, r)
+	s.hub.UpdateBasicsComponentOnCharacterSheet(sheet, r)
+	if err := views.EquipmentComponent(sheet).Render(r.Context(), w); err != nil {
+		log.Printf("render views.EquipmentComponent failed: %v", err)
 	}
 }
 
@@ -426,14 +420,6 @@ func (s *Server) handleTalentGrantsManagePost(w http.ResponseWriter, r *http.Req
 	if err := views.TalentGrantsManageModalPlaceholder().Render(r.Context(), w); err != nil {
 		log.Printf("render views.TalentGrantsManageModalPlaceholder failed: %v", err)
 	}
-}
-
-func mapInventorySlice(inventory []character.Inventory) map[int]character.Inventory {
-	result := make(map[int]character.Inventory)
-	for _, item := range inventory {
-		result[item.ID] = item
-	}
-	return result
 }
 
 // buildSheetData is buildCharacterSheetData plus live server state (the highstorm flag).

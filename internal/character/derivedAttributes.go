@@ -36,6 +36,16 @@ func RecalculateDerivedAttributes(char *Character) {
 	}
 }
 
+// CarryingCapacity is the weight (in lb) the character can carry without penalty.
+func CarryingCapacity(char *Character) int {
+	return getCarryingCapacity(EffectiveAttributes(char).Strength)
+}
+
+// LiftingCapacity is the most weight (in lb) the character can lift off the ground.
+func LiftingCapacity(char *Character) int {
+	return getLiftingCapacity(EffectiveAttributes(char).Strength)
+}
+
 func getSensesRange(awareness int) int {
 	if awareness < 0 || awareness >= len(sensesRangeTable) {
 		return 0
@@ -44,17 +54,11 @@ func getSensesRange(awareness int) int {
 }
 
 func getLiftingCapacity(strength int) int {
-	if strength < 0 || strength >= len(liftingCapacityTable) {
-		return 0
-	}
-	return liftingCapacityTable[strength]
+	return liftingCapacityTable[min(max(strength, 0), len(liftingCapacityTable)-1)]
 }
 
 func getCarryingCapacity(strength int) int {
-	if strength < 0 || strength >= len(carryingCapacityTable) {
-		return 0
-	}
-	return carryingCapacityTable[strength]
+	return carryingCapacityTable[min(max(strength, 0), len(carryingCapacityTable)-1)]
 }
 
 func getMovementSpeed(speed int) int {

@@ -15,7 +15,7 @@ type Item struct {
 	Price       float32 `json:"price"`
 	Rarity      string  `json:"rarity"`
 	Description string  `json:"description"`
-	Equipable   bool    `json:"equippable"`
+	Equipable   bool    `json:"equipable"`
 	Stackable   bool    `json:"stackable"`
 	Slot        string  `json:"slot"`
 	Category    string  `json:"category,omitempty"`
@@ -54,6 +54,29 @@ type Properties struct {
 	Intelligence     string   `json:"intelligence"`
 	MovementSpeed    int      `json:"movementSpeed"`
 	SpecialAbilities []string `json:"specialAbilities"`
+}
+
+// IsTwoHanded reports whether the item carries the Two-Handed trait.
+func (i Item) IsTwoHanded() bool {
+	if i.Weapon == nil {
+		return false
+	}
+	for _, t := range i.Weapon.Traits {
+		if strings.EqualFold(t, "Two-Handed") {
+			return true
+		}
+	}
+	return false
+}
+
+// IsCarried reports whether the item's weight counts against the owner's carrying capacity.
+// Companions, mounts and vehicles carry their own weight.
+func (i Item) IsCarried() bool {
+	switch i.Type {
+	case "pet", "mount", "vehicle":
+		return false
+	}
+	return true
 }
 
 var Items = map[string]Item{}

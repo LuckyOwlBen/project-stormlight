@@ -522,28 +522,164 @@ templ ActiveStanceCard(stance character.TalentHistory) {
 }
 
 templ EquipmentComponent(characterSheet models.CharacterSheetData) {
-	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-		for _, item := range *characterSheet.Char.Inventory {
-			<div class="card bg-base-200 shadow border-t-4 border-primary">
-				<div class="card-body p-4 text-center">
-					<span class="text-xs uppercase font-extrabold text-primary">{ item.Name }</span>
-					<form
-						hx-post={ "/playspace/toggle-equipped" }
-						hx-target="#equipmentComponent"
-						hx-swap="outerHTML"
-					>
-						<input type="hidden" name="itemID" value={ strconv.Itoa(item.ID) } />
-						<input type="hidden" name="characterID" value={ strconv.Itoa(characterSheet.Char.ID) } />
-						<input type="hidden" name="equipped" value={ strconv.FormatBool(item.Equipped) } />
-						<button class="btn btn-primary btn-sm mt-2"type="submit">
-							Toggle Equipped
-						</button>
-					</form>
-					<span class="text-sm text-secondary">{ item.Equipped }</span>
-				</div>
+	{{ view := character.BuildEquipmentView(characterSheet.Char) }}
+	<div class="space-y-6">
+		@CarryWarnings(view)
+		@CarryCapacityPanel(view.Summary)
+		<div>
+			<h3 class="text-lg font-bold mb-2">Equipped</h3>
+			<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+				for _, slot := range view.Slots {
+					@EquipSlotCard(characterSheet.Char.ID, slot)
+				}
 			</div>
-	}
+		</div>
+		if len(view.Groups) == 0 {
+			<div class="text-sm opacity-60 italic">Nothing else in your pack.</div>
+		}
+		for _, group := range view.Groups {
+			@CarriedItemsTable(characterSheet.Char.ID, group)
+		}
 	</div>
+}
+
+// CarryWarnings sits at the very top of the Equipment tab. Overloading never blocks anything;
+// it only tells the player.
+templ CarryWarnings(view character.EquipmentView) {
+	if view.Summary.OverLifting {
+		<div role="alert" class="alert alert-error">
+			<span>
+				<strong>Too heavy to lift.</strong>
+				You're carrying { formatWeight(view.Summary.Carried) } lb, more than your lifting capacity of { strconv.Itoa(view.Summary.LiftingCapacity) } lb.
+			</span>
+		</div>
+	} else if view.Summary.OverCarrying {
+		<div role="alert" class="alert alert-warning">
+			<span>
+				<strong>Over carrying capacity.</strong>
+				You're carrying { formatWeight(view.Summary.Carried) } lb, { formatWeight(view.Summary.OverBy) } lb over your carrying capacity of { strconv.Itoa(view.Summary.CarryingCapacity) } lb.
+			</span>
+		</div>
+	}
+	for _, warning := range view.Warnings {
+		<div role="alert" class="alert alert-info alert-soft">
+			<span>{ warning }</span>
+		</div>
+	}
+}
+
+templ CarryCapacityPanel(summary character.CarrySummary) {
+	<div class="card bg-base-200 shadow border-t-4 border-primary">
+		<div class="card-body p-4 gap-2">
+			<div class="flex flex-wrap items-baseline justify-between gap-2">
+				<span class="text-xs uppercase font-extrabold text-primary">Weight Carried</span>
+				<span class="text-2xl font-extrabold">{ formatWeight(summary.Carried) } / { strconv.Itoa(summary.CarryingCapacity) } lb</span>
+			</div>
+			<progress class={ carryProgressClass(summary) } value={ progressValue(summary.Carried) } max={ strconv.Itoa(summary.CarryingCapacity) }></progress>
+			<div class="flex flex-wrap gap-x-6 gap-y-1 text-sm opacity-70">
+				<span>Carrying capacity: { strconv.Itoa(summary.CarryingCapacity) } lb</span>
+				<span>Lifting capacity: { strconv.Itoa(summary.LiftingCapacity) } lb</span>
+				<span>Equipped: { formatWeight(summary.Equipped) } lb</span>
+			</div>
+		</div>
+	</div>
+}
+
+templ EquipSlotCard(charID int, slot character.SlotView) {
+	<div class="card bg-base-200 shadow border-t-4 border-secondary">
+		<div class="card-body p-4 gap-2">
+			<span class="text-xs uppercase font-extrabold text-secondary">{ slot.Label }</span>
+			if len(slot.Entries) == 0 {
+				<span class="text-sm opacity-50 italic">Empty</span>
+			}
+			for _, entry := range slot.Entries {
+				<div class="flex items-start justify-between gap-2">
+					<div class="min-w-0">
+						<div class="font-semibold">{ entry.Inv.Name }</div>
+						<div class="flex flex-wrap gap-1 mt-1">
+							for _, badge := range itemBadges(entry.Item) {
+								<span class="badge badge-sm badge-ghost">{ badge }</span>
+							}
+						</div>
+						if entry.Counted {
+							<div class="text-xs opacity-60 mt-1">{ formatWeight(entry.TotalWeight) } lb</div>
+						}
+					</div>
+					@EquipToggleButton(charID, entry)
+				</div>
+			}
+		</div>
+	</div>
+}
+
+templ CarriedItemsTable(charID int, group character.ItemGroup) {
+	<div>
+		<div class="flex items-baseline gap-2 mb-1">
+			<h3 class="text-lg font-bold">{ group.Label }</h3>
+			if group.Note != "" {
+				<span class="text-xs opacity-60">{ group.Note }</span>
+			}
+		</div>
+		<div class="overflow-x-auto bg-base-200 rounded-box shadow">
+			<table class="table table-sm">
+				<thead>
+					<tr>
+						<th>Item</th>
+						<th>Details</th>
+						<th class="text-right">Qty</th>
+						<th class="text-right">Weight</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, entry := range group.Entries {
+						<tr>
+							<td class="font-semibold">{ entry.Inv.Name }</td>
+							<td>
+								<div class="flex flex-wrap gap-1">
+									for _, badge := range itemBadges(entry.Item) {
+										<span class="badge badge-sm badge-ghost">{ badge }</span>
+									}
+									if !entry.Known {
+										<span class="badge badge-sm badge-warning">Unknown item</span>
+									}
+								</div>
+							</td>
+							<td class="text-right">{ strconv.Itoa(max(entry.Inv.Quantity, 1)) }</td>
+							<td class="text-right">
+								if entry.Counted {
+									{ formatWeight(entry.TotalWeight) } lb
+								} else {
+									<span class="opacity-50">&mdash;</span>
+								}
+							</td>
+							<td class="text-right">
+								if entry.CanEquip {
+									@EquipToggleButton(charID, entry)
+								}
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+}
+
+templ EquipToggleButton(charID int, entry character.InventoryEntry) {
+	<form
+		hx-post="/playspace/toggle-equipped"
+		hx-target="#equipmentComponent"
+		hx-swap="innerHTML"
+	>
+		<input type="hidden" name="itemID" value={ strconv.Itoa(entry.Inv.ID) }/>
+		<input type="hidden" name="characterID" value={ strconv.Itoa(charID) }/>
+		if entry.Inv.Equipped {
+			<button class="btn btn-outline btn-xs" type="submit">Unequip</button>
+		} else {
+			<button class="btn btn-primary btn-xs" type="submit">Equip</button>
+		}
+	</form>
 }
 
 templ DerivedAttributesComponent(characterSheet models.CharacterSheetData) {
